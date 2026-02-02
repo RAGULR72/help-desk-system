@@ -18,6 +18,6 @@ pyotp==2.9.0
 qrcode==7.4.2
 user-agents==2.2.0
 requests==2.31.0
-psycopg2-binary==2.9.9
 redis==5.2.0
 xlsxwriter==3.2.9
+google-generativeai==0.3.1
