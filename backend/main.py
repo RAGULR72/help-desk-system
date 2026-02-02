@@ -30,7 +30,16 @@ from asset_management import models as asset_models  # Register Asset models
 from sla_system import sla_routes 
 from knowledge_base import models as kb_models
 
+from sqlalchemy import text
+
 # Create database tables
+with engine.connect() as connection:
+    try:
+        connection.execute(text("CREATE EXTENSION IF NOT EXISTS pg_trgm"))
+        connection.commit()
+    except Exception as e:
+        print(f"Warning: Could not create pg_trgm extension: {e}")
+
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="Proserve API", version="1.0.0")
