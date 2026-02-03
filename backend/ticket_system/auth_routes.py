@@ -1008,7 +1008,7 @@ def disable_2fa(
     db.commit()
     return {"message": "2FA disabled successfully"}
 
-@router.post("/2fa/verify")
+@router.post("/2fa/verify-direct")
 def verify_2fa_login(
     data: root_schemas.TwoFactorVerify,
     db: Session = Depends(get_db)
