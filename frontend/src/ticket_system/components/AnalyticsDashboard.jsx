@@ -6,7 +6,7 @@ import {
 import api, { baseURL } from '../../api/axios';
 import {
     FiActivity, FiClock, FiCheckCircle, FiUsers, FiRefreshCw,
-    FiArrowUpRight, FiArrowDownRight, FiMoreVertical, FiMessageSquare, FiFile, FiZap, FiAlertTriangle, FiInfo
+    FiArrowUpRight, FiArrowDownRight, FiMoreVertical, FiZap, FiAlertTriangle, FiInfo
 } from 'react-icons/fi';
 import { RiRoadMapLine, RiWallet3Line } from 'react-icons/ri';
 import { motion } from 'framer-motion';
@@ -224,8 +224,8 @@ const AnalyticsDashboard = () => {
                         </div>
                     </div>
                     <div className="w-full h-[240px] min-w-0">
-                        <ResponsiveContainer width="100%" height="100%">
-                            {isMounted ? (
+                        {isMounted && (
+                            <ResponsiveContainer width="100%" height="100%">
                                 <AreaChart data={trend_data}>
                                     <defs>
                                         <linearGradient id="colorCreated" x1="0" y1="0" x2="0" y2="1">
@@ -280,8 +280,8 @@ const AnalyticsDashboard = () => {
                                         animationDuration={1500}
                                     />
                                 </AreaChart>
-                            ) : <div>Loading Chart...</div>}
-                        </ResponsiveContainer>
+                            </ResponsiveContainer>
+                        )}
                     </div>
                 </div>
 
@@ -294,8 +294,8 @@ const AnalyticsDashboard = () => {
                         <h3 className="text-xs font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wider italic">Categories</h3>
                     </div>
                     <div className="h-[200px] w-full flex items-center justify-center min-w-0">
-                        <ResponsiveContainer width="100%" height="100%">
-                            {isMounted ? (
+                        {isMounted && (
+                            <ResponsiveContainer width="100%" height="100%">
                                 <PieChart>
                                     <Pie
                                         data={category_distribution}
@@ -334,8 +334,8 @@ const AnalyticsDashboard = () => {
                                         )}
                                     />
                                 </PieChart>
-                            ) : null}
-                        </ResponsiveContainer>
+                            </ResponsiveContainer>
+                        )}
                     </div>
                 </div>
             </div>
@@ -351,8 +351,8 @@ const AnalyticsDashboard = () => {
                         <h3 className="text-xs font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wider italic">Resolution Speed</h3>
                     </div>
                     <div className="h-[200px] w-full min-w-0">
-                        <ResponsiveContainer width="100%" height="100%">
-                            {isMounted ? (
+                        {isMounted && (
+                            <ResponsiveContainer width="100%" height="100%">
                                 <BarChart data={resolution_distribution}>
                                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" opacity={0.5} />
                                     <XAxis
@@ -383,8 +383,8 @@ const AnalyticsDashboard = () => {
                                         ))}
                                     </Bar>
                                 </BarChart>
-                            ) : null}
-                        </ResponsiveContainer>
+                            </ResponsiveContainer>
+                        )}
                     </div>
                 </div>
 

@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-    FiActivity, FiMapPin, FiAlertTriangle, FiTrendingUp,
-    FiRefreshCw, FiZap, FiCpu, FiMessageSquare, FiShield
+    FiMapPin, FiAlertTriangle, FiTrendingUp,
+    FiRefreshCw, FiZap, FiCpu, FiShield
 } from 'react-icons/fi';
 import {
     LineChart, Line, XAxis, YAxis, CartesianGrid,
@@ -19,6 +19,7 @@ const CommandCenterView = () => {
     });
     const [loading, setLoading] = useState(true);
     const [lastUpdated, setLastUpdated] = useState(new Date());
+    const [isMounted, setIsMounted] = useState(false);
 
     const fetchData = async () => {
         setLoading(true);
@@ -34,6 +35,7 @@ const CommandCenterView = () => {
     };
 
     useEffect(() => {
+        setIsMounted(true);
         fetchData();
         const interval = setInterval(fetchData, 30000); // 30s auto-refresh
         return () => clearInterval(interval);
@@ -141,28 +143,30 @@ const CommandCenterView = () => {
                                 <span className="text-[9px] font-black text-slate-500 uppercase">Next 7 Days</span>
                             </div>
                             <div className="h-[200px] w-full">
-                                <ResponsiveContainer width="100%" height="100%">
-                                    <AreaChart data={data.prediction}>
-                                        <defs>
-                                            <linearGradient id="colorPredict" x1="0" y1="0" x2="0" y2="1">
-                                                <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3} />
-                                                <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
-                                            </linearGradient>
-                                        </defs>
-                                        <Tooltip
-                                            contentStyle={{ backgroundColor: '#0f172a', border: '1px solid #1e293b', borderRadius: '12px', fontSize: '10px' }}
-                                        />
-                                        <Area
-                                            type="monotone"
-                                            dataKey="predict"
-                                            stroke="#6366f1"
-                                            strokeWidth={3}
-                                            fillOpacity={1}
-                                            fill="url(#colorPredict)"
-                                            animationDuration={2000}
-                                        />
-                                    </AreaChart>
-                                </ResponsiveContainer>
+                                {isMounted && (
+                                    <ResponsiveContainer width="100%" height="100%">
+                                        <AreaChart data={data.prediction}>
+                                            <defs>
+                                                <linearGradient id="colorPredict" x1="0" y1="0" x2="0" y2="1">
+                                                    <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3} />
+                                                    <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
+                                                </linearGradient>
+                                            </defs>
+                                            <Tooltip
+                                                contentStyle={{ backgroundColor: '#0f172a', border: '1px solid #1e293b', borderRadius: '12px', fontSize: '10px' }}
+                                            />
+                                            <Area
+                                                type="monotone"
+                                                dataKey="predict"
+                                                stroke="#6366f1"
+                                                strokeWidth={3}
+                                                fillOpacity={1}
+                                                fill="url(#colorPredict)"
+                                                animationDuration={2000}
+                                            />
+                                        </AreaChart>
+                                    </ResponsiveContainer>
+                                )}
                             </div>
                         </motion.div>
 

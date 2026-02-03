@@ -2,9 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import {
-    FiClock, FiAlertTriangle, FiCheckCircle, FiTrendingUp,
-    FiActivity, FiShield, FiSettings, FiDownload, FiRefreshCw,
-    FiMoreVertical, FiArrowRight, FiBarChart2, FiCalendar, FiBell, FiAlertCircle
+    FiCheckCircle, FiRefreshCw, FiMoreVertical, FiCalendar
 } from 'react-icons/fi';
 import {
     BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -39,8 +37,10 @@ const SLAMonitoring = ({ userRole, onTabChange }) => {
     // Live data from API
     const [hourlyData, setHourlyData] = useState([]);
     const [categoryData, setCategoryData] = useState([]);
+    const [isMounted, setIsMounted] = useState(false);
 
     useEffect(() => {
+        setIsMounted(true);
         fetchSLAData();
         const timer = setInterval(() => {
             setCurrentDate(new Date());
@@ -173,44 +173,46 @@ const SLAMonitoring = ({ userRole, onTabChange }) => {
                     </div>
 
                     <div className="h-72 w-full">
-                        <ResponsiveContainer width="100%" height="100%">
-                            <BarChart data={trendData} barGap={8}>
-                                <defs>
-                                    <pattern id="striped" x="0" y="0" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
-                                        <rect width="4" height="8" transform="translate(0,0)" fill="#4B5563" opacity="0.3"></rect>
-                                    </pattern>
-                                </defs>
-                                <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} opacity={0.2} />
-                                <XAxis
-                                    dataKey="label"
-                                    stroke="#94a3b8"
-                                    fontSize={10}
-                                    tickLine={false}
-                                    axisLine={false}
-                                    minTickGap={30}
-                                    dy={10}
-                                />
-                                <YAxis
-                                    stroke="#94a3b8"
-                                    fontSize={10}
-                                    tickLine={false}
-                                    axisLine={false}
-                                    dx={-10}
-                                />
-                                <Tooltip
-                                    contentStyle={{
-                                        backgroundColor: '#1E293B',
-                                        borderColor: '#334155',
-                                        borderRadius: '8px',
-                                        color: '#fff',
-                                        fontSize: '12px'
-                                    }}
-                                    cursor={{ fill: 'rgba(255,255,255,0.05)' }}
-                                />
-                                <Bar dataKey="resolved" name="Resolved" fill="#64748b" radius={[2, 2, 0, 0]} barSize={12} />
-                                <Bar dataKey="breached" name="Breached" fill="#f97316" radius={[2, 2, 0, 0]} barSize={12} />
-                            </BarChart>
-                        </ResponsiveContainer>
+                        {isMounted && (
+                            <ResponsiveContainer width="100%" height="100%">
+                                <BarChart data={trendData} barGap={8}>
+                                    <defs>
+                                        <pattern id="striped" x="0" y="0" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+                                            <rect width="4" height="8" transform="translate(0,0)" fill="#4B5563" opacity="0.3"></rect>
+                                        </pattern>
+                                    </defs>
+                                    <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} opacity={0.2} />
+                                    <XAxis
+                                        dataKey="label"
+                                        stroke="#94a3b8"
+                                        fontSize={10}
+                                        tickLine={false}
+                                        axisLine={false}
+                                        minTickGap={30}
+                                        dy={10}
+                                    />
+                                    <YAxis
+                                        stroke="#94a3b8"
+                                        fontSize={10}
+                                        tickLine={false}
+                                        axisLine={false}
+                                        dx={-10}
+                                    />
+                                    <Tooltip
+                                        contentStyle={{
+                                            backgroundColor: '#1E293B',
+                                            borderColor: '#334155',
+                                            borderRadius: '8px',
+                                            color: '#fff',
+                                            fontSize: '12px'
+                                        }}
+                                        cursor={{ fill: 'rgba(255,255,255,0.05)' }}
+                                    />
+                                    <Bar dataKey="resolved" name="Resolved" fill="#64748b" radius={[2, 2, 0, 0]} barSize={12} />
+                                    <Bar dataKey="breached" name="Breached" fill="#f97316" radius={[2, 2, 0, 0]} barSize={12} />
+                                </BarChart>
+                            </ResponsiveContainer>
+                        )}
                     </div>
                 </div>
 
@@ -224,27 +226,29 @@ const SLAMonitoring = ({ userRole, onTabChange }) => {
                             <FiMoreVertical className="text-gray-400 cursor-pointer" />
                         </div>
                         <div className="flex-1 relative min-h-[200px]">
-                            <ResponsiveContainer width="100%" height="100%">
-                                <PieChart>
-                                    <Pie
-                                        data={categoryData}
-                                        cx="50%"
-                                        cy="50%"
-                                        innerRadius={50}
-                                        outerRadius={70}
-                                        paddingAngle={5}
-                                        dataKey="onTime"
-                                    >
-                                        {categoryData.map((entry, index) => (
-                                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} stroke="none" />
-                                        ))}
-                                    </Pie>
-                                    <Tooltip
-                                        contentStyle={{ backgroundColor: '#1E293B', borderColor: '#334155', borderRadius: '8px', color: '#fff', fontSize: '11px' }}
-                                        itemStyle={{ color: '#fff' }}
-                                    />
-                                </PieChart>
-                            </ResponsiveContainer>
+                            {isMounted && (
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <PieChart>
+                                        <Pie
+                                            data={categoryData}
+                                            cx="50%"
+                                            cy="50%"
+                                            innerRadius={50}
+                                            outerRadius={70}
+                                            paddingAngle={5}
+                                            dataKey="onTime"
+                                        >
+                                            {categoryData.map((entry, index) => (
+                                                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} stroke="none" />
+                                            ))}
+                                        </Pie>
+                                        <Tooltip
+                                            contentStyle={{ backgroundColor: '#1E293B', borderColor: '#334155', borderRadius: '8px', color: '#fff', fontSize: '11px' }}
+                                            itemStyle={{ color: '#fff' }}
+                                        />
+                                    </PieChart>
+                                </ResponsiveContainer>
+                            )}
                             {/* Available Label Overlay */}
                             <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
                                 <span className="text-2xl font-bold text-gray-900 dark:text-white shadow-black drop-shadow-md">{stats.complianceRate}%</span>

@@ -63,8 +63,10 @@ const ExpenseDashboard = () => {
     });
     const [idConfig, setIdConfig] = useState({ prefix: 'REI', next_number: 1001 });
     const [settingsTab, setSettingsTab] = useState('travel'); // 'travel', 'approvers', 'id_config'
+    const [isMounted, setIsMounted] = useState(false);
 
     useEffect(() => {
+        setIsMounted(true);
         if (viewMode === 'admin') {
             fetchAdminStats();
         } else if (viewMode === 'settings') {
@@ -523,37 +525,39 @@ const ExpenseDashboard = () => {
                             </div>
 
                             <div className="h-[350px] w-full min-h-[350px] relative overflow-hidden">
-                                <ResponsiveContainer width="99%" height="100%" minWidth={0}>
-                                    <AreaChart data={teamChartPeriod === 'monthly' ? (stats.spend_trend || []) : (stats.weekly_trend || [])}>
-                                        <defs>
-                                            <linearGradient id="colorTrend" x1="0" y1="0" x2="0" y2="1">
-                                                <stop offset="5%" stopColor={teamChartPeriod === 'monthly' ? '#6366f1' : '#10b981'} stopOpacity={0.1} />
-                                                <stop offset="95%" stopColor={teamChartPeriod === 'monthly' ? '#6366f1' : '#10b981'} stopOpacity={0} />
-                                            </linearGradient>
-                                        </defs>
-                                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                                        <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 10, fontWeight: 700 }} dy={10} />
-                                        <YAxis
-                                            axisLine={false}
-                                            tickLine={false}
-                                            tick={{ fill: '#94a3b8', fontSize: 10, fontWeight: 700 }}
-                                            tickFormatter={(value) => teamChartPeriod === 'monthly' ? `₹${value}` : value}
-                                        />
-                                        <Tooltip
-                                            contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0/0.1)' }}
-                                            formatter={(value) => [teamChartPeriod === 'monthly' ? `₹${value.toLocaleString()}` : `${value} Claims`, teamChartPeriod === 'monthly' ? 'Total Amount' : 'Volume']}
-                                        />
-                                        <Area
-                                            type="monotone"
-                                            dataKey={teamChartPeriod === 'monthly' ? "amount" : "count"}
-                                            stroke={teamChartPeriod === 'monthly' ? "#6366f1" : "#10b981"}
-                                            strokeWidth={4}
-                                            fillOpacity={1}
-                                            fill="url(#colorTrend)"
-                                            isAnimationActive={true}
-                                        />
-                                    </AreaChart>
-                                </ResponsiveContainer>
+                                {isMounted && (
+                                    <ResponsiveContainer width="99%" height="100%" minWidth={0}>
+                                        <AreaChart data={teamChartPeriod === 'monthly' ? (stats.spend_trend || []) : (stats.weekly_trend || [])}>
+                                            <defs>
+                                                <linearGradient id="colorTrend" x1="0" y1="0" x2="0" y2="1">
+                                                    <stop offset="5%" stopColor={teamChartPeriod === 'monthly' ? '#6366f1' : '#10b981'} stopOpacity={0.1} />
+                                                    <stop offset="95%" stopColor={teamChartPeriod === 'monthly' ? '#6366f1' : '#10b981'} stopOpacity={0} />
+                                                </linearGradient>
+                                            </defs>
+                                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                                            <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 10, fontWeight: 700 }} dy={10} />
+                                            <YAxis
+                                                axisLine={false}
+                                                tickLine={false}
+                                                tick={{ fill: '#94a3b8', fontSize: 10, fontWeight: 700 }}
+                                                tickFormatter={(value) => teamChartPeriod === 'monthly' ? `₹${value}` : value}
+                                            />
+                                            <Tooltip
+                                                contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0/0.1)' }}
+                                                formatter={(value) => [teamChartPeriod === 'monthly' ? `₹${value.toLocaleString()}` : `${value} Claims`, teamChartPeriod === 'monthly' ? 'Total Amount' : 'Volume']}
+                                            />
+                                            <Area
+                                                type="monotone"
+                                                dataKey={teamChartPeriod === 'monthly' ? "amount" : "count"}
+                                                stroke={teamChartPeriod === 'monthly' ? "#6366f1" : "#10b981"}
+                                                strokeWidth={4}
+                                                fillOpacity={1}
+                                                fill="url(#colorTrend)"
+                                                isAnimationActive={true}
+                                            />
+                                        </AreaChart>
+                                    </ResponsiveContainer>
+                                )}
                             </div>
                         </motion.div>
                     )}
