@@ -80,7 +80,7 @@ def register(user: root_schemas.UserCreate, db: Session = Depends(get_db)):
         # Auto-approve admin user for bootstrapping
         is_approved=(user.username == "admin"),
         role="admin" if user.username == "admin" else "user",
-        is_2fa_enabled=True
+        is_2fa_enabled=False
     )
     db.add(db_user)
     db.commit()
