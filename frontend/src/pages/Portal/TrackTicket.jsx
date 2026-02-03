@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     MagnifyingGlassIcon,
@@ -10,8 +9,7 @@ import {
     ExclamationCircleIcon,
     ArrowPathIcon
 } from '@heroicons/react/24/outline';
-
-const API_BASE_URL = 'http://localhost:8000';
+import api from '../../api/axios';
 
 const TrackTicket = () => {
     const [ticketId, setTicketId] = useState('');
@@ -27,7 +25,7 @@ const TrackTicket = () => {
         setTicket(null);
 
         try {
-            const response = await axios.get(`${API_BASE_URL}/api/portal/track-ticket`, {
+            const response = await api.get(`/api/portal/track-ticket`, {
                 params: { ticket_id: ticketId, email: email }
             });
             setTicket(response.data);

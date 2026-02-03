@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
-import api from '../api/axios';
+import api, { wsURL } from '../api/axios';
 
 const ChatContext = createContext();
 
@@ -44,8 +44,7 @@ export const ChatProvider = ({ children }) => {
         const token = localStorage.getItem('token');
         if (!token || !user) return;
 
-        const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
-        const wsUrl = `${protocol}://${window.location.hostname}:8000/api/chat/ws?token=${token}`;
+        const wsUrl = `${wsURL}/api/chat/ws?token=${token}`;
         const ws = new WebSocket(wsUrl);
 
         ws.onopen = () => {

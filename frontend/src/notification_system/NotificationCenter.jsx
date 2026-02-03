@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { FiBell, FiX, FiCheckCircle, FiAlertTriangle, FiInfo, FiTrash2, FiClock } from 'react-icons/fi';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
-import api from '../api/axios';
+import api, { wsURL } from '../api/axios';
 import { useNavigate } from 'react-router-dom';
 
 const NotificationCenter = () => {
@@ -32,8 +32,7 @@ const NotificationCenter = () => {
             const token = localStorage.getItem('token');
             if (!token) return;
 
-            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-            const wsUrl = `${protocol}//${window.location.host.split(':')[0]}:8000/api/notifications/ws?token=${token}`;
+            const wsUrl = `${wsURL}/api/notifications/ws?token=${token}`;
 
             ws = new WebSocket(wsUrl);
 

@@ -1,5 +1,4 @@
 import React, { useState, useRef, useEffect } from 'react';
-import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     ChatBubbleLeftRightIcon,
@@ -7,8 +6,7 @@ import {
     PaperAirplaneIcon,
     SparklesIcon
 } from '@heroicons/react/24/outline';
-
-const API_BASE_URL = 'http://localhost:8000';
+import api from '../../api/axios';
 
 const AIChatbot = () => {
     const [isOpen, setIsOpen] = useState(false);
@@ -37,7 +35,7 @@ const AIChatbot = () => {
         setIsLoading(true);
 
         try {
-            const res = await axios.post(`${API_BASE_URL}/api/portal/chat`, {
+            const res = await api.post(`/api/portal/chat`, {
                 message: inputText
             });
             setMessages(prev => [...prev, { text: res.data.reply, isBot: true }]);
@@ -112,8 +110,8 @@ const AIChatbot = () => {
                                     className={`flex ${msg.isBot ? 'justify-start' : 'justify-end'}`}
                                 >
                                     <div className={`max-w-[80%] p-4 rounded-2xl text-sm ${msg.isBot
-                                            ? 'bg-white border border-slate-200 text-slate-800 rounded-tl-none shadow-sm'
-                                            : 'bg-indigo-600 text-white rounded-tr-none shadow-md'
+                                        ? 'bg-white border border-slate-200 text-slate-800 rounded-tl-none shadow-sm'
+                                        : 'bg-indigo-600 text-white rounded-tr-none shadow-md'
                                         }`}>
                                         {msg.text}
                                     </div>

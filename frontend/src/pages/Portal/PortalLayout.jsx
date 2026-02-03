@@ -10,10 +10,8 @@ import {
     LifebuoyIcon
 } from '@heroicons/react/24/outline';
 import { useAuth } from '../../context/AuthContext';
-import axios from 'axios';
+import api from '../../api/axios';
 import AIChatbot from './AIChatbot';
-
-const API_BASE_URL = 'http://localhost:8000';
 
 const PortalLayout = () => {
     const { user } = useAuth();
@@ -23,7 +21,7 @@ const PortalLayout = () => {
     React.useEffect(() => {
         const checkAccess = async () => {
             try {
-                const res = await axios.get(`${API_BASE_URL}/api/portal/settings`);
+                const res = await api.get(`/api/portal/settings`);
                 const { active, allowed_roles } = res.data;
 
                 if (!active) {
