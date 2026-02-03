@@ -370,7 +370,7 @@ const UserProfileView = () => {
                                                     type="text"
                                                     value={formData.firstName}
                                                     onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-                                                    placeholder="Ivan"
+                                                    placeholder="First Name"
                                                     className="w-full px-4 py-3 bg-gray-50 border-0 rounded-xl text-sm text-gray-900 focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
                                                 />
                                             </div>
@@ -382,7 +382,7 @@ const UserProfileView = () => {
                                                     type="text"
                                                     value={formData.lastName}
                                                     onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-                                                    placeholder="Norris"
+                                                    placeholder="Last Name"
                                                     className="w-full px-4 py-3 bg-gray-50 border-0 rounded-xl text-sm text-gray-900 focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
                                                 />
                                             </div>
@@ -398,7 +398,7 @@ const UserProfileView = () => {
                                                     type="email"
                                                     value={formData.email}
                                                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                                                    placeholder="ivannorris@gmail.com"
+                                                    placeholder="email@example.com"
                                                     className="w-full px-4 py-3 bg-gray-50 border-0 rounded-xl text-sm text-gray-900 focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
                                                 />
                                             </div>
@@ -410,7 +410,7 @@ const UserProfileView = () => {
                                                     type="text"
                                                     value={formData.username}
                                                     onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-                                                    placeholder="ivan.norris"
+                                                    placeholder="username"
                                                     className="w-full px-4 py-3 bg-gray-50 border-0 rounded-xl text-sm text-gray-900 focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
                                                 />
                                             </div>
@@ -452,7 +452,7 @@ const UserProfileView = () => {
                                                     type="tel"
                                                     value={formData.phone}
                                                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                                                    placeholder="+17840363856"
+                                                    placeholder="+91 00000 00000"
                                                     className="w-full px-4 py-3 bg-gray-50 border-0 rounded-xl text-sm text-gray-900 focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
                                                 />
                                             </div>
@@ -482,7 +482,7 @@ const UserProfileView = () => {
                                             <textarea
                                                 value={formData.address}
                                                 onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                                                placeholder="Orella Cottage, Coucledeyka Lane, Kinton, Brazil"
+                                                placeholder="Enter your full address"
                                                 rows={3}
                                                 className="w-full px-4 py-3 bg-gray-50 border-0 rounded-xl text-sm text-gray-900 focus:ring-2 focus:ring-indigo-500 outline-none transition-all resize-none"
                                             />
