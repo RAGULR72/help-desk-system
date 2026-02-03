@@ -82,6 +82,12 @@ const UserManagementView = () => {
     const [resetLoading, setResetLoading] = useState(false);
     const [resetSuccess, setResetSuccess] = useState(false);
 
+    // Approval States
+    const [showApproveModal, setShowApproveModal] = useState(false);
+    const [userToApprove, setUserToApprove] = useState(null);
+    const [approveRole, setApproveRole] = useState('user');
+    const [approveLoading, setApproveLoading] = useState(false);
+
     const [newColumnLabel, setNewColumnLabel] = useState('');
 
     const handleAddCustomColumn = () => {
@@ -296,7 +302,19 @@ const UserManagementView = () => {
             case 'role':
                 return <UserRoleBadge role={user.role} />;
             case 'status':
-                return <UserStatusBadge user={user} />;
+                return (
+                    <div className="flex items-center gap-4">
+                        <UserStatusBadge user={user} />
+                        {!user.is_approved && user.status !== 'Rejected' && (
+                            <button
+                                onClick={(e) => { e.stopPropagation(); handleApproveUser(user); }}
+                                className="text-[10px] font-black uppercase tracking-widest text-emerald-600 hover:text-white bg-emerald-50 hover:bg-emerald-600 border border-emerald-100 px-2 py-1 rounded-md transition-all flex items-center gap-1.5 shadow-sm active:scale-95"
+                            >
+                                <FiCheck size={12} /> Approve
+                            </button>
+                        )}
+                    </div>
+                );
             case 'reporting':
                 return <span className="text-sm text-gray-600 dark:text-slate-400">{user.manager || '-'}</span>;
             case 'joined_date':
@@ -419,8 +437,32 @@ const UserManagementView = () => {
         }
     };
 
+    const handleApproveUser = (user) => {
+        setUserToApprove(user);
+        setApproveRole(user.role || 'user');
+        setShowApproveModal(true);
+    };
+
+    const confirmApprove = async () => {
+        if (!userToApprove) return;
+        setApproveLoading(true);
+        try {
+            await api.put(`/api/admin/users/${userToApprove.id}/approve`, null, {
+                params: { role: approveRole }
+            });
+            setShowApproveModal(false);
+            setUserToApprove(null);
+            fetchUsers();
+        } catch (error) {
+            console.error(error);
+            alert("Failed to approve user");
+        } finally {
+            setApproveLoading(false);
+        }
+    };
+
     // Reusable Action Menu Component
-    const UserActionMenu = ({ user: targetUser, onEdit, onView, onReset, onDeactivate, onDelete }) => {
+    const UserActionMenu = ({ user: targetUser, onEdit, onView, onReset, onDeactivate, onDelete, onApprove }) => {
         const [isOpen, setIsOpen] = useState(false);
 
         return (
@@ -449,6 +491,14 @@ const UserManagementView = () => {
                                 <div className="px-4 py-2 border-b border-slate-50 dark:border-slate-800 mb-1">
                                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">User options</p>
                                 </div>
+                                {!targetUser.is_approved && targetUser.status !== 'Rejected' && (
+                                    <button
+                                        onClick={() => { onApprove(); setIsOpen(false); }}
+                                        className="w-full flex items-center gap-3 px-4 py-3 text-sm font-bold text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 transition-all"
+                                    >
+                                        <FiCheckCircle size={16} /> Approve User
+                                    </button>
+                                )}
                                 <button
                                     onClick={() => { onView(); setIsOpen(false); }}
                                     className="w-full flex items-center gap-3 px-4 py-3 text-sm font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-indigo-600 transition-all"
@@ -851,6 +901,7 @@ const UserManagementView = () => {
                                                     onReset={() => handleResetPassword(user)}
                                                     onDeactivate={() => handleToggleStatus(user)}
                                                     onDelete={() => handleDeleteUser(user)}
+                                                    onApprove={() => handleApproveUser(user)}
                                                 />
                                             </td>
                                         </tr>
@@ -893,6 +944,7 @@ const UserManagementView = () => {
                                             onReset={() => handleResetPassword(user)}
                                             onDeactivate={() => handleToggleStatus(user)}
                                             onDelete={() => handleDeleteUser(user)}
+                                            onApprove={() => handleApproveUser(user)}
                                         />
                                     </div>
                                 </div>
@@ -1179,6 +1231,61 @@ const UserManagementView = () => {
                                         </div>
                                     </div>
                                 )}
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+                {/* Approval Modal */}
+                {showApproveModal && (
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                            className="bg-white dark:bg-slate-900 w-full max-w-sm rounded-[32px] shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden"
+                        >
+                            <div className="p-8 text-center text-slate-300">
+                                <div className="w-20 h-20 bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 rounded-full flex items-center justify-center mx-auto mb-6">
+                                    <FiCheckCircle size={40} />
+                                </div>
+                                <h3 className="text-2xl font-black text-slate-900 dark:text-white mb-2 uppercase tracking-tighter">Approve Access</h3>
+                                <p className="text-xs text-slate-400 font-bold mb-8 uppercase tracking-widest whitespace-normal">
+                                    Assign a core role for <span className="text-slate-900 dark:text-white">{userToApprove?.full_name || userToApprove?.username}</span>
+                                </p>
+
+                                <div className="space-y-4 mb-8 text-left">
+                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Select Access Role</label>
+                                    <div className="grid grid-cols-2 gap-2">
+                                        {['user', 'technician', 'manager', 'admin'].map((role) => (
+                                            <button
+                                                key={role}
+                                                onClick={() => setApproveRole(role)}
+                                                className={`py-3 px-4 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-all ${approveRole === role
+                                                    ? 'bg-emerald-600 text-white border-emerald-600 shadow-lg shadow-emerald-500/20'
+                                                    : 'bg-slate-50 dark:bg-slate-800 text-slate-400 dark:text-slate-500 border-slate-100 dark:border-slate-800 hover:border-emerald-500/30'
+                                                    }`}
+                                            >
+                                                {role}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <div className="flex gap-3">
+                                    <button
+                                        onClick={() => setShowApproveModal(false)}
+                                        className="flex-1 py-4 px-6 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-black text-xs uppercase tracking-widest rounded-2xl hover:bg-slate-200 transition-all"
+                                    >
+                                        Dismiss
+                                    </button>
+                                    <button
+                                        onClick={confirmApprove}
+                                        disabled={approveLoading}
+                                        className="flex-1 py-4 px-6 bg-emerald-600 text-white font-black text-xs uppercase tracking-widest rounded-2xl hover:bg-emerald-700 shadow-xl shadow-emerald-600/20 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                                    >
+                                        {approveLoading ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : 'Grant Access'}
+                                    </button>
+                                </div>
                             </div>
                         </motion.div>
                     </div>
