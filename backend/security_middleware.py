@@ -47,6 +47,8 @@ class SecurityMiddleware(BaseHTTPMiddleware):
         self.blocked_ips: Dict[str, datetime] = {}
         # Whitelisted IPs (bypass rate limiting)
         self.whitelist = self._load_whitelist()
+        # Set global instance for route access
+        set_security_middleware_instance(self)
         
     def _load_whitelist(self) -> List[str]:
         """Load IP whitelist from environment"""

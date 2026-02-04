@@ -89,16 +89,31 @@ async def catch_exceptions_middleware(request: Request, call_next):
         return JSONResponse(
             status_code=500,
             content={
-                "detail": f"Internal Server Error",
-                "msg": str(exc)
+                "detail": f"Internal Server Error: {str(exc)}",
+                "msg": str(exc),
+                "trace": traceback.format_exc() if os.getenv("ENVIRONMENT") == "development" else "Refer to logs"
             }
         )
 
-# Configure CORS - MUST be added AFTER catch_exceptions_middleware to ensure 
-# it wraps it and adds headers even to error responses.
+# Configure CORS
+# Hardcode critical origins to avoid wildcard * issues when credentials=True
+allowed_origins = [
+    "https://www.proservehelpdesk.in",
+    "https://proservehelpdesk.in",
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    "https://help-desk-system-b5gy.onrender.com"
+]
+
+# Add any extra origins from env, but filter out '*' if exists
+if origins:
+    for o in origins:
+        if o != "*":
+            allowed_origins.append(o)
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins + ["https://www.proservehelpdesk.in", "https://proservehelpdesk.in"],
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -106,8 +121,9 @@ app.add_middleware(
 
 # Add Security Middleware (Rate Limiting, IP Blocking, Security Headers)
 from security_middleware import SecurityMiddleware, set_security_middleware_instance
-security_mw = SecurityMiddleware(app)
-set_security_middleware_instance(security_mw)
+# No need to instantiate here, add_middleware handles it. 
+# We'll set the instance inside the middleware's __init__ or use a different approach.
+# For now, let's just add it correctly.
 app.add_middleware(SecurityMiddleware)
 
 # Include routers

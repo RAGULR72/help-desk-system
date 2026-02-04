@@ -12,6 +12,10 @@ SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL")
 if not SQLALCHEMY_DATABASE_URL:
     raise ValueError("DATABASE_URL environment variable is not set in .env file")
 
+# SQLAlchemy 1.4+ and 2.0 require 'postgresql://' instead of 'postgres://'
+if SQLALCHEMY_DATABASE_URL.startswith("postgres://"):
+    SQLALCHEMY_DATABASE_URL = SQLALCHEMY_DATABASE_URL.replace("postgres://", "postgresql://", 1)
+
 # Create engine with appropriate parameters based on database type
 if SQLALCHEMY_DATABASE_URL.startswith("sqlite"):
     engine = create_engine(
