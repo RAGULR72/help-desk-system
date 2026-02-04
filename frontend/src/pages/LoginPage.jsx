@@ -34,7 +34,7 @@ const LoginPage = () => {
     const [activeSessions, setActiveSessions] = useState([]);
 
     // Captcha State
-    const [showCaptcha, setShowCaptcha] = useState(false);
+    const [showCaptcha, setShowCaptcha] = useState(true);
     const [captcha, setCaptcha] = useState('');
     const [captchaInput, setCaptchaInput] = useState('');
     const [twoFactorCode, setTwoFactorCode] = useState('');
@@ -168,8 +168,8 @@ const LoginPage = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        // Verify Captcha for Login (Only if required after 3 failures)
-        if (isLogin && forgotStep === 0 && showCaptcha) {
+        // Verify Captcha for Login & Register
+        if (forgotStep === 0 && showCaptcha) {
             if (captchaInput.toUpperCase() !== captcha.toUpperCase()) {
                 setError("Invalid Captcha. Please try again.");
                 generateCaptcha();
@@ -182,8 +182,8 @@ const LoginPage = () => {
         setSuccessMessage('');
 
         const result = isLogin
-            ? await login(formData.username, formData.password, showCaptcha ? captchaInput : null)
-            : await register(formData);
+            ? await login(formData.username, formData.password, captchaInput)
+            : await register({ ...formData, captcha_token: captchaInput });
 
         setLoading(false);
 
@@ -482,7 +482,7 @@ const LoginPage = () => {
 
                             <div className="flex p-1 bg-gray-50 rounded-xl mb-8 border border-gray-200">
                                 <button
-                                    onClick={() => { setIsLogin(true); setForgotStep(0); setError(''); setSuccessMessage(''); setShowCaptcha(false); }}
+                                    onClick={() => { setIsLogin(true); setForgotStep(0); setError(''); setSuccessMessage(''); }}
                                     className={`flex-1 py-3 rounded-lg font-bold transition-all ${isLogin && forgotStep === 0 ? 'bg-white text-indigo-600 shadow-sm border border-gray-100' : 'text-gray-500 hover:text-gray-700'}`}
                                 >
                                     Log In

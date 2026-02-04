@@ -119,6 +119,13 @@ def create_login_log(user, request, db):
 @router.post("/register", response_model=root_schemas.UserResponse, status_code=status.HTTP_201_CREATED)
 def register(user: root_schemas.UserCreate, db: Session = Depends(get_db)):
     """Register a new user"""
+    # Always require CAPTCHA (as requested by user)
+    if not user.captcha_token:
+         raise HTTPException(
+             status_code=status.HTTP_400_BAD_REQUEST,
+             detail="captcha_required"
+         )
+    
     # Check if user already exists
     db_user = db.query(root_models.User).filter(root_models.User.email == user.email).first()
     if db_user:
@@ -212,9 +219,8 @@ def login(user_credentials: root_schemas.UserLogin, request: Request, response: 
                 detail=f"Account locked until {user.locked_until.strftime('%H:%M')} UTC due to multiple failed attempts."
             )
 
-        # Brute Force Protection: Require CAPTCHA after 3 failures
-        if user and user.failed_login_attempts >= 3 and not user_credentials.captcha_token:
-             # In a real app, we'd verify the token here. For now, we signal the frontend to show it.
+        # Always require CAPTCHA (as requested by user)
+        if not user_credentials.captcha_token:
              raise HTTPException(
                  status_code=status.HTTP_401_UNAUTHORIZED,
                  detail="captcha_required"
