@@ -43,6 +43,8 @@ class AuditLogger:
                 activity_type=event_type,
                 description=description,
                 icon=_get_icon_for_event(event_type),
+                ip_address=ip_address,
+                severity=severity,
                 timestamp=get_ist()
             )
             db.add(activity)
@@ -189,20 +191,75 @@ class AuditLogger:
             severity="info"
         )
 
+    @staticmethod
+    def log_ticket_event(db: Session, user_id: int, ticket_id: int, event: str, description: str):
+        """Log ticket-related security events"""
+        AuditLogger.log_security_event(
+            db=db,
+            user_id=user_id,
+            event_type=f"ticket_{event}",
+            description=description,
+            severity="info"
+        )
+
+    @staticmethod
+    def log_file_upload(db: Session, user_id: int, filename: str, file_url: str, ip_address: str):
+        """Log file upload events"""
+        AuditLogger.log_security_event(
+            db=db,
+            user_id=user_id,
+            event_type="file_upload",
+            description=f"File uploaded: {filename} ({file_url})",
+            ip_address=ip_address,
+            severity="info"
+        )
+
+    @staticmethod
+    def log_admin_action(db: Session, admin_id: int, target_user_id: Optional[int], action: str, description: str):
+        """Log administrative actions"""
+        AuditLogger.log_security_event(
+            db=db,
+            user_id=admin_id,
+            event_type="admin_action",
+            description=f"Admin action: {action} - {description}",
+            severity="warning"
+        )
+
+    @staticmethod
+    def log_api_error(db: Session, path: str, method: str, error: str, user_id: Optional[int] = None, ip_address: Optional[str] = None):
+        """Log critical API errors for security audit"""
+        AuditLogger.log_security_event(
+            db=db,
+            user_id=user_id,
+            event_type="api_error",
+            description=f"API Error ({method} {path}): {error}",
+            ip_address=ip_address,
+            severity="critical"
+        )
+
 
 def _get_icon_for_event(event_type: str) -> str:
     """Get appropriate icon for event type"""
+    # Handle prefixed event types like ticket_created
+    base_type = event_type.split('_')[0] if '_' in event_type else event_type
+    
     icon_map = {
-        "login_success": "log-in",
-        "login_failed": "alert-circle",
+        "login": "log-in",
         "logout": "log-out",
-        "password_changed": "lock",
-        "password_reset": "key",
-        "2fa_enabled": "shield",
-        "2fa_disabled": "shield-off",
-        "permission_changed": "user-check",
-        "account_locked": "lock",
-        "suspicious_activity": "alert-triangle",
-        "session_terminated": "x-circle"
+        "password": "lock",
+        "2fa": "shield",
+        "permission": "user-check",
+        "account": "lock",
+        "suspicious": "alert-triangle",
+        "session": "x-circle",
+        "ticket": "file-text",
+        "file": "upload",
+        "admin": "settings",
+        "api": "alert-octagon"
     }
-    return icon_map.get(event_type, "info")
+    
+    # Specific overrides
+    if event_type == "login_failed": return "alert-circle"
+    if event_type == "2fa_disabled": return "shield-off"
+    
+    return icon_map.get(base_type, "info")

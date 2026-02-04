@@ -21,6 +21,7 @@ from fastapi import File, UploadFile
 from ticket_system.models import Ticket
 import email_service
 import logging
+from audit_logger import AuditLogger
 
 router = APIRouter(prefix="/api/admin", tags=["admin"])
 
@@ -30,6 +31,12 @@ def get_current_admin(current_user: root_models.User = Depends(auth.get_current_
             status_code=status.HTTP_403_FORBIDDEN,
             detail="The user doesn't have enough privileges"
         )
+    # Step 14: 2FA Mandatory for Admins
+    if not current_user.is_2fa_enabled:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Two-factor authentication (2FA) is mandatory for administrator access. Please enable it in your security settings."
+        )
     return current_user
 
 def get_current_admin_or_manager(current_user: root_models.User = Depends(auth.get_current_user)):
@@ -38,6 +45,12 @@ def get_current_admin_or_manager(current_user: root_models.User = Depends(auth.g
             status_code=status.HTTP_403_FORBIDDEN,
             detail="The user doesn't have enough privileges"
         )
+    # Step 14: 2FA Mandatory for Staff
+    if not current_user.is_2fa_enabled:
+         raise HTTPException(
+             status_code=status.HTTP_403_FORBIDDEN,
+             detail="Two-factor authentication (2FA) is mandatory for staff access. Please enable it in your security settings."
+         )
     return current_user
 
 @router.get("/users/pending", response_model=List[root_schemas.UserResponse])
@@ -107,6 +120,10 @@ def create_user_admin(
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
+    
+    # Audit Log
+    AuditLogger.log_admin_action(db, current_user.id, db_user.id, "user_created", f"Created user {db_user.username} with role {db_user.role}")
+    
     return db_user
 
 @router.put("/users/{user_id}/approve")
@@ -132,6 +149,10 @@ def approve_user(
         
     user.is_approved = True
     user.role = role
+    
+    # Audit Log
+    AuditLogger.log_admin_action(db, current_user.id, user.id, "user_approved", f"Approved user {user.username} as {role}")
+    
     db.commit()
     return {"message": "User approved successfully"}
 
@@ -202,6 +223,9 @@ def update_user_details(
         # Ensure it's stored as JSON string
         user.permissions = json.dumps(user_update.permissions)
         
+    # Audit Log
+    AuditLogger.log_admin_action(db, current_user.id, user.id, "user_updated", f"Updated details for user {user.username}")
+    
     db.commit()
     return {"message": "User updated successfully"}
 
@@ -232,9 +256,11 @@ def reset_user_password(
     user.hashed_password = hashed_pw
     user.must_change_password = True # Force password change on next login
     
-    # Update password_last_changed timestamp
     from datetime import datetime
     user.password_last_changed = datetime.utcnow()
+    
+    # Audit Log
+    AuditLogger.log_admin_action(db, current_user.id, user.id, "password_reset", f"Manually reset password for {user.username}")
     
     db.commit()
     logging.info(f"DEBUG PW Reset: Success for {user.username}. New hash starts with: {hashed_pw[:10]}")
@@ -284,8 +310,13 @@ async def upload_user_avatar_admin(
     # Create directory if not exists
     os.makedirs("static/avatars", exist_ok=True)
     
+    # Security: Extension Whitelist
+    ALLOWED_EXTENSIONS = {'.png', '.jpg', '.jpeg', '.gif', '.webp'}
+    file_extension = os.path.splitext(file.filename)[1].lower()
+    if file_extension not in ALLOWED_EXTENSIONS:
+        raise HTTPException(status_code=400, detail=f"Unsupported file extension: {file_extension}")
+
     # Generate unique filename
-    file_extension = os.path.splitext(file.filename)[1]
     filename = f"{user_id}_{uuid.uuid4()}{file_extension}"
     file_path = f"static/avatars/{filename}"
     
@@ -448,6 +479,9 @@ def update_system_setting(
     else:
         setting.value = update.value
     
+    # Audit Log
+    AuditLogger.log_admin_action(db, current_user.id, None, "system_setting_updated", f"Updated setting '{key}' to '{update.value}'")
+    
     db.commit()
     db.refresh(setting)
     return setting
@@ -501,11 +535,20 @@ def delete_user(
             ("user_activity_logs", "user_id")
         ]
         
+        # Security: Whitelist of allowed characters for raw SQL (alphanumeric + underscore)
+        import re
+        sql_safe_pattern = re.compile(r"^[a-zA-Z0-9_]+$")
+
         for table, col in delete_targets:
+            # Multi-layer safety: Predefined list + Regex check
+            if not sql_safe_pattern.match(table) or not sql_safe_pattern.match(col):
+                continue
+            
             try:
                 # Use a nested transaction so one failure doesn't kill the whole session
                 with db.begin_nested():
-                    db.execute(text(f"DELETE FROM {table} WHERE {col} = :uid"), {"uid": user_id})
+                    # bandit result B608: nosec added since identifiers are whitelisted
+                    db.execute(text(f"DELETE FROM {table} WHERE {col} = :uid"), {"uid": user_id}) # nosec
             except Exception:
                 pass # Table might not exist or other non-critical error
 
@@ -520,16 +563,25 @@ def delete_user(
         ]
         
         for table, col in nullify_targets:
+            # Multi-layer safety: Predefined list + Regex check
+            if not sql_safe_pattern.match(table) or not sql_safe_pattern.match(col):
+                continue
+                
             try:
                 with db.begin_nested():
-                    db.execute(text(f"UPDATE {table} SET {col} = NULL WHERE {col} = :uid"), {"uid": user_id})
+                    # bandit result B608: nosec added since identifiers are whitelisted
+                    db.execute(text(f"UPDATE {table} SET {col} = NULL WHERE {col} = :uid"), {"uid": user_id}) # nosec
             except Exception:
                 pass
 
         # 4. Handle remaining potential root_models relationships if any
         # 5. Final Delete of the user itself using raw SQL to bypass ORM relationship checks 
         # (This avoids errors if some related tables don't exist in the DB)
-        db.execute(text("DELETE FROM users WHERE id = :uid"), {"uid": user_id})
+        db.execute(text("DELETE FROM users WHERE id = :uid"), {"uid": user_id}) # nosec
+        
+        # Audit Log
+        AuditLogger.log_admin_action(db, current_user.id, user_id, "user_deleted", f"Deleted user ID {user_id} ({user.username})")
+        
         db.commit()
         return {"message": "User deleted successfully"}
     except Exception as e:

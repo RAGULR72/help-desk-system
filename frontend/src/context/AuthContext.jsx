@@ -22,9 +22,7 @@ export const AuthProvider = ({ children }) => {
 
                 try {
                     // Always verify/update with fresh data
-                    const response = await api.get('/api/auth/me', {
-                        headers: { Authorization: `Bearer ${token}` }
-                    });
+                    const response = await api.get('/api/auth/me');
                     const userData = response.data;
                     try {
                         if (userData.permissions && typeof userData.permissions === 'string') {
@@ -116,9 +114,9 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
-    const login = async (username, password) => {
+    const login = async (username, password, captcha_token = null) => {
         try {
-            const response = await api.post('/api/auth/login', { username, password });
+            const response = await api.post('/api/auth/login', { username, password, captcha_token });
 
             if (response.data.status === '2fa_required' || response.data.status === '2fa_setup_required') {
                 return {
@@ -137,9 +135,7 @@ export const AuthProvider = ({ children }) => {
             }
 
             // Get user profile
-            const userResponse = await api.get('/api/auth/me', {
-                headers: { Authorization: `Bearer ${access_token}` }
-            });
+            const userResponse = await api.get('/api/auth/me');
 
             const userData = userResponse.data;
             try {

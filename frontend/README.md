@@ -1,59 +1,49 @@
-# Proserve Website - Frontend
+# Proserve Help Desk - Intelligence Interface
 
-Modern React website with Tailwind CSS and Framer Motion animations.
+A premium, high-performance React frontend designed for modern enterprise support operations. Featuring glassmorphism aesthetics, AI-powered interactions, and multi-layer security.
 
-## Features
+## ✨ Premium Features
 
-✨ **Premium UI Design**
-- Glassmorphism effects
-- Gradient backgrounds
-- Smooth animations
-- Responsive design
+- **AI Concierge**: Multilingual (English, Tamil, Hindi, Telugu) AI assistant for instant ticket drafting and support.
+- **Smart Co-Pilot**: Automated resolution blueprints and technical guidance directly in the ticket view.
+- **Interactive Command Center**: Real-time admin dashboard with live headcounts and SLA breach monitoring.
+- **Visual Analytics**: Dynamic charts (Recharts) for monitoring system performance and ticket trends.
+- **Modern UI**: Full dark mode support, smooth Framer Motion transitions, and responsive layouts.
 
-🔐 **Authentication**
-- Login/Register modal
-- JWT token authentication
-- User profile management
+## 🚀 Getting Started
 
-🎨 **Components**
-- Header with sticky navigation
-- Hero section with animated stats
-- Products showcase
-- Services grid
-- About section
-- Contact form
-- Footer with links
+1. **Install Dependencies**:
+   ```bash
+   npm install
+   ```
 
-## Setup
+2. **Configuration**:
+   Copy `.env.example` to `.env` and configure your `VITE_API_URL` and map keys.
 
-1. Install dependencies:
-```bash
-npm install
-```
+3. **Development Mode**:
+   ```bash
+   npm run dev
+   ```
 
-2. Start the development server:
-```bash
-npm run dev
-```
+4. **Production Build**:
+   ```bash
+   npm run build
+   ```
 
-The website will be available at `http://localhost:5173`
+## 🔐 Security & UX
 
-## Build
+- **Client-Side Sanitization**: All content (especially AI responses) is sanitized using DOMPurify to prevent XSS.
+- **Secure Sessions**: Enforce concurrent session limits and automatic inactivity logouts.
+- **MFA Flow**: Integrated 2FA setup and verification process for staff members.
+- **CSRF Safety**: Enforces custom security headers on all state-changing API requests.
 
-To create a production build:
-```bash
-npm run build
-```
+## 🛠️ Technology Stack
 
-## Technologies
+- **React 19**: Latest performance and hook features.
+- **Tailwind CSS**: Utility-first styling with custom glassmorphism effects.
+- **Framer Motion**: Production-grade animation engine.
+- **Axios**: Configured with interceptors for auth and error handling.
+- **Lucide/Fi Icons**: Modern iconography.
 
-- **React 18** - UI library
-- **Vite** - Build tool
-- **Tailwind CSS** - Styling
-- **Framer Motion** - Animations
-- **Axios** - HTTP client
-- **React Icons** - Icon library
-
-## Environment
-
-Make sure the backend API is running at `http://localhost:8000` for authentication to work.
+## 📡 Backend Connectivity
+Ensure the [Backend](../backend/README.md) is running and accessible. The frontend communicates via the base URL defined in your `.env`.

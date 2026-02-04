@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../api/axios';
+import DOMPurify from 'dompurify';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     MagnifyingGlassIcon,
@@ -155,7 +156,7 @@ const KBPortal = () => {
 
                                 <div
                                     className="prose prose-indigo max-w-none text-slate-600"
-                                    dangerouslySetInnerHTML={{ __html: selectedArticle.content }}
+                                    dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(selectedArticle.content) }}
                                 />
 
                                 <div className="mt-12 pt-8 border-t border-slate-100 text-center">

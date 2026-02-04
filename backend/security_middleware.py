@@ -20,8 +20,10 @@ RATE_LIMIT_REQUESTS = int(os.getenv("RATE_LIMIT_REQUESTS", "100"))  # requests p
 RATE_LIMIT_WINDOW = int(os.getenv("RATE_LIMIT_WINDOW", "60"))  # seconds
 LOGIN_RATE_LIMIT = int(os.getenv("LOGIN_RATE_LIMIT", "5"))  # login attempts per window
 LOGIN_RATE_WINDOW = int(os.getenv("LOGIN_RATE_WINDOW", "300"))  # 5 minutes
-MAX_FAILED_ATTEMPTS = int(os.getenv("MAX_FAILED_ATTEMPTS", "10"))  # before IP block
+MAX_FAILED_ATTEMPTS = int(os.getenv("MAX_FAILED_ATTEMPTS", "5"))  # before IP block
 IP_BLOCK_DURATION = int(os.getenv("IP_BLOCK_DURATION", "3600"))  # seconds (1 hour)
+ADMIN_IP_RESTRICT = os.getenv("ADMIN_IP_RESTRICT", "false").lower() == "true"
+ADMIN_WHITELIST = [ip.strip() for ip in os.getenv("ADMIN_WHITELIST", "127.0.0.1").split(",")]
 
 logger = logging.getLogger(__name__)
 
@@ -177,7 +179,7 @@ class SecurityMiddleware(BaseHTTPMiddleware):
         client_ip = self._get_client_ip(request)
         endpoint = request.url.path
         
-        # Check if IP is blocked
+        # 1. Check if IP is blocked
         if self._is_ip_blocked(client_ip):
             logger.warning(f"Blocked IP {client_ip} attempted access to {endpoint}")
             return JSONResponse(
@@ -187,6 +189,36 @@ class SecurityMiddleware(BaseHTTPMiddleware):
                 }
             )
         
+        # 2. Admin/Manager IP Restriction
+        if ADMIN_IP_RESTRICT:
+            is_admin_route = endpoint.startswith("/api/admin") or endpoint.startswith("/api/manager")
+            if is_admin_route and client_ip not in ADMIN_WHITELIST:
+                logger.warning(f"Unauthorized IP {client_ip} attempted to access admin route {endpoint}")
+                return JSONResponse(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    content={
+                        "detail": "Access denied. Your IP address is not authorized to access administrative functions."
+                    }
+                )
+        
+        # CSRF Protection: Enforce custom header for state-changing methods
+        # Browsers don't allow cross-origin requests to set custom headers without CORS preflight.
+        if request.method in ["POST", "PUT", "DELETE", "PATCH"]:
+            csrf_token = request.headers.get("X-CSRF-Token")
+            requested_with = request.headers.get("X-Requested-With")
+            
+            # Allow login and public endpoints to pass without CSRF if needed, 
+            # but usually even login should be protected.
+            # We check if either of our expected security headers is present.
+            if not csrf_token and not requested_with:
+                logger.warning(f"CSRF attempted for IP {client_ip} on {endpoint}")
+                return JSONResponse(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    content={
+                        "detail": "CSRF validation failed. Missing security headers (X-CSRF-Token or X-Requested-With)."
+                    }
+                )
+
         # Check rate limiting
         if self._check_rate_limit(client_ip, endpoint):
             logger.warning(f"Rate limit exceeded for IP {client_ip} on {endpoint}")

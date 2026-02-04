@@ -34,6 +34,7 @@ const LoginPage = () => {
     const [activeSessions, setActiveSessions] = useState([]);
 
     // Captcha State
+    const [showCaptcha, setShowCaptcha] = useState(false);
     const [captcha, setCaptcha] = useState('');
     const [captchaInput, setCaptchaInput] = useState('');
     const [twoFactorCode, setTwoFactorCode] = useState('');
@@ -62,7 +63,20 @@ const LoginPage = () => {
             // Refresh state and navigate
             window.location.href = `/dashboard/${userData.role || 'user'}`;
         } catch (err) {
-            setError(err.response?.data?.detail || "Invalid 2FA code.");
+            const status = err.response?.status;
+            const detail = err.response?.data?.detail;
+
+            if (status === 409 || (detail && typeof detail === 'object' && detail.message === 'session_limit_exceeded')) {
+                const sessionData = status === 409 ? detail.sessions : detail.sessions;
+                setActiveSessions(sessionData);
+                setForgotStep(4);
+                setError("Maximum concurrent sessions reached.");
+            } else if (status === 401) {
+                setError("Your login session expired. Please login again.");
+                setForgotStep(0);
+            } else {
+                setError(typeof detail === 'string' ? detail : "Invalid 2FA code.");
+            }
             setTwoFactorCode('');
         } finally {
             setLoading(false);
@@ -94,7 +108,20 @@ const LoginPage = () => {
                 window.location.href = `/dashboard/${userData.role || 'user'}`;
             }, 1000);
         } catch (err) {
-            setError(err.response?.data?.detail || "Verification failed.");
+            const status = err.response?.status;
+            const detail = err.response?.data?.detail;
+
+            if (status === 409 || (detail && typeof detail === 'object' && detail.message === 'session_limit_exceeded')) {
+                const sessionData = status === 409 ? detail.sessions : detail.sessions;
+                setActiveSessions(sessionData);
+                setForgotStep(4);
+                setError("Maximum concurrent sessions reached.");
+            } else if (status === 401) {
+                setError("Your setup session expired. Please start over.");
+                setForgotStep(0);
+            } else {
+                setError(typeof detail === 'string' ? detail : "Verification failed.");
+            }
         } finally {
             setLoading(false);
         }
@@ -141,8 +168,8 @@ const LoginPage = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        // Verify Captcha for Login
-        if (isLogin && forgotStep === 0) {
+        // Verify Captcha for Login (Only if required after 3 failures)
+        if (isLogin && forgotStep === 0 && showCaptcha) {
             if (captchaInput.toUpperCase() !== captcha.toUpperCase()) {
                 setError("Invalid Captcha. Please try again.");
                 generateCaptcha();
@@ -155,7 +182,7 @@ const LoginPage = () => {
         setSuccessMessage('');
 
         const result = isLogin
-            ? await login(formData.username, formData.password)
+            ? await login(formData.username, formData.password, showCaptcha ? captchaInput : null)
             : await register(formData);
 
         setLoading(false);
@@ -201,10 +228,14 @@ const LoginPage = () => {
                 setActiveSessions(sessionData);
                 setForgotStep(4);
                 setError("Maximum concurrent sessions reached.");
+            } else if (result.error === 'captcha_required') {
+                setShowCaptcha(true);
+                generateCaptcha();
+                setError("Security check required. Please enter the captcha.");
             } else {
                 setError(typeof result.error === 'string' ? result.error : "Failed to login");
             }
-            generateCaptcha();
+            if (showCaptcha) generateCaptcha();
         }
     };
 
@@ -451,7 +482,7 @@ const LoginPage = () => {
 
                             <div className="flex p-1 bg-gray-50 rounded-xl mb-8 border border-gray-200">
                                 <button
-                                    onClick={() => { setIsLogin(true); setForgotStep(0); setError(''); setSuccessMessage(''); generateCaptcha(); }}
+                                    onClick={() => { setIsLogin(true); setForgotStep(0); setError(''); setSuccessMessage(''); setShowCaptcha(false); }}
                                     className={`flex-1 py-3 rounded-lg font-bold transition-all ${isLogin && forgotStep === 0 ? 'bg-white text-indigo-600 shadow-sm border border-gray-100' : 'text-gray-500 hover:text-gray-700'}`}
                                 >
                                     Log In
@@ -568,40 +599,47 @@ const LoginPage = () => {
                                                 required
                                                 className="w-full bg-gray-50 border border-gray-200 rounded-xl py-4 pl-12 pr-4 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/5 transition-all"
                                             />
+                                            {!isLogin && (
+                                                <p className="text-[10px] text-gray-400 mt-1 ml-1 font-medium">
+                                                    Minimum 12 characters, including uppercase, lowercase, numbers, and symbols.
+                                                </p>
+                                            )}
                                         </div>
                                     </div>
 
-                                    <div className="space-y-2">
-                                        <div className="flex justify-between items-center ml-1">
-                                            <label className="text-sm font-semibold text-gray-700">Security Check</label>
-                                            <button
-                                                type="button"
-                                                onClick={generateCaptcha}
-                                                className="text-[10px] text-indigo-600 font-bold uppercase tracking-wider hover:underline"
-                                            >
-                                                Refresh Code
-                                            </button>
-                                        </div>
-                                        <div className="flex gap-3">
-                                            <div className="flex-1 relative group">
-                                                <FiLock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-indigo-600 transition-colors" />
-                                                <input
-                                                    type="text"
-                                                    placeholder="Enter Code"
-                                                    value={captchaInput}
-                                                    onChange={(e) => setCaptchaInput(e.target.value)}
-                                                    required={isLogin && forgotStep === 0}
-                                                    className="w-full bg-gray-50 border border-gray-200 rounded-xl py-4 pl-12 pr-4 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:bg-white focus:border-indigo-500 transition-all font-mono tracking-widest uppercase"
-                                                />
+                                    {showCaptcha && (
+                                        <div className="space-y-4 pt-2 border-t border-gray-100">
+                                            <div className="flex justify-between items-center ml-1">
+                                                <label className="text-sm font-semibold text-gray-700">Security Check</label>
+                                                <button
+                                                    type="button"
+                                                    onClick={generateCaptcha}
+                                                    className="text-[10px] text-indigo-600 font-bold uppercase tracking-wider hover:underline"
+                                                >
+                                                    Refresh Code
+                                                </button>
                                             </div>
-                                            <div className="w-32 bg-indigo-50 border-2 border-dashed border-indigo-200 rounded-xl flex items-center justify-center select-none overflow-hidden relative">
-                                                <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'repeating-linear-gradient(45deg, #4f46e5 0, #4f46e5 1px, transparent 0, transparent 50%)', backgroundSize: '10px 10px' }}></div>
-                                                <span className="text-xl font-black text-indigo-600 tracking-widest italic drop-shadow-sm z-10">
-                                                    {captcha}
-                                                </span>
+                                            <div className="flex gap-3">
+                                                <div className="flex-1 relative group">
+                                                    <FiLock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-indigo-600 transition-colors" />
+                                                    <input
+                                                        type="text"
+                                                        placeholder="Enter Code"
+                                                        value={captchaInput}
+                                                        onChange={(e) => setCaptchaInput(e.target.value)}
+                                                        required={showCaptcha}
+                                                        className="w-full bg-gray-50 border border-gray-200 rounded-xl py-4 pl-12 pr-4 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:bg-white focus:border-indigo-500 transition-all font-mono tracking-widest uppercase"
+                                                    />
+                                                </div>
+                                                <div className="w-32 bg-indigo-50 border-2 border-dashed border-indigo-200 rounded-xl flex items-center justify-center select-none overflow-hidden relative">
+                                                    <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'repeating-linear-gradient(45deg, #4f46e5 0, #4f46e5 1px, transparent 0, transparent 50%)', backgroundSize: '10px 10px' }}></div>
+                                                    <span className="text-xl font-black text-indigo-600 tracking-widest italic drop-shadow-sm z-10">
+                                                        {captcha}
+                                                    </span>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
+                                    )}
 
                                     <button
                                         type="submit"

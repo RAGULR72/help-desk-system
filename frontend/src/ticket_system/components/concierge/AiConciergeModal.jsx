@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiX, FiSend, FiZap, FiCheckCircle, FiPlus, FiMic, FiImage, FiCamera, FiTrash2, FiVolume2 } from 'react-icons/fi';
 import api from '../../../api/axios';
+import DOMPurify from 'dompurify';
 
 const AiConciergeModal = ({ onClose, onProceedToTicket }) => {
     const [config, setConfig] = useState({ name: 'Proserve AI', enabled: true });
@@ -181,10 +182,10 @@ const AiConciergeModal = ({ onClose, onProceedToTicket }) => {
                                     </div>
                                 )}
                                 <div className={`p-5 rounded-[2rem] text-sm leading-relaxed ${msg.role === 'user'
-                                        ? 'bg-indigo-600 text-white shadow-xl shadow-indigo-600/10'
-                                        : 'bg-white dark:bg-slate-800 text-gray-800 dark:text-slate-200 shadow-sm border border-gray-100 dark:border-slate-700'
+                                    ? 'bg-indigo-600 text-white shadow-xl shadow-indigo-600/10'
+                                    : 'bg-white dark:bg-slate-800 text-gray-800 dark:text-slate-200 shadow-sm border border-gray-100 dark:border-slate-700'
                                     }`}>
-                                    <div dangerouslySetInnerHTML={{ __html: msg.content }} />
+                                    <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(msg.content) }} />
                                 </div>
                             </div>
                         </motion.div>

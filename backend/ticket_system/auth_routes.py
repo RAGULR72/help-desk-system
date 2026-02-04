@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Request
+from fastapi import APIRouter, Depends, HTTPException, status, Request, Response
 from typing import List
 from sqlalchemy.orm import Session
 from sqlalchemy import or_, func
@@ -22,6 +22,7 @@ import email_service
 import notification_service
 import sms_service
 import random
+import secrets
 import uuid
 import pyotp
 import qrcode
@@ -184,7 +185,7 @@ def register(user: root_schemas.UserCreate, db: Session = Depends(get_db)):
     return db_user
 
 @router.post("/login")
-def login(user_credentials: root_schemas.UserLogin, request: Request, db: Session = Depends(get_db)):
+def login(user_credentials: root_schemas.UserLogin, request: Request, response: Response, db: Session = Depends(get_db)):
     """Login and get access token"""
     try:
         # Support for email OR username login, case-insensitive
@@ -204,17 +205,44 @@ def login(user_credentials: root_schemas.UserLogin, request: Request, db: Sessio
         os_name = user_agent.os.family
         browser_name = user_agent.browser.family
 
-        print(f"DEBUG Login: Attempting login for {user_credentials.username}")
-        if not user:
-             print(f"DEBUG Login: User {user_credentials.username} not found")
-        elif not auth.verify_password(user_credentials.password, user.hashed_password):
-             print(f"DEBUG Login: Password verification failed for {user_credentials.username}")
-             # Let's also check if hashing the entered password matches the stored one (manually)
-             # Just to be extra sure about the auth module
-             test_hash = auth.get_password_hash(user_credentials.password)
-             print(f"DEBUG Login: Entered PW hash test: {test_hash[:10]}... Stored: {user.hashed_password[:10]}...")
-             
-        if not user or not auth.verify_password(user_credentials.password, user.hashed_password):
+        # Brute Force Protection: Check if account is locked
+        if user and user.locked_until and user.locked_until > datetime.utcnow():
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=f"Account locked until {user.locked_until.strftime('%H:%M')} UTC due to multiple failed attempts."
+            )
+
+        # Brute Force Protection: Require CAPTCHA after 3 failures
+        if user and user.failed_login_attempts >= 3 and not user_credentials.captcha_token:
+             # In a real app, we'd verify the token here. For now, we signal the frontend to show it.
+             raise HTTPException(
+                 status_code=status.HTTP_401_UNAUTHORIZED,
+                 detail="captcha_required"
+             )
+
+        # Verify Password
+        is_verified = False
+        if user:
+            is_verified, needs_update, new_hash = auth.verify_password(user_credentials.password, user.hashed_password)
+            if is_verified and needs_update:
+                user.hashed_password = new_hash
+                db.commit()
+
+        if not user or not is_verified:
+            if user:
+                user.failed_login_attempts += 1
+                if user.failed_login_attempts >= 5:
+                    user.locked_until = datetime.utcnow() + timedelta(minutes=30)
+                    user.failed_login_attempts = 0 # Reset after locking
+                    AuditLogger.log_security_event(
+                        db=db,
+                        user_id=user.id,
+                        event_type="account_locked",
+                        description="Account locked due to 5 failed login attempts",
+                        ip_address=client_ip,
+                        severity="critical"
+                    )
+                db.commit()
             # Log failed attempt
             try:
                 # Record failed attempt for rate limiting/IP blocking
@@ -260,7 +288,21 @@ def login(user_credentials: root_schemas.UserLogin, request: Request, db: Sessio
             raise HTTPException(status_code=401, detail="Incorrect username or password")
         
         if not user.is_approved:
+            # Log approval hold attempt
+            AuditLogger.log_security_event(
+                db=db,
+                user_id=user.id,
+                event_type="login_blocked",
+                description="Login attempted for unapproved account",
+                ip_address=client_ip,
+                severity="warning"
+            )
             raise HTTPException(status_code=403, detail="Wait for admin approval")
+        
+        # Reset failed attempts on successful stage 1
+        user.failed_login_attempts = 0
+        user.locked_until = None
+        db.commit()
         
         # 2FA Check
         if user.is_2fa_enabled:
@@ -288,12 +330,29 @@ def login(user_credentials: root_schemas.UserLogin, request: Request, db: Sessio
         # Tracking & Session Limit Check
         check_session_limit(user, db)
         new_log = create_login_log(user, request, db)
+        
+        # Log successful login to Audit Log
+        AuditLogger.log_login_success(db, user.id, client_ip, device_type, browser_name)
 
+        # Step 5: Secure Sessions (Set Cookies)
+        response.set_cookie(
+            key="access_token",
+            value=access_token,
+            httponly=True,
+            secure=True, # In prod, this should be True. In local with HTTP, it might need to be False or use samesite=Lax
+            samesite="strict",
+            max_age=auth.ACCESS_TOKEN_EXPIRE_MINUTES * 60
+        )
+        
         return {
-            "access_token": access_token, 
+            "access_token": access_token, # Keep for legacy compatibility during transition
             "token_type": "bearer",
-            "require_password_change": user.must_change_password,
-            "session_id": new_log.id if new_log else None
+            "user": {
+                "id": user.id,
+                "username": user.username,
+                "role": user.role,
+                "full_name": user.full_name
+            }
         }
     except HTTPException:
         raise
@@ -328,8 +387,13 @@ def terminate_session_by_credentials(
         )
     ).first()
 
-    if not user or not auth.verify_password(data.password, user.hashed_password):
+    is_verified, needs_update, new_hash = auth.verify_password(data.password, user.hashed_password)
+    if not user or not is_verified:
         raise HTTPException(status_code=401, detail="Authentication failed")
+    
+    if is_verified and needs_update:
+        user.hashed_password = new_hash
+        db.commit()
 
     session = db.query(admin_models.LoginLog).filter(
         admin_models.LoginLog.id == data.session_id,
@@ -353,7 +417,8 @@ def change_password(
     user = db.query(root_models.User).filter(root_models.User.id == current_user.id).first()
     
     # Verify old password
-    if not auth.verify_password(password_data.old_password, current_user.hashed_password):
+    is_verified, needs_update, new_hash = auth.verify_password(password_data.old_password, current_user.hashed_password)
+    if not is_verified:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Incorrect old password"
@@ -383,6 +448,9 @@ def change_password(
     )
     db.add(activity)
     
+    # Audit Log
+    AuditLogger.log_password_change(db, current_user.id)
+    
     db.commit()
     db.refresh(current_user)
     
@@ -399,8 +467,13 @@ async def upload_avatar(file: UploadFile = File(...), current_user: root_models.
     # Create directory if not exists
     os.makedirs("static/avatars", exist_ok=True)
     
+    # Security: Extension Whitelist
+    ALLOWED_EXTENSIONS = {'.png', '.jpg', '.jpeg', '.gif', '.webp'}
+    file_extension = os.path.splitext(file.filename)[1].lower()
+    if file_extension not in ALLOWED_EXTENSIONS:
+        raise HTTPException(status_code=400, detail=f"Unsupported file extension: {file_extension}")
+
     # Generate unique filename
-    file_extension = os.path.splitext(file.filename)[1]
     filename = f"{current_user.id}_{uuid.uuid4()}{file_extension}"
     file_path = f"static/avatars/{filename}"
     
@@ -670,8 +743,8 @@ def forgot_password_request(
         # User said "forgot password option work aagla so adha ready panu"
         raise HTTPException(status_code=404, detail="User not found with provided identifier")
     
-    # Generate 6-digit OTP
-    otp_code = str(random.randint(100000, 999999))
+    # Generate 6-digit OTP using cryptographically secure random numbers
+    otp_code = ''.join(secrets.choice('0123456789') for _ in range(6))
     expires_at = datetime.utcnow() + timedelta(minutes=10) # 10 min expiry
     
     # Store OTP
@@ -699,6 +772,15 @@ def forgot_password_request(
 
     if not sms_sent and not email_sent:
         raise HTTPException(status_code=500, detail="Failed to send verification code")
+        
+    # Audit Log
+    AuditLogger.log_security_event(
+        db=db,
+        user_id=user.id,
+        event_type="password_reset_initiated",
+        description=f"Password reset initiated via {'phone' if sms_sent else 'email'}",
+        severity="info"
+    )
         
     return {"message": "Verification code sent successfully", "method": "phone" if sms_sent else "email"}
 
@@ -783,6 +865,9 @@ def reset_password(
         icon="key"
     )
     db.add(activity)
+    
+    # Audit Log
+    AuditLogger.log_password_reset(db, user.id, "N/A")
     
     db.commit()
     return {"message": "Password has been reset successfully. You can now login with your new password."}
@@ -924,8 +1009,13 @@ def setup_2fa(
 ):
     """Generate TOTP secret and QR code URI for 2FA setup"""
     user = db.query(root_models.User).filter(root_models.User.username == data.username).first()
-    if not user or not auth.verify_password(data.password, user.hashed_password):
+    is_verified, needs_update, new_hash = auth.verify_password(data.password, user.hashed_password)
+    if not user or not is_verified:
         raise HTTPException(status_code=401, detail="Authentication failed")
+    
+    if is_verified and needs_update:
+        user.hashed_password = new_hash
+        db.commit()
 
     if not user.totp_secret:
         user.totp_secret = pyotp.random_base32()
@@ -949,14 +1039,19 @@ def confirm_2fa(
 ):
     """Verify first TOTP code to finalize 2FA setup"""
     user = db.query(root_models.User).filter(root_models.User.username == data.username).first()
-    if not user or not auth.verify_password(data.password, user.hashed_password):
+    is_verified, needs_update, new_hash = auth.verify_password(data.password, user.hashed_password)
+    if not user or not is_verified:
         raise HTTPException(status_code=401, detail="Authentication failed")
+    
+    if is_verified and needs_update:
+        user.hashed_password = new_hash
+        db.commit()
 
     if not user.totp_secret:
         raise HTTPException(status_code=400, detail="2FA not initiated")
     
     totp = pyotp.TOTP(user.totp_secret)
-    if totp.verify(data.code):
+    if totp.verify(data.code, valid_window=1):
         user.is_2fa_enabled = True
         user.is_2fa_setup = True
         db.commit()
@@ -996,7 +1091,7 @@ def confirm_2fa_authenticated(
         raise HTTPException(status_code=400, detail="2FA not initiated")
     
     totp = pyotp.TOTP(current_user.totp_secret)
-    if totp.verify(data.code):
+    if totp.verify(data.code, valid_window=1):
         current_user.is_2fa_enabled = True
         current_user.is_2fa_setup = True
         db.commit()
@@ -1019,6 +1114,7 @@ def disable_2fa(
 @router.post("/2fa/verify-direct")
 def verify_2fa_login(
     data: root_schemas.TwoFactorVerify,
+    response: Response,
     db: Session = Depends(get_db)
 ):
     """Verify TOTP code during login process"""
@@ -1030,14 +1126,19 @@ def verify_2fa_login(
         )
     ).first()
 
-    if not user or not auth.verify_password(data.password, user.hashed_password):
+    is_verified, needs_update, new_hash = auth.verify_password(data.password, user.hashed_password)
+    if not user or not is_verified:
         raise HTTPException(status_code=401, detail="Authentication failed")
+    
+    if is_verified and needs_update:
+        user.hashed_password = new_hash
+        db.commit()
 
     if not user.is_2fa_enabled or not user.totp_secret:
         raise HTTPException(status_code=400, detail="2FA not enabled for this user")
 
     totp = pyotp.TOTP(user.totp_secret)
-    if not totp.verify(data.code):
+    if not totp.verify(data.code, valid_window=1):
         raise HTTPException(status_code=400, detail="Invalid 2FA code")
 
     # If verification succeeds, proceed with full login logic (tracking, token creation)
@@ -1051,6 +1152,16 @@ def verify_2fa_login(
         data={"sub": user.username}, expires_delta=access_token_expires
     )
     
+    # Step 5: Secure Sessions (Set Cookies)
+    response.set_cookie(
+        key="access_token",
+        value=access_token,
+        httponly=True,
+        secure=True,
+        samesite="strict",
+        max_age=auth.ACCESS_TOKEN_EXPIRE_MINUTES * 60
+    )
+    
     return {
         "access_token": access_token, 
         "token_type": "bearer",
@@ -1061,6 +1172,7 @@ def verify_2fa_login(
 @router.post("/logout")
 def logout(
     request: Request,
+    response: Response,
     db: Session = Depends(get_db),
     current_user: root_models.User = Depends(auth.get_current_user),
     token: str = Depends(auth.oauth2_scheme)
@@ -1083,12 +1195,15 @@ def logout(
     # Log audit event
     AuditLogger.log_logout(db, current_user.id, client_ip)
     
+    # Clear Secure Cookie
+    response.delete_cookie("access_token")
+    
     db.commit()
     return {"message": "Successfully logged out"}
 
 
 @router.post("/refresh")
-def refresh_token(refresh_token: str, db: Session = Depends(get_db)):
+def refresh_token(refresh_token: str, response: Response, db: Session = Depends(get_db)):
     """Refresh access token using refresh token"""
     payload = auth.verify_refresh_token(refresh_token)
     
@@ -1113,6 +1228,16 @@ def refresh_token(refresh_token: str, db: Session = Depends(get_db)):
         data={"sub": user.username}, expires_delta=access_token_expires
     )
     
+    # Step 5: Secure Sessions (Set Cookies)
+    response.set_cookie(
+        key="access_token",
+        value=new_access_token,
+        httponly=True,
+        secure=True,
+        samesite="strict",
+        max_age=auth.ACCESS_TOKEN_EXPIRE_MINUTES * 60
+    )
+    
     return {
         "access_token": new_access_token,
         "token_type": "bearer"
@@ -1134,7 +1259,7 @@ def get_security_policy():
 def setup_2fa_initiate(req: root_schemas.Setup2FAInitiate, db: Session = Depends(get_db)):
     """Initiate 2FA setup by generating a secret and QR code"""
     try:
-        payload = auth.jwt.decode(req.token, auth.SECRET_KEY, algorithms=[auth.ALGORITHM])
+        payload = auth.jwt.decode(req.token, auth.SECRET_KEY, algorithms=[auth.ALGORITHM], options={"leeway": 60})
         if payload.get("type") != "2fa_pre_auth":
             raise HTTPException(status_code=401, detail="Invalid token type")
         
@@ -1174,10 +1299,10 @@ def setup_2fa_initiate(req: root_schemas.Setup2FAInitiate, db: Session = Depends
         raise HTTPException(status_code=401, detail="Token expired or invalid")
 
 @router.post("/2fa/setup/finalize")
-def setup_2fa_finalize(req: root_schemas.Verify2FARequest, request: Request, db: Session = Depends(get_db)):
+def setup_2fa_finalize(req: root_schemas.Verify2FARequest, request: Request, response: Response, db: Session = Depends(get_db)):
     """Verify first 2FA code and finalize setup"""
     try:
-        payload = auth.jwt.decode(req.token, auth.SECRET_KEY, algorithms=[auth.ALGORITHM])
+        payload = auth.jwt.decode(req.token, auth.SECRET_KEY, algorithms=[auth.ALGORITHM], options={"leeway": 60})
         if payload.get("type") != "2fa_pre_auth":
             raise HTTPException(status_code=401, detail="Invalid token type")
             
@@ -1187,7 +1312,7 @@ def setup_2fa_finalize(req: root_schemas.Verify2FARequest, request: Request, db:
             raise HTTPException(status_code=404, detail="User not found")
             
         totp = pyotp.TOTP(user.totp_secret)
-        if totp.verify(req.code):
+        if totp.verify(req.code, valid_window=1):
             user.is_2fa_setup = True
             db.commit()
             
@@ -1203,6 +1328,16 @@ def setup_2fa_finalize(req: root_schemas.Verify2FARequest, request: Request, db:
             # Create Session Log
             new_log = create_login_log(user, request, db)
             
+            # Step 5: Secure Sessions (Set Cookies)
+            response.set_cookie(
+                key="access_token",
+                value=access_token,
+                httponly=True,
+                secure=True,
+                samesite="strict",
+                max_age=auth.ACCESS_TOKEN_EXPIRE_MINUTES * 60
+            )
+
             return {
                 "access_token": access_token,
                 "token_type": "bearer",
@@ -1215,10 +1350,11 @@ def setup_2fa_finalize(req: root_schemas.Verify2FARequest, request: Request, db:
         raise HTTPException(status_code=401, detail="Token expired or invalid")
 
 @router.post("/2fa/verify")
-def verify_2fa(req: root_schemas.Verify2FARequest, request: Request, db: Session = Depends(get_db)):
+def verify_2fa(req: root_schemas.Verify2FARequest, request: Request, response: Response, db: Session = Depends(get_db)):
     """Verify 2FA code during login"""
     try:
-        payload = auth.jwt.decode(req.token, auth.SECRET_KEY, algorithms=[auth.ALGORITHM])
+        # Use leeway to handle small clock differences between servers
+        payload = auth.jwt.decode(req.token, auth.SECRET_KEY, algorithms=[auth.ALGORITHM], options={"leeway": 60})
         if payload.get("type") != "2fa_pre_auth":
             raise HTTPException(status_code=401, detail="Invalid token type")
             
@@ -1231,7 +1367,7 @@ def verify_2fa(req: root_schemas.Verify2FARequest, request: Request, db: Session
             raise HTTPException(status_code=400, detail="2FA not setup")
             
         totp = pyotp.TOTP(user.totp_secret)
-        if totp.verify(req.code):
+        if totp.verify(req.code, valid_window=1):
             # Check session limit
             check_session_limit(user, db)
             
@@ -1244,6 +1380,16 @@ def verify_2fa(req: root_schemas.Verify2FARequest, request: Request, db: Session
             # Create Session Log
             new_log = create_login_log(user, request, db)
             
+            # Step 5: Secure Sessions (Set Cookies)
+            response.set_cookie(
+                key="access_token",
+                value=access_token,
+                httponly=True,
+                secure=True,
+                samesite="strict",
+                max_age=auth.ACCESS_TOKEN_EXPIRE_MINUTES * 60
+            )
+
             return {
                 "access_token": access_token,
                 "token_type": "bearer",
@@ -1253,4 +1399,4 @@ def verify_2fa(req: root_schemas.Verify2FARequest, request: Request, db: Session
         else:
             raise HTTPException(status_code=400, detail="Invalid verification code")
     except auth.JWTError:
-        raise HTTPException(status_code=401, detail="Token expired or invalid")
+        raise HTTPException(status_code=401, detail="Token expired or invalid (check system time)")

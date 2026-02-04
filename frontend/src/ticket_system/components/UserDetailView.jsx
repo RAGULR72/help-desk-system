@@ -677,7 +677,7 @@ const UserDetailView = ({ userId, onClose, onUpdate }) => {
                                 <button onClick={() => setShowCropper(false)} className="p-3 hover:bg-slate-100 rounded-2xl transition-all"><FiX size={20} /></button>
                             </div>
                             <div className="h-[400px] bg-slate-50">
-                                <ImageCropper image={tempImage} onCropComplete={handleCropComplete} />
+                                <ImageCropper imageSrc={tempImage} onCropComplete={handleCropComplete} onCancel={() => setShowCropper(false)} />
                             </div>
                         </div>
                     </motion.div>

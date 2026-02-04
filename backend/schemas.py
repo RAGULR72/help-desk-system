@@ -40,6 +40,7 @@ class UserCreate(UserBase):
 class UserLogin(BaseModel):
     username: str
     password: str
+    captcha_token: Optional[str] = None
 
 class UserUpdate(BaseModel):
     full_name: Optional[str] = None

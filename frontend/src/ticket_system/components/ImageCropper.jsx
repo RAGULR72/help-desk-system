@@ -1,6 +1,10 @@
-import React, { useState, useRef } from 'react';
-import { FiX } from 'react-icons/fi';
+import React, { useState, useCallback } from 'react';
+import Cropper from 'react-easy-crop';
+import { FiX, FiCheck } from 'react-icons/fi';
 
+/**
+ * Utility to convert dataURL to Blob for upload
+ */
 export const dataURLtoBlob = (dataurl) => {
     let arr = dataurl.split(','),
         mime = arr[0].match(/:(.*?);/)[1],
@@ -13,103 +17,105 @@ export const dataURLtoBlob = (dataurl) => {
     return new Blob([u8arr], { type: mime });
 };
 
+/**
+ * Utility to create the cropped image
+ */
+const getCroppedImg = (imageSrc, pixelCrop) => {
+    return new Promise((resolve, reject) => {
+        const image = new Image();
+        image.src = imageSrc;
+        image.onload = () => {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+
+            canvas.width = pixelCrop.width;
+            canvas.height = pixelCrop.height;
+
+            ctx.drawImage(
+                image,
+                pixelCrop.x,
+                pixelCrop.y,
+                pixelCrop.width,
+                pixelCrop.height,
+                0,
+                0,
+                pixelCrop.width,
+                pixelCrop.height
+            );
+
+            resolve(canvas.toDataURL('image/jpeg'));
+        };
+        image.onerror = (error) => reject(error);
+    });
+};
+
 const ImageCropper = ({ imageSrc, onCropComplete, onCancel }) => {
-    const canvasRef = useRef(null);
-    const [scale, setScale] = useState(1.0);
-    const [position, setPosition] = useState({ x: 0, y: 0 });
-    const [isDragging, setIsDragging] = useState(false);
-    const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+    const [crop, setCrop] = useState({ x: 0, y: 0 });
+    const [zoom, setZoom] = useState(1);
+    const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
 
-    const handleWheel = (e) => {
-        e.preventDefault();
-        const newScale = Math.min(Math.max(0.1, scale - e.deltaY * 0.001), 3);
-        setScale(newScale);
+    const onCropChange = (crop) => {
+        setCrop(crop);
     };
 
-    const handleMouseDown = (e) => {
-        setIsDragging(true);
-        setDragStart({ x: e.clientX - position.x, y: e.clientY - position.y });
+    const onZoomChange = (zoom) => {
+        setZoom(zoom);
     };
 
-    const handleMouseMove = (e) => {
-        if (isDragging) {
-            setPosition({ x: e.clientX - dragStart.x, y: e.clientY - dragStart.y });
+    const onCropCompleteInternal = useCallback((croppedArea, croppedAreaPixels) => {
+        setCroppedAreaPixels(croppedAreaPixels);
+    }, []);
+
+    const handleSave = async () => {
+        try {
+            const croppedImage = await getCroppedImg(imageSrc, croppedAreaPixels);
+            onCropComplete(croppedImage);
+        } catch (e) {
+            console.error(e);
         }
     };
 
-    const handleMouseUp = () => {
-        setIsDragging(false);
-    };
-
-    const handleSave = () => {
-        // In a real app, you would render the cropped area to a canvas and return that.
-        // For now, we return the original data URL as mock crop.
-        onCropComplete(imageSrc);
-    };
-
     return (
-        <div className="fixed inset-0 z-[110] flex items-center justify-center bg-slate-900/80 backdrop-blur-sm p-4">
-            <div className="bg-white dark:bg-slate-900 rounded-[32px] overflow-hidden max-w-lg w-full shadow-2xl border border-slate-200 dark:border-slate-800">
-                <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center">
-                    <div>
-                        <h3 className="text-xl font-black text-slate-900 dark:text-white">Adjust Profile Picture</h3>
-                        <p className="text-sm text-slate-500 font-medium">Drag and zoom to position your photo</p>
-                    </div>
-                    <button onClick={onCancel} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors text-slate-400">
-                        <FiX size={24} />
-                    </button>
-                </div>
-                <div
-                    className="h-80 bg-slate-50 dark:bg-slate-950 overflow-hidden relative flex items-center justify-center cursor-move select-none"
-                    onMouseDown={handleMouseDown}
-                    onMouseMove={handleMouseMove}
-                    onMouseUp={handleMouseUp}
-                    onMouseLeave={handleMouseUp}
-                    onWheel={handleWheel}
-                >
-                    <img
-                        src={imageSrc}
-                        style={{
-                            transform: `translate(${position.x}px, ${position.y}px) scale(${scale})`,
-                            transition: isDragging ? 'none' : 'transform 0.1s'
-                        }}
-                        className="max-w-none"
-                        draggable="false"
-                        alt="Crop Preview"
+        <div className="flex flex-col h-full bg-slate-900 rounded-[2rem] overflow-hidden shadow-2xl border border-white/10">
+            <div className="relative flex-1 bg-slate-950">
+                <Cropper
+                    image={imageSrc}
+                    crop={crop}
+                    zoom={zoom}
+                    aspect={1}
+                    onCropChange={onCropChange}
+                    onZoomChange={onZoomChange}
+                    onCropComplete={onCropCompleteInternal}
+                    cropShape="round"
+                    showGrid={false}
+                />
+            </div>
+            <div className="p-8 bg-slate-900 space-y-6">
+                <div className="flex items-center gap-6">
+                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest whitespace-nowrap">Zoom Level</span>
+                    <input
+                        type="range"
+                        value={zoom}
+                        min={1}
+                        max={3}
+                        step={0.1}
+                        onChange={(e) => setZoom(e.target.value)}
+                        className="flex-1 accent-indigo-500 h-1.5 bg-slate-800 rounded-full appearance-none cursor-pointer"
                     />
-                    {/* Overlay Circle */}
-                    <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
-                        <div className="w-56 h-56 rounded-full border-4 border-white shadow-[0_0_0_9999px_rgba(15,23,42,0.6)]"></div>
-                        <div className="absolute w-56 h-56 rounded-full border border-white/20"></div>
-                    </div>
                 </div>
-                <div className="p-6 space-y-6 bg-white dark:bg-slate-900">
-                    <div className="flex items-center gap-4">
-                        <span className="text-xs font-black text-slate-400 uppercase tracking-widest">Zoom</span>
-                        <input
-                            type="range"
-                            min="0.1"
-                            max="3"
-                            step="0.01"
-                            value={scale}
-                            onChange={(e) => setScale(parseFloat(e.target.value))}
-                            className="flex-1 accent-indigo-600 h-1.5 bg-slate-100 dark:bg-slate-800 rounded-lg appearance-none cursor-pointer"
-                        />
-                    </div>
-                    <div className="flex gap-3">
-                        <button
-                            onClick={onCancel}
-                            className="flex-1 py-4 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded-2xl font-black uppercase tracking-tighter hover:bg-slate-200 dark:hover:bg-slate-700 transition-all"
-                        >
-                            Cancel
-                        </button>
-                        <button
-                            onClick={handleSave}
-                            className="flex-[2] py-4 bg-indigo-600 text-white rounded-2xl font-black uppercase tracking-tighter hover:bg-indigo-700 shadow-lg shadow-indigo-500/20 transition-all"
-                        >
-                            Set Profile Picture
-                        </button>
-                    </div>
+                <div className="grid grid-cols-2 gap-4">
+                    <button
+                        onClick={onCancel}
+                        className="py-4 bg-slate-800 text-slate-400 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-slate-750 transition-all flex items-center justify-center gap-2"
+                    >
+                        <FiX size={16} /> CANCEL
+                    </button>
+                    <button
+                        onClick={handleSave}
+                        className="py-4 bg-gradient-to-r from-indigo-500 to-indigo-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:shadow-lg shadow-indigo-500/20 transition-all flex items-center justify-center gap-2"
+                    >
+                        <FiCheck size={16} /> APPLY CHANGES
+                    </button>
                 </div>
             </div>
         </div>

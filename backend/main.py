@@ -1,7 +1,10 @@
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, Depends
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from sqlalchemy.orm import Session
+from datetime import datetime
+from database import get_db
 from dotenv import load_dotenv
 import os
 import traceback
@@ -66,6 +69,24 @@ async def catch_exceptions_middleware(request: Request, call_next):
         err_msg = f"Unhandled error: {str(exc)}\n{traceback.format_exc()}"
         logging.error(err_msg)
         
+        # Log to Audit DB if possible
+        try:
+            from database import SessionLocal
+            from audit_logger import AuditLogger
+            db = SessionLocal()
+            try:
+                AuditLogger.log_api_error(
+                    db=db,
+                    path=request.url.path,
+                    method=request.method,
+                    error=str(exc),
+                    ip_address=request.client.host
+                )
+            finally:
+                db.close()
+        except:
+            pass # Don't let logging fail the response
+        
         return JSONResponse(
             status_code=500,
             content={
@@ -83,6 +104,12 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Add Security Middleware (Rate Limiting, IP Blocking, Security Headers)
+from security_middleware import SecurityMiddleware, set_security_middleware_instance
+security_mw = SecurityMiddleware(app)
+set_security_middleware_instance(security_mw)
+app.add_middleware(SecurityMiddleware)
 
 # Include routers
 import upload_routes 
@@ -135,11 +162,23 @@ def read_root():
 
 @app.get("/health")
 def health_check():
-    return {"status": "healthy"}
+    return {"status": "healthy", "timestamp": datetime.utcnow().isoformat()}
 
 @app.get("/api/health/status")
-def api_health_check():
-    return {"status": "ok", "message": "Service is healthy"}
+def api_health_check(db: Session = Depends(get_db)):
+    try:
+        # Check database connectivity
+        db.execute(text("SELECT 1"))
+        db_status = "connected"
+    except Exception as e:
+        db_status = f"error: {str(e)}"
+        
+    return {
+        "status": "ok" if db_status == "connected" else "degraded",
+        "database": db_status,
+        "version": "1.0.0",
+        "timestamp": datetime.utcnow().isoformat()
+    }
 
 @app.get("/api/statistics/homepage")
 def homepage_stats():

@@ -26,13 +26,27 @@ REFRESH_TOKEN_EXPIRE_DAYS = int(os.getenv("REFRESH_TOKEN_EXPIRE_DAYS", "7"))  # 
 token_blacklist: Set[str] = set()
 
 # Password policy
-MIN_PASSWORD_LENGTH = int(os.getenv("MIN_PASSWORD_LENGTH", "8"))
+MIN_PASSWORD_LENGTH = int(os.getenv("MIN_PASSWORD_LENGTH", "12"))
 REQUIRE_UPPERCASE = os.getenv("REQUIRE_UPPERCASE", "true").lower() == "true"
 REQUIRE_LOWERCASE = os.getenv("REQUIRE_LOWERCASE", "true").lower() == "true"
 REQUIRE_DIGIT = os.getenv("REQUIRE_DIGIT", "true").lower() == "true"
 REQUIRE_SPECIAL = os.getenv("REQUIRE_SPECIAL", "true").lower() == "true"
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto", bcrypt__rounds=12)  # Increased rounds for better security
+# Password Hashing Configuration
+# Argon2id is the current gold standard for password hashing
+# We keep bcrypt as a fallback for legacy hashes
+pwd_context = CryptContext(
+    schemes=["argon2", "bcrypt"], 
+    deprecated="auto",
+    argon2__memory_cost=65536,
+    argon2__time_cost=3,
+    argon2__parallelism=4
+)
+
+# Pepper adds an extra layer of security. It is NOT stored in the database.
+# If the DB is leaked, passwords still cannot be cracked without the PASS_PEPPER secret.
+PASS_PEPPER = os.getenv("PASS_PEPPER", SECRET_KEY)
+
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/auth/login")
 
 def validate_password_strength(password: str) -> tuple[bool, str]:
@@ -40,8 +54,9 @@ def validate_password_strength(password: str) -> tuple[bool, str]:
     if len(password) < MIN_PASSWORD_LENGTH:
         return False, f"Password must be at least {MIN_PASSWORD_LENGTH} characters long"
     
-    if len(password) > 72:  # BCrypt limit
-        return False, "Password must be 72 characters or less"
+    # Extended limit for Argon2 (unlike BCrypt's 72 byte limit)
+    if len(password) > 256:
+        return False, "Password is too long (max 256 characters)"
     
     if REQUIRE_UPPERCASE and not re.search(r'[A-Z]', password):
         return False, "Password must contain at least one uppercase letter"
@@ -62,26 +77,34 @@ def validate_password_strength(password: str) -> tuple[bool, str]:
     
     return True, "Password is strong"
 
-def verify_password(plain_password: str, hashed_password: str) -> bool:
-    """Verify a password against its hash"""
+def verify_password(plain_password: str, hashed_password: str) -> tuple[bool, bool, Optional[str]]:
+    """
+    Verify a password and check if it needs re-hashing (due to algorithm upgrade or salt/rounds change).
+    Returns: (is_verified, needs_update, new_hash)
+    """
     try:
-        # BCrypt has a limit of 72 bytes. If the password is longer, it's invalid.
-        if len(plain_password.encode('utf-8')) > 72:
-            # print("DEBUG Auth: Plain password exceeds 72 bytes")
-            return False
-        result = pwd_context.verify(plain_password, hashed_password)
-        if not result:
-            pass
-        return result
-    except Exception:
-        return False
+        # 1. Try with Pepper (New standard)
+        peppered = f"{plain_password}{PASS_PEPPER}"
+        verified, new_hash = pwd_context.verify_and_update(peppered, hashed_password)
+        if verified:
+            return True, new_hash is not None, new_hash
+            
+        # 2. Fallback for legacy hashes (No pepper)
+        # This handles users who registered before Pepper or Argon2 were introduced.
+        verified_legacy, new_hash_legacy = pwd_context.verify_and_update(plain_password, hashed_password)
+        if verified_legacy:
+            # Upgrade them to Argon2 + Pepper immediately
+            return True, True, get_password_hash(plain_password)
+            
+        return False, False, None
+    except Exception as e:
+        print(f"Auth Error: {e}")
+        return False, False, None
 
 def get_password_hash(password: str) -> str:
-    """Hash a password"""
-    # Enforce limit for new passwords
-    if len(password.encode('utf-8')) > 72:
-        raise ValueError("Password must be 72 bytes or less")
-    return pwd_context.hash(password)
+    """Hash a password using Argon2id with Pepper"""
+    peppered = f"{password}{PASS_PEPPER}"
+    return pwd_context.hash(peppered)
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     """Create a JWT access token"""
@@ -102,8 +125,8 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     return encoded_jwt
 
 def create_pre_auth_token(username: str):
-    """Create a short-lived token for 2FA stage"""
-    expire = datetime.utcnow() + timedelta(minutes=5)
+    """Create a short-lived token for 2FA stage (Increased to 10 mins for better reliability)"""
+    expire = datetime.utcnow() + timedelta(minutes=10)
     to_encode = {
         "sub": username,
         "exp": expire,
@@ -129,7 +152,7 @@ def create_refresh_token(data: dict):
 def verify_refresh_token(token: str) -> Optional[dict]:
     """Verify and decode refresh token"""
     try:
-        payload = jwt.decode(token, REFRESH_SECRET_KEY, algorithms=[ALGORITHM])
+        payload = jwt.decode(token, REFRESH_SECRET_KEY, algorithms=[ALGORITHM], options={"leeway": 60})
         if payload.get("type") != "refresh":
             return None
         return payload
@@ -144,31 +167,56 @@ def is_token_blacklisted(token: str) -> bool:
     """Check if token is blacklisted"""
     return token in token_blacklist
 
-def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
-    """Get the current authenticated user from JWT token"""
+from fastapi import Depends, HTTPException, status, Request
+
+def get_current_user(request: Request, db: Session = Depends(get_db)):
+    """Get the current authenticated user from Secure Cookie (preferred) or JWT Header"""
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
     
-    # Check if token is blacklisted
-    if is_token_blacklisted(token):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Token has been revoked",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
+    # Priority 1: Secure Cookie (Step 5: Cookies Only)
+    token = request.cookies.get("access_token")
+    
+    # Priority 2: Authorization Header (Legacy support)
+    if not token:
+        auth_header = request.headers.get("Authorization")
+        if auth_header and auth_header.startswith("Bearer "):
+            token = auth_header.split(" ")[1]
+            
+    if not token or is_token_blacklisted(token):
+        raise credentials_exception
     
     try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        # Use leeway to handle small clock differences between servers
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM], options={"leeway": 60})
         username: str = payload.get("sub")
         token_type: str = payload.get("type")
         
         if username is None or token_type != "access":
-            raise credentials_exception
+            # If cookie was invalid, try header before giving up
+            if not request.headers.get("Authorization"):
+                raise credentials_exception
+            token = request.headers.get("Authorization").split(" ")[1]
+            payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM], options={"leeway": 60})
+            username = payload.get("sub")
+            if not username: raise credentials_exception
+            
         token_data = schemas.TokenData(username=username)
     except JWTError:
+        # Fallback to header if cookie failed
+        auth_header = request.headers.get("Authorization")
+        if auth_header and auth_header.startswith("Bearer "):
+            try:
+                token = auth_header.split(" ")[1]
+                payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM], options={"leeway": 60})
+                username = payload.get("sub")
+                if username:
+                    return db.query(models.User).filter(models.User.username == username).first()
+            except:
+                pass
         raise credentials_exception
     
     user = db.query(models.User).filter(models.User.username == token_data.username).first()
@@ -205,6 +253,15 @@ def require_roles(allowed_roles: list[str]):
         return current_user
     return role_checker
 
+def require_2fa(current_user: models.User = Depends(get_current_user)):
+    """Enforce 2FA for highly sensitive operations (e.g. Admin Panel)"""
+    if not current_user.is_2fa_enabled:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Two-factor authentication (2FA) is mandatory for this operation. Please enable it in your profile settings."
+        )
+    return current_user
+
 async def get_current_user_ws(token: str, db: Session):
     """WebSocket specific user retriever"""
     try:
@@ -227,7 +284,7 @@ def verify_access_token(token: str) -> Optional[dict]:
         if is_token_blacklisted(token):
             return None
             
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM], options={"leeway": 60})
         if payload.get("type") != "access":
             return None
         return payload

@@ -92,6 +92,11 @@ class User(Base):
     has_backup_codes = Column(Boolean, default=False)
     about_me = Column(String, nullable=True)
     last_activity_at = Column(DateTime, default=get_ist)
+    
+    # Brute Force Protection
+    failed_login_attempts = Column(Integer, default=0)
+    locked_until = Column(DateTime, nullable=True)
+    
     latitude = Column(Float, nullable=True)
     longitude = Column(Float, nullable=True)
     last_location_update = Column(DateTime, nullable=True)

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { FiToggleLeft, FiToggleRight, FiSave, FiUser, FiCheckCircle, FiShield, FiBriefcase } from 'react-icons/fi';
+import { useToast } from '../context/ToastContext';
 import api from '../api/axios';
 
 const AssetSettings = () => {
@@ -7,7 +8,7 @@ const AssetSettings = () => {
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
-    const [message, setMessage] = useState('');
+    const { showToast } = useToast();
 
     useEffect(() => {
         fetchSettings();
@@ -44,10 +45,10 @@ const AssetSettings = () => {
         setGlobalActive(newValue);
         try {
             await api.put('/api/system/config/asset_management_active', { value: newValue.toString() });
-            showMessage("Global setting updated!", "success");
+            showToast("Global setting updated!");
         } catch (error) {
             setGlobalActive(!newValue); // Revert
-            showMessage("Failed to update setting.", "error");
+            showToast("Failed to update setting.", "error");
         }
     };
 
@@ -70,16 +71,11 @@ const AssetSettings = () => {
             await api.put(`/api/admin/users/${user.id}`, {
                 permissions: user.permissions || {}
             });
-            showMessage(`Permissions saved for ${user.username}`, "success");
+            showToast(`Permissions saved for ${user.username}`);
         } catch (error) {
             console.error(error);
-            showMessage("Failed to save permissions", "error");
+            showToast("Failed to save permissions", "error");
         }
-    };
-
-    const showMessage = (msg, type) => {
-        setMessage({ text: msg, type });
-        setTimeout(() => setMessage(''), 3000);
     };
 
     const getCompaniesString = (user) => {
@@ -193,12 +189,6 @@ const AssetSettings = () => {
                 </div>
             )}
 
-            {/* Notification Toast */}
-            {message && (
-                <div className={`fixed bottom-6 right-6 px-6 py-3 rounded-xl shadow-lg text-white font-bold animate-bounce ${message.type === 'error' ? 'bg-rose-500' : 'bg-emerald-500'}`}>
-                    {message.text}
-                </div>
-            )}
         </div>
     );
 };

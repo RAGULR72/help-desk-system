@@ -12,6 +12,7 @@ import auth
 from ticket_system.external_dispatcher import dispatcher
 from models import User
 import ai_service
+import html
 
 router = APIRouter(prefix="/api/communication", tags=["communication"])
 
@@ -45,13 +46,22 @@ def post_comment(
         raise HTTPException(status_code=404, detail="Ticket not found")
 
     # Permission check for internal notes
-    if comment.is_internal and current_user.role not in ["admin", "manager", "technician"]:
+    is_staff = current_user.role in ["admin", "manager", "technician"]
+    is_owner = db_ticket.user_id == current_user.id
+    
+    if not is_staff and not is_owner:
+        raise HTTPException(status_code=403, detail="Not authorized to comment on this ticket")
+
+    if comment.is_internal and not is_staff:
         raise HTTPException(status_code=403, detail="Only staff can post internal notes")
+
+    # XSS Protection: Escaping inputs
+    sanitized_text = html.escape(comment.text, quote=True)
 
     db_comment = comms_models.TicketComment(
         ticket_id=ticket_id,
         user_id=current_user.id,
-        text=comment.text,
+        text=sanitized_text,
         is_internal=1 if comment.is_internal else 0
     )
     db.add(db_comment)
@@ -60,7 +70,7 @@ def post_comment(
     history = json.loads(db_ticket.ticket_history or '[]')
     history.append({
         "type": "comment",
-        "text": comment.text,
+        "text": sanitized_text,
         "user": current_user.full_name or current_user.username,
         "is_internal": comment.is_internal,
         "timestamp": ticket_models.get_ist().isoformat()
@@ -82,6 +92,13 @@ def get_comments(
     db_ticket = db.query(ticket_models.Ticket).filter(ticket_models.Ticket.id == ticket_id).first()
     if not db_ticket:
         raise HTTPException(status_code=404, detail="Ticket not found")
+
+    # Permission check: Only owner or staff can see comments
+    is_staff = current_user.role in ["admin", "manager", "technician"]
+    is_owner = db_ticket.user_id == current_user.id
+
+    if not is_staff and not is_owner:
+        raise HTTPException(status_code=403, detail="Not authorized to view comments for this ticket")
 
     query = db.query(comms_models.TicketComment).filter(comms_models.TicketComment.ticket_id == ticket_id)
     
@@ -114,7 +131,7 @@ def submit_ticket_feedback(
     if rating_data.rating is not None:
         db_ticket.rating = rating_data.rating
     if rating_data.feedback is not None:
-        db_ticket.feedback = rating_data.feedback
+        db_ticket.feedback = html.escape(rating_data.feedback, quote=True)
     
     db_ticket.updated_at = ticket_models.get_ist()
     db.commit()

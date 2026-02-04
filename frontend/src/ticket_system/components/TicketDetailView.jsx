@@ -11,6 +11,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from '../../context/TranslationContext';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../api/axios';
+import DOMPurify from 'dompurify';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import AIAssistantButton from '../../components/AIAssistantButton';
@@ -1627,7 +1628,11 @@ const TicketDetailView = () => {
                                             prose-p:mt-0 prose-p:mb-4
                                             prose-ul:my-2 prose-li:my-0 pb-2"
                                             dangerouslySetInnerHTML={{
-                                                __html: ticket.ai_tech_guide.replace(/\n\n/g, '<br/>').replace(/### (.*)/g, '<h3>$1</h3>')
+                                                __html: DOMPurify.sanitize(
+                                                    (ticket.ai_tech_guide || "")
+                                                        .replace(/\n\n/g, '<br/>')
+                                                        .replace(/### (.*)/g, '<h3>$1</h3>')
+                                                )
                                             }}
                                         />
 

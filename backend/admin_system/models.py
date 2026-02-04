@@ -51,6 +51,8 @@ class UserActivity(Base):
     timestamp = Column(DateTime, default=get_ist)
     icon = Column(String, nullable=True)
     link = Column(String, nullable=True)
+    ip_address = Column(String, nullable=True) # Added for security audit
+    severity = Column(String, default="info") # info, warning, critical
 
 class TicketSequence(Base):
     __tablename__ = "ticket_sequences"

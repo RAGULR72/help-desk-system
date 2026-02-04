@@ -6,9 +6,7 @@ export const wsURL = baseURL.replace(/^http/, 'ws');
 
 const api = axios.create({
     baseURL: baseURL,
-    headers: {
-        // 'Content-Type': 'application/json', // Let axios handle this (JSON vs FormData)
-    },
+    withCredentials: true,
 });
 
 // Add token to requests
@@ -29,10 +27,13 @@ api.interceptors.request.use(
 api.interceptors.response.use(
     (response) => response,
     (error) => {
-        // Only redirect to login if the error isn't from the login attempt itself
-        const isLoginRequest = error.config?.url?.includes('/api/auth/login');
+        // Only redirect to login if the error isn't from the login/auth stage itself
+        const url = error.config?.url || '';
+        const isAuthFlow = url.includes('/api/auth/login') ||
+            url.includes('/api/auth/2fa/verify') ||
+            url.includes('/api/auth/2fa/setup/finalize');
 
-        if (error.response?.status === 401 && !isLoginRequest) {
+        if (error.response?.status === 401 && !isAuthFlow) {
             localStorage.removeItem('token');
             localStorage.removeItem('user');
             // Check if we are already on the login page to avoid infinite loop

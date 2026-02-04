@@ -31,6 +31,8 @@ from sla_system import sla_service
 from ws_manager import manager
 import ai_service
 import re
+from audit_logger import AuditLogger
+import html
 
 
 router = APIRouter(prefix="/api/tickets", tags=["tickets"])
@@ -43,10 +45,17 @@ async def create_ticket(
     current_user: User = Depends(auth.get_current_user)
 ):
     """Create a new ticket"""
+    # XSS Protection: Escaping inputs
+    ticket_dict = ticket.dict()
+    if ticket_dict.get("subject"):
+        ticket_dict["subject"] = html.escape(ticket_dict["subject"], quote=True)
+    if ticket_dict.get("description"):
+        ticket_dict["description"] = html.escape(ticket_dict["description"], quote=True)
+
     # Initialize history
     history = [{
         "type": "created",
-        "description": ticket.description,
+        "description": ticket_dict["description"],
         "user": current_user.username,
         "timestamp": ticket_models.get_ist().isoformat()
     }]
@@ -56,7 +65,7 @@ async def create_ticket(
     custom_ticket_id = id_generator.generate_ticket_id(db)
 
     db_ticket = ticket_models.Ticket(
-        **ticket.dict(),
+        **ticket_dict,
         user_id=current_user.id,
         custom_id=custom_ticket_id,
         ticket_history=json.dumps(history)
@@ -104,6 +113,10 @@ async def create_ticket(
         timestamp=ist_now
     )
     db.add(activity)
+    
+    # Audit Log
+    AuditLogger.log_ticket_event(db, current_user.id, db_ticket.id, "created", f"Created ticket #{db_ticket.id}: {db_ticket.subject}")
+    
     db.commit()
 
     # Dashboard Notification
@@ -164,21 +177,28 @@ async def create_ticket(
 
 @router.get("/", response_model=List[schemas.TicketResponse])
 def get_tickets(
+    limit: int = 50,
+    offset: int = 0,
     db: Session = Depends(get_db),
     current_user: User = Depends(auth.get_current_user)
 ):
-    """Get tickets based on user role"""
+    """Get tickets based on user role with pagination"""
+    # Safety limit
+    limit = min(limit, 100)
+    
     check_sla_expirations(db)
+    query = db.query(ticket_models.Ticket)
+    
     if current_user.role in ["admin", "manager"]:
-        return db.query(ticket_models.Ticket).all()
+        tickets = query.offset(offset).limit(limit).all()
     elif current_user.role == "technician":
-        # Technicians see tickets assigned to them OR all open tickets (business logic choice)
-        # For now, let's show them all tickets to pick from, or just assigned. 
-        # Let's show all for now so they can work.
-        return db.query(ticket_models.Ticket).all()
+        # Technicians see tickets assigned to them OR all open tickets
+        tickets = query.offset(offset).limit(limit).all()
     else:
         # Regular users only see their own tickets
-        return db.query(ticket_models.Ticket).filter(ticket_models.Ticket.user_id == current_user.id).all()
+        tickets = query.filter(ticket_models.Ticket.user_id == current_user.id).offset(offset).limit(limit).all()
+    
+    return tickets
 
 @router.get("/stats")
 def get_ticket_stats(
@@ -557,6 +577,16 @@ async def update_ticket(
 
     update_data = ticket_update.dict(exclude_unset=True)
 
+    # XSS Protection: Escaping inputs
+    if update_data.get("subject"):
+        update_data["subject"] = html.escape(update_data["subject"], quote=True)
+    if update_data.get("description"):
+        update_data["description"] = html.escape(update_data["description"], quote=True)
+    if update_data.get("resolution_note"):
+        update_data["resolution_note"] = html.escape(update_data["resolution_note"], quote=True)
+    if update_data.get("hold_reason"):
+        update_data["hold_reason"] = html.escape(update_data["hold_reason"], quote=True)
+
     # Track status changes or resolution in history
     if "status" in update_data and update_data["status"] != db_ticket.status:
         history = json.loads(db_ticket.ticket_history) if db_ticket.ticket_history else []
@@ -592,6 +622,10 @@ async def update_ticket(
         link=f"/tickets/{db_ticket.id}"
     )
     db.add(activity)
+    
+    # Audit Log
+    AuditLogger.log_ticket_event(db, current_user.id, db_ticket.id, "updated", f"Updated ticket #{db_ticket.id} (Status: {db_ticket.status})")
+    
     db.commit()
     await manager.broadcast_all({"type": "dashboard_update", "source": "tickets"})
 
@@ -726,6 +760,12 @@ async def reopen_ticket(
     if not db_ticket:
         raise HTTPException(status_code=404, detail="Ticket not found")
         
+    # Permission check: Only owner or staff can reopen
+    is_staff = current_user.role in ["admin", "manager", "technician"]
+    is_owner = db_ticket.user_id == current_user.id
+    if not is_staff and not is_owner:
+        raise HTTPException(status_code=403, detail="Not authorized to reopen this ticket")
+
     db_ticket.status = "reopened"
     db_ticket.updated_at = ticket_models.get_ist()
     # Reset SLA notification if reopened
@@ -864,6 +904,10 @@ async def update_repair(
     if not ticket:
         raise HTTPException(status_code=404, detail="Ticket not found")
         
+    # Staff check
+    if current_user.role not in ["admin", "manager", "technician"]:
+        raise HTTPException(status_code=403, detail="Not authorized to update repair workflow")
+        
     if not ticket.repair_details:
         raise HTTPException(status_code=400, detail="Repair workflow not initiated")
 
@@ -890,11 +934,15 @@ async def submit_site_report(
     if not ticket or not ticket.repair_details:
         raise HTTPException(status_code=404, detail="Ticket or repair details not found")
 
+    # Staff check
+    if current_user.role not in ["admin", "manager", "technician"]:
+        raise HTTPException(status_code=403, detail="Not authorized to submit site report")
+
     rd = ticket.repair_details
     rd.machine_photo = report.machine_photo
-    rd.machine_condition = report.machine_condition
-    rd.issue_description = report.issue_description
-    rd.solution_provided = report.solution_provided
+    rd.machine_condition = html.escape(report.machine_condition, quote=True) if report.machine_condition else None
+    rd.issue_description = html.escape(report.issue_description, quote=True) if report.issue_description else None
+    rd.solution_provided = html.escape(report.solution_provided, quote=True) if report.solution_provided else None
     rd.output_image = report.output_image
     rd.resolution_timestamp = ticket_models.get_ist() # Auto timestamp on resolve
     
@@ -929,6 +977,10 @@ async def close_repair_ticket(
     ticket = db.query(ticket_models.Ticket).filter(ticket_models.Ticket.id == ticket_id).first()
     if not ticket or not ticket.repair_details:
         raise HTTPException(status_code=404, detail="Ticket or repair details not found")
+        
+    # Staff check
+    if current_user.role not in ["admin", "manager", "technician"]:
+        raise HTTPException(status_code=403, detail="Not authorized to close repair workflow")
         
     ticket.status = "resolved"
     
