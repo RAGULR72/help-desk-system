@@ -98,7 +98,7 @@ async def catch_exceptions_middleware(request: Request, call_next):
 # it wraps it and adds headers even to error responses.
 app.add_middleware(
     CORSMiddleware,
-    allow_origin_regex=r"https?://.*", # Flexible for dev/network access
+    allow_origins=origins + ["https://www.proservehelpdesk.in", "https://proservehelpdesk.in"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

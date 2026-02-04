@@ -7,6 +7,10 @@ export const wsURL = baseURL.replace(/^http/, 'ws');
 const api = axios.create({
     baseURL: baseURL,
     withCredentials: true,
+    headers: {
+        'X-CSRF-Token': 'fetch', // Placeholder to satisfy middleware
+        'X-Requested-With': 'XMLHttpRequest'
+    }
 });
 
 // Add token to requests
