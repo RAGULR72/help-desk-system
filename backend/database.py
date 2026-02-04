@@ -25,13 +25,20 @@ else:
     # Production Database (PostgreSQL/MySQL) with Connection Pooling
     engine = create_engine(
         SQLALCHEMY_DATABASE_URL,
-        pool_size=20,          # Maintain up to 20 permanent connections
-        max_overflow=30,       # Allow up to 30 extra connections during spikes
-        pool_recycle=3600,     # Refresh connections every hour
-        pool_pre_ping=True,    # Check if connection is alive before using it
-        pool_timeout=30,       # Time to wait for connection from pool
-        echo=False,            # Set to True for SQL query logging (dev only)
-        connect_args={"sslmode": "require"} if "postgresql" in SQLALCHEMY_DATABASE_URL else {}
+        pool_size=10,          # Reduced pool size for efficiency on Render
+        max_overflow=20,
+        pool_recycle=300,      # Refresh connections every 5 minutes (more aggressive)
+        pool_pre_ping=True,    # Vital for handling dropped connections
+        pool_timeout=30,
+        echo=False,
+        connect_args={
+            "sslmode": "require",
+            "connect_timeout": 10,
+            "keepalives": 1,
+            "keepalives_idle": 30,
+            "keepalives_interval": 10,
+            "keepalives_count": 5,
+        } if "postgresql" in SQLALCHEMY_DATABASE_URL else {}
     )
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)

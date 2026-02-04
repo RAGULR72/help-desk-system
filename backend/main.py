@@ -50,7 +50,7 @@ for i in range(5):
     except Exception as e:
         print(f"Database initialization attempt {i+1} failed: {e}")
         if i < 4:
-            time.sleep(2)
+            time.sleep(5)
         else:
             print("Warning: Could not initialize database after 5 attempts. Starting app anyway...")
 
