@@ -112,7 +112,8 @@ allowed_origins = [
     "https://proservehelpdesk.in",
     "http://localhost:5173",
     "http://127.0.0.1:5173",
-    "https://help-desk-system-b5gy.onrender.com"
+    "https://help-desk-system-b5gy.onrender.com",
+    "https://help-desk-system-one.vercel.app"
 ]
 
 # Add any extra origins from env, but filter out '*' if exists
