@@ -26,7 +26,8 @@ else:
         pool_recycle=3600,     # Refresh connections every hour
         pool_pre_ping=True,    # Check if connection is alive before using it
         pool_timeout=30,       # Time to wait for connection from pool
-        echo=False             # Set to True for SQL query logging (dev only)
+        echo=False,            # Set to True for SQL query logging (dev only)
+        connect_args={"sslmode": "require"} if "postgresql" in SQLALCHEMY_DATABASE_URL else {}
     )
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)

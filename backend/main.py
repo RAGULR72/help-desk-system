@@ -36,12 +36,12 @@ from knowledge_base import models as kb_models
 from sqlalchemy import text
 
 # Create database tables
-with engine.connect() as connection:
-    try:
+try:
+    with engine.connect() as connection:
         connection.execute(text("CREATE EXTENSION IF NOT EXISTS pg_trgm"))
         connection.commit()
-    except Exception as e:
-        print(f"Warning: Could not create pg_trgm extension: {e}")
+except Exception as e:
+    print(f"Warning: Could not create pg_trgm extension or connect to DB on startup: {e}")
 
 Base.metadata.create_all(bind=engine)
 
