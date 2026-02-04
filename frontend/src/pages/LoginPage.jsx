@@ -50,15 +50,17 @@ const LoginPage = () => {
                 code: twoFactorCode
             });
 
-            const { access_token } = res.data;
+            const { access_token, session_id } = res.data;
             localStorage.setItem('token', access_token);
+            if (session_id) localStorage.setItem('session_id', session_id);
 
             // Get user profile
             const userResponse = await api.get('/api/auth/me');
             const userData = userResponse.data;
             localStorage.setItem('user', JSON.stringify(userData));
 
-            navigate(`/dashboard/${userData.role || 'user'}`);
+            // Refresh state and navigate
+            window.location.href = `/dashboard/${userData.role || 'user'}`;
         } catch (err) {
             setError(err.response?.data?.detail || "Invalid 2FA code.");
             setTwoFactorCode('');
@@ -77,8 +79,9 @@ const LoginPage = () => {
                 code: twoFactorCode
             });
 
-            const { access_token } = res.data;
+            const { access_token, session_id } = res.data;
             localStorage.setItem('token', access_token);
+            if (session_id) localStorage.setItem('session_id', session_id);
 
             setSuccessMessage("2FA setup complete! Logging you in...");
 
@@ -88,8 +91,8 @@ const LoginPage = () => {
             localStorage.setItem('user', JSON.stringify(userData));
 
             setTimeout(() => {
-                navigate(`/dashboard/${userData.role || 'user'}`);
-            }, 1500);
+                window.location.href = `/dashboard/${userData.role || 'user'}`;
+            }, 1000);
         } catch (err) {
             setError(err.response?.data?.detail || "Verification failed.");
         } finally {

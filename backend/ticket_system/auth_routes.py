@@ -42,6 +42,79 @@ def get_ist(timezone="UTC+5:30"):
 def ping():
     return {"message": "pong"}
 
+def check_session_limit(user, db):
+    """Check if user has reached the maximum of 2 active sessions"""
+    active_sessions = db.query(admin_models.LoginLog).filter(
+        admin_models.LoginLog.user_id == user.id,
+        admin_models.LoginLog.is_active == True
+    ).order_by(admin_models.LoginLog.login_time.asc()).all()
+    
+    if len(active_sessions) >= 2:
+        session_list = []
+        for s in active_sessions:
+            session_list.append({
+                "id": s.id,
+                "device": s.device,
+                "os": s.os,
+                "browser": s.browser,
+                "ip": s.ip_address,
+                "time": s.login_time.strftime("%Y-%m-%d %H:%M")
+            })
+        raise HTTPException(
+            status_code=409, 
+            detail={
+                "message": "session_limit_exceeded",
+                "sessions": session_list
+            }
+        )
+
+def create_login_log(user, request, db):
+    """Create a success login log, activity record and notification"""
+    client_ip = request.client.host
+    user_agent_string = request.headers.get('user-agent', '')
+    user_agent = parse(user_agent_string)
+    device_type = "Mobile" if user_agent.is_mobile else "Tablet" if user_agent.is_tablet else "Desktop"
+    os_name = user_agent.os.family
+    browser_name = user_agent.browser.family
+    
+    ist_now = get_ist(user.timezone)
+    
+    new_log = admin_models.LoginLog(
+        user_id=user.id,
+        username=user.username,
+        ip_address=client_ip,
+        device=device_type,
+        os=os_name,
+        browser=browser_name,
+        location="Local Connection",
+        is_active=True,
+        login_time=ist_now
+    )
+    db.add(new_log)
+    
+    activity = admin_models.UserActivity(
+        user_id=user.id,
+        activity_type="login",
+        description=f"Successfully logged in via {device_type} ({browser_name})",
+        icon="log-in",
+        timestamp=ist_now
+    )
+    db.add(activity)
+    
+    try:
+        notification_service.create_notification(
+            db=db,
+            user_id=user.id,
+            title="Login Successful",
+            message=f"You have logged in from {device_type} ({os_name}) at {ist_now.strftime('%H:%M')}.",
+            type="login"
+        )
+    except: pass
+    
+    db.commit()
+    db.refresh(new_log)
+    return new_log
+
 @router.post("/register", response_model=root_schemas.UserResponse, status_code=status.HTTP_201_CREATED)
 def register(user: root_schemas.UserCreate, db: Session = Depends(get_db)):
     """Register a new user"""
@@ -212,74 +285,9 @@ def login(user_credentials: root_schemas.UserLogin, request: Request, db: Sessio
             data={"sub": user.username}, expires_delta=access_token_expires
         )
         
-        # Tracking Logic (Successful Login)
-        try:
-            ist_now = get_ist(user.timezone)
-            
-            # Session Limit Management: Max 2 active sessions (As per user request)
-            active_sessions = db.query(admin_models.LoginLog).filter(
-                admin_models.LoginLog.user_id == user.id,
-                admin_models.LoginLog.is_active == True
-            ).order_by(admin_models.LoginLog.login_time.asc()).all()
-            
-            # If we already have 2 or more, return 409 Conflict with session list
-            if len(active_sessions) >= 2:
-                session_list = []
-                for s in active_sessions:
-                    session_list.append({
-                        "id": s.id,
-                        "device": s.device,
-                        "os": s.os,
-                        "browser": s.browser,
-                        "ip": s.ip_address,
-                        "time": s.login_time.strftime("%Y-%m-%d %H:%M")
-                    })
-                raise HTTPException(
-                    status_code=409, 
-                    detail={
-                        "message": "session_limit_exceeded",
-                        "sessions": session_list
-                    }
-                )
-            
-            new_log = admin_models.LoginLog(
-                user_id=user.id,
-                username=user.username,
-                ip_address=client_ip,
-                device=device_type,
-                os=os_name,
-                browser=browser_name,
-                location="Local Connection",
-                is_active=True,
-                login_time=ist_now
-            )
-            db.add(new_log)
-            
-            activity = admin_models.UserActivity(
-                user_id=user.id,
-                activity_type="login",
-                description=f"Successfully logged in via {device_type} ({browser_name})",
-                icon="log-in",
-                timestamp=ist_now
-            )
-            db.add(activity)
-            
-            # Successful login notification
-            try:
-                notification_service.create_notification(
-                    db=db,
-                    user_id=user.id,
-                    title="Login Successful",
-                    message=f"You have logged in from {device_type} ({os_name}) at {ist_now.strftime('%H:%M')}.",
-                    type="login"
-                )
-            except: pass
-            
-            db.commit()
-        except Exception as e:
-            print(f"Tracking error: {e}")
-            db.rollback()
-            new_log = None  # Ensure it's defined even if tracking fails
+        # Tracking & Session Limit Check
+        check_session_limit(user, db)
+        new_log = create_login_log(user, request, db)
 
         return {
             "access_token": access_token, 
@@ -1166,7 +1174,7 @@ def setup_2fa_initiate(req: root_schemas.Setup2FAInitiate, db: Session = Depends
         raise HTTPException(status_code=401, detail="Token expired or invalid")
 
 @router.post("/2fa/setup/finalize")
-def setup_2fa_finalize(req: root_schemas.Verify2FARequest, db: Session = Depends(get_db)):
+def setup_2fa_finalize(req: root_schemas.Verify2FARequest, request: Request, db: Session = Depends(get_db)):
     """Verify first 2FA code and finalize setup"""
     try:
         payload = auth.jwt.decode(req.token, auth.SECRET_KEY, algorithms=[auth.ALGORITHM])
@@ -1183,15 +1191,23 @@ def setup_2fa_finalize(req: root_schemas.Verify2FARequest, db: Session = Depends
             user.is_2fa_setup = True
             db.commit()
             
+            # Check session limit before issuing token
+            check_session_limit(user, db)
+            
             # Now issue full access token
             access_token_expires = timedelta(minutes=auth.ACCESS_TOKEN_EXPIRE_MINUTES)
             access_token = auth.create_access_token(
                 data={"sub": user.username}, expires_delta=access_token_expires
             )
+            
+            # Create Session Log
+            new_log = create_login_log(user, request, db)
+            
             return {
                 "access_token": access_token,
                 "token_type": "bearer",
-                "message": "2FA setup complete"
+                "message": "2FA setup complete",
+                "session_id": new_log.id if new_log else None
             }
         else:
             raise HTTPException(status_code=400, detail="Invalid verification code")
@@ -1199,7 +1215,7 @@ def setup_2fa_finalize(req: root_schemas.Verify2FARequest, db: Session = Depends
         raise HTTPException(status_code=401, detail="Token expired or invalid")
 
 @router.post("/2fa/verify")
-def verify_2fa(req: root_schemas.Verify2FARequest, db: Session = Depends(get_db)):
+def verify_2fa(req: root_schemas.Verify2FARequest, request: Request, db: Session = Depends(get_db)):
     """Verify 2FA code during login"""
     try:
         payload = auth.jwt.decode(req.token, auth.SECRET_KEY, algorithms=[auth.ALGORITHM])
@@ -1216,15 +1232,23 @@ def verify_2fa(req: root_schemas.Verify2FARequest, db: Session = Depends(get_db)
             
         totp = pyotp.TOTP(user.totp_secret)
         if totp.verify(req.code):
+            # Check session limit
+            check_session_limit(user, db)
+            
             # Issue full tokens
             access_token_expires = timedelta(minutes=auth.ACCESS_TOKEN_EXPIRE_MINUTES)
             access_token = auth.create_access_token(
                 data={"sub": user.username}, expires_delta=access_token_expires
             )
+            
+            # Create Session Log
+            new_log = create_login_log(user, request, db)
+            
             return {
                 "access_token": access_token,
                 "token_type": "bearer",
-                "message": "2FA verification successful"
+                "message": "2FA verification successful",
+                "session_id": new_log.id if new_log else None
             }
         else:
             raise HTTPException(status_code=400, detail="Invalid verification code")
