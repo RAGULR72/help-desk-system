@@ -34,6 +34,7 @@ from sla_system import sla_routes
 from knowledge_base import models as kb_models
 
 from sqlalchemy import text
+from fix_db import fix_users_table
 
 import time
 
@@ -45,6 +46,8 @@ for i in range(5):
             connection.execute(text("CREATE EXTENSION IF NOT EXISTS pg_trgm"))
             connection.commit()
         Base.metadata.create_all(bind=engine)
+        # Run schema fixes for existing tables
+        fix_users_table()
         print("Database initialized successfully.")
         break
     except Exception as e:
