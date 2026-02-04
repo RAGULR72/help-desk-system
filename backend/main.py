@@ -40,10 +40,9 @@ try:
     with engine.connect() as connection:
         connection.execute(text("CREATE EXTENSION IF NOT EXISTS pg_trgm"))
         connection.commit()
+    Base.metadata.create_all(bind=engine)
 except Exception as e:
-    print(f"Warning: Could not create pg_trgm extension or connect to DB on startup: {e}")
-
-Base.metadata.create_all(bind=engine)
+    print(f"Warning: Could not initialize database (extensions/tables) on startup: {e}")
 
 app = FastAPI(title="Proserve API", version="1.0.0")
 
