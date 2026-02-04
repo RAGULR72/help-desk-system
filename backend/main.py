@@ -35,14 +35,24 @@ from knowledge_base import models as kb_models
 
 from sqlalchemy import text
 
-# Create database tables
-try:
-    with engine.connect() as connection:
-        connection.execute(text("CREATE EXTENSION IF NOT EXISTS pg_trgm"))
-        connection.commit()
-    Base.metadata.create_all(bind=engine)
-except Exception as e:
-    print(f"Warning: Could not initialize database (extensions/tables) on startup: {e}")
+import time
+
+# Create database tables with retry logic
+for i in range(5):
+    try:
+        print(f"Database initialization attempt {i+1}/5...")
+        with engine.connect() as connection:
+            connection.execute(text("CREATE EXTENSION IF NOT EXISTS pg_trgm"))
+            connection.commit()
+        Base.metadata.create_all(bind=engine)
+        print("Database initialized successfully.")
+        break
+    except Exception as e:
+        print(f"Database initialization attempt {i+1} failed: {e}")
+        if i < 4:
+            time.sleep(2)
+        else:
+            print("Warning: Could not initialize database after 5 attempts. Starting app anyway...")
 
 app = FastAPI(title="Proserve API", version="1.0.0")
 
