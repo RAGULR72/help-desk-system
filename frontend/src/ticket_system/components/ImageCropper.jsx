@@ -76,8 +76,8 @@ const ImageCropper = ({ imageSrc, onCropComplete, onCancel }) => {
     };
 
     return (
-        <div className="flex flex-col h-full bg-slate-900 rounded-[2rem] overflow-hidden shadow-2xl border border-white/10">
-            <div className="relative flex-1 bg-slate-950">
+        <div className="flex flex-col h-full bg-white rounded-[2rem] overflow-hidden shadow-2xl border border-gray-100">
+            <div className="relative flex-1 bg-gray-50">
                 <Cropper
                     image={imageSrc}
                     crop={crop}
@@ -90,23 +90,23 @@ const ImageCropper = ({ imageSrc, onCropComplete, onCancel }) => {
                     showGrid={false}
                 />
             </div>
-            <div className="p-8 bg-slate-900 space-y-6">
+            <div className="p-8 bg-white space-y-6">
                 <div className="flex items-center gap-6">
-                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest whitespace-nowrap">Zoom Level</span>
+                    <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">Zoom Level</span>
                     <input
                         type="range"
                         value={zoom}
                         min={1}
                         max={3}
                         step={0.1}
-                        onChange={(e) => setZoom(e.target.value)}
-                        className="flex-1 accent-indigo-500 h-1.5 bg-slate-800 rounded-full appearance-none cursor-pointer"
+                        onChange={(e) => setZoom(parseFloat(e.target.value))}
+                        className="flex-1 accent-indigo-500 h-1.5 bg-gray-100 rounded-full appearance-none cursor-pointer"
                     />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                     <button
                         onClick={onCancel}
-                        className="py-4 bg-slate-800 text-slate-400 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-slate-750 transition-all flex items-center justify-center gap-2"
+                        className="py-4 bg-gray-50 text-gray-500 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-gray-100 transition-all flex items-center justify-center gap-2 border border-gray-100"
                     >
                         <FiX size={16} /> CANCEL
                     </button>
