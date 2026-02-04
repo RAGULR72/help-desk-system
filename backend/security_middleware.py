@@ -178,6 +178,10 @@ class SecurityMiddleware(BaseHTTPMiddleware):
     
     async def dispatch(self, request: Request, call_next):
         """Main middleware handler"""
+        # Bypass for CORS preflight requests
+        if request.method == "OPTIONS":
+            return await call_next(request)
+            
         client_ip = self._get_client_ip(request)
         endpoint = request.url.path
         

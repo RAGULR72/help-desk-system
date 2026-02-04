@@ -122,6 +122,15 @@ if origins:
         if o != "*":
             allowed_origins.append(o)
 
+# Security Middleware will be added first, then CORSMiddleware will wrap it
+# to ensure CORS headers are added even to rejected requests.
+
+# Add Security Middleware (Rate Limiting, IP Blocking, Security Headers)
+from security_middleware import SecurityMiddleware, set_security_middleware_instance
+app.add_middleware(SecurityMiddleware)
+
+# Add CORS Middleware LAST so it is the OUTERMOST middleware
+# This ensures CORS headers are present even when SecurityMiddleware blocks a request (e.g. 403 or 429)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=allowed_origins,
@@ -129,13 +138,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-# Add Security Middleware (Rate Limiting, IP Blocking, Security Headers)
-from security_middleware import SecurityMiddleware, set_security_middleware_instance
-# No need to instantiate here, add_middleware handles it. 
-# We'll set the instance inside the middleware's __init__ or use a different approach.
-# For now, let's just add it correctly.
-app.add_middleware(SecurityMiddleware)
 
 # Include routers
 import upload_routes 

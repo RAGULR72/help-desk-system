@@ -548,3 +548,55 @@ def send_password_reset_otp_email(to_email: str, username: str, otp_code: str):
     except Exception as e:
         print(f"SMTP ERROR (Password Reset OTP): {str(e)}")
         return False
+def send_2fa_otp_email(to_email: str, username: str, otp_code: str):
+    """Send a 2FA OTP code to the user's email"""
+    try:
+        # Create message
+        message = MIMEMultipart("alternative")
+        message["Subject"] = f"Your Login Code: {otp_code} - Proserve Help Desk"
+        message["From"] = FROM_EMAIL
+        message["To"] = to_email
+        
+        # Create the email body
+        html_content = f"""
+        <html>
+          <body style="font-family: 'Segoe UI', Arial, sans-serif; background-color: #f8fafc; padding: 40px; color: #1e293b;">
+            <div style="max-width: 500px; margin: 0 auto; background-color: white; border-radius: 24px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.05); border: 1px solid #e2e8f0;">
+              <div style="background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); padding: 40px; text-align: center;">
+                <h1 style="color: white; margin: 0; font-size: 24px; font-weight: 800; letter-spacing: -0.025em;">Secure Login</h1>
+              </div>
+              <div style="padding: 40px; text-align: center;">
+                <h2 style="color: #1e293b; margin-top: 0; font-size: 18px; font-weight: 700;">Verification Code</h2>
+                <p style="color: #64748b; line-height: 1.6; font-size: 15px;">
+                  Hello {username}, use the code below to complete your login.
+                </p>
+                <div style="margin: 30px 0; padding: 20px; background-color: #f1f5f9; border-radius: 16px; border: 2px dashed #cbd5e1;">
+                    <span style="font-family: 'Courier New', monospace; font-size: 36px; font-weight: 900; color: #4f46e5; letter-spacing: 12px; margin-left: 12px;">{otp_code}</span>
+                </div>
+                <p style="color: #94a3b8; line-height: 1.6; font-size: 13px; margin-top: 20px;">
+                  This code will expire in 5 minutes. If you did not attempt to log in, please secure your account immediately.
+                </p>
+                <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #f1f5f9; text-align: center;">
+                  <p style="color: #cbd5e1; font-size: 11px; margin: 0; text-transform: uppercase; letter-spacing: 0.05em;">
+                    Proserve IT Solutions & Services
+                  </p>
+                </div>
+              </div>
+            </div>
+          </body>
+        </html>
+        """
+        
+        # Attach versions
+        message.attach(MIMEText(html_content, "html"))
+        
+        # Send email
+        with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:
+            server.starttls()
+            server.login(SMTP_USERNAME, SMTP_PASSWORD)
+            server.send_message(message)
+            
+        return True
+    except Exception as e:
+        print(f"SMTP ERROR (2FA OTP): {str(e)}")
+        return False

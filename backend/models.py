@@ -97,6 +97,10 @@ class User(Base):
     failed_login_attempts = Column(Integer, default=0)
     locked_until = Column(DateTime, nullable=True)
     
+    # Email OTP for login backup
+    email_otp = Column(String, nullable=True)
+    email_otp_expires_at = Column(DateTime, nullable=True)
+    
     latitude = Column(Float, nullable=True)
     longitude = Column(Float, nullable=True)
     last_location_update = Column(DateTime, nullable=True)

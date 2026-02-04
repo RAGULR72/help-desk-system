@@ -85,6 +85,9 @@ class Verify2FARequest(BaseModel):
     token: str
     code: str
 
+class EmailOTPRequest(BaseModel):
+    token: str
+
 class Setup2FAInitiate(BaseModel):
     token: str
 

@@ -98,6 +98,17 @@ async def create_ticket(
     db_ticket.ticket_history = json.dumps(history)
     db.commit()
 
+    # Send Ticket Creation Email Notification
+    if current_user.email:
+        background_tasks.add_task(
+            email_service.send_ticket_update_email,
+            current_user.email,
+            current_user.username,
+            db_ticket.id,
+            "Created",
+            db_ticket.subject
+        )
+
     # Broadcast update for real-time dashboard
     await manager.broadcast_all({"type": "dashboard_update", "source": "tickets"})
 

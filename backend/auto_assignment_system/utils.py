@@ -26,7 +26,42 @@ def trigger_auto_assignment(db: Session, ticket_id: int, force: bool = False) ->
 
     # 2. Use Service for Assignment (AI or Balanced)
     service = AutoAssignmentService(db)
-    return service.assign_ticket(ticket_id, force=force)
+    tech_id = service.assign_ticket(ticket_id, force=force)
+    
+    if tech_id:
+        # Send Notification to technician
+        try:
+            from notification_service import create_notification
+            import email_service
+            from ticket_system.models import Ticket
+            from models import User
+            
+            ticket = db.query(Ticket).filter(Ticket.id == ticket_id).first()
+            tech = db.query(User).filter(User.id == tech_id).first()
+            
+            if ticket and tech:
+                create_notification(
+                    db,
+                    tech_id,
+                    "New Ticket Assigned",
+                    f"Ticket #{ticket.id} has been assigned to you: {ticket.subject}",
+                    "ticket",
+                    f"/dashboard/tickets/{ticket.id}"
+                )
+                
+                # Email Notification
+                if tech.email:
+                    email_service.send_ticket_update_email(
+                        tech.email,
+                        tech.username,
+                        ticket.id,
+                        "Assigned to You",
+                        ticket.subject
+                    )
+        except Exception as e:
+            print(f"Error notifying technician: {e}")
+            
+    return tech_id
 
 
 def trigger_auto_assignment_wrapper(ticket_id: int):

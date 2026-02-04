@@ -40,13 +40,35 @@ const LoginPage = () => {
     const [twoFactorCode, setTwoFactorCode] = useState('');
     const [twoFactorData, setTwoFactorData] = useState(null); // { secret, qr_code }
     const [preAuthToken, setPreAuthToken] = useState('');
+    const [twoFactorMethod, setTwoFactorMethod] = useState('app'); // 'app' or 'email'
+
+    const handleRequestEmailOTP = async () => {
+        setLoading(true);
+        setError('');
+        try {
+            await api.post('/api/auth/2fa/email-otp/request', {
+                token: preAuthToken
+            });
+            setTwoFactorMethod('email');
+            setSuccessMessage("Verification code sent to your email!");
+            setTwoFactorCode('');
+        } catch (err) {
+            setError(err.response?.data?.detail || "Failed to send OTP to email.");
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const handleTwoFactorVerify = async (e) => {
         if (e) e.preventDefault();
         setLoading(true);
         setError('');
         try {
-            const res = await api.post('/api/auth/2fa/verify', {
+            const endpoint = twoFactorMethod === 'email'
+                ? '/api/auth/2fa/email-otp/verify'
+                : '/api/auth/2fa/verify';
+
+            const res = await api.post(endpoint, {
                 token: preAuthToken,
                 code: twoFactorCode
             });
@@ -810,6 +832,29 @@ const LoginPage = () => {
                                         {loading ? "Verifying..." : "Verify & Sign In"}
                                     </button>
                                 </form>
+
+                                {twoFactorMethod === 'app' ? (
+                                    <div className="text-center">
+                                        <p className="text-xs text-gray-400 mb-3">Authenticator App work aagala ya?</p>
+                                        <button
+                                            onClick={handleRequestEmailOTP}
+                                            disabled={loading}
+                                            className="text-sm font-bold text-indigo-600 hover:text-indigo-800 flex items-center justify-center gap-2 mx-auto"
+                                        >
+                                            <FiMail /> Receive code via Email
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <div className="text-center">
+                                        <p className="text-xs text-gray-400 mb-3">Email varala ya?</p>
+                                        <button
+                                            onClick={() => { setTwoFactorMethod('app'); setTwoFactorCode(''); }}
+                                            className="text-sm font-bold text-indigo-600 hover:text-indigo-800 flex items-center justify-center gap-2 mx-auto"
+                                        >
+                                            <FiSmartphone /> Use Authenticator App
+                                        </button>
+                                    </div>
+                                )}
 
                                 <button
                                     onClick={() => setForgotStep(0)}

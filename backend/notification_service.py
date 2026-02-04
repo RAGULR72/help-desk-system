@@ -60,8 +60,17 @@ def create_notification(db: Session, user_id: int, title: str, message: str, typ
 
 def notify_admins(db: Session, title: str, message: str, type: str, link: str = None):
     """
-    Send notification to all admin users
+    Send notification to all admin users via in-app and email
     """
+    import email_service
     admins = db.query(models.User).filter(models.User.role == "admin").all()
     for admin in admins:
         create_notification(db, admin.id, title, message, type, link)
+        # Optional: Email admins for important stuff
+        if admin.email:
+             # Using generic email function or a specific one
+             email_service.send_email(
+                 admin.email,
+                 f"Admin Alert: {title}",
+                 f"<h3>{title}</h3><p>{message}</p><br/><a href='{link}'>View in Dashboard</a>"
+             )

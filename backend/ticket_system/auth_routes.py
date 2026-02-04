@@ -337,6 +337,16 @@ def login(user_credentials: root_schemas.UserLogin, request: Request, response: 
         check_session_limit(user, db)
         new_log = create_login_log(user, request, db)
         
+        # Send Security Alert Email
+        if user.email:
+            login_data = {
+                "device": new_log.device if new_log else "Unknown",
+                "browser": new_log.browser if new_log else "Unknown",
+                "location": new_log.location if new_log else "Unknown",
+                "ip_address": new_log.ip_address if new_log else "Unknown"
+            }
+            email_service.send_security_alert(user.email, user.username, login_data)
+
         # Log successful login to Audit Log
         AuditLogger.log_login_success(db, user.id, client_ip, device_type, browser_name)
 
@@ -1386,6 +1396,16 @@ def verify_2fa(req: root_schemas.Verify2FARequest, request: Request, response: R
             # Create Session Log
             new_log = create_login_log(user, request, db)
             
+            # Send Security Alert Email
+            if user.email:
+                login_data = {
+                    "device": new_log.device if new_log else "Unknown",
+                    "browser": new_log.browser if new_log else "Unknown",
+                    "location": new_log.location if new_log else "Unknown",
+                    "ip_address": new_log.ip_address if new_log else "Unknown"
+                }
+                email_service.send_security_alert(user.email, user.username, login_data)
+            
             # Step 5: Secure Sessions (Set Cookies)
             response.set_cookie(
                 key="access_token",
@@ -1406,3 +1426,96 @@ def verify_2fa(req: root_schemas.Verify2FARequest, request: Request, response: R
             raise HTTPException(status_code=400, detail="Invalid verification code")
     except auth.JWTError:
         raise HTTPException(status_code=401, detail="Token expired or invalid (check system time)")
+
+@router.post("/2fa/email-otp/request")
+def request_email_otp(req: root_schemas.EmailOTPRequest, db: Session = Depends(get_db)):
+    """Request a backup OTP via email if TOTP is unavailable"""
+    try:
+        payload = auth.jwt.decode(req.token, auth.SECRET_KEY, algorithms=[auth.ALGORITHM], options={"leeway": 60})
+        if payload.get("type") != "2fa_pre_auth":
+            raise HTTPException(status_code=401, detail="Invalid token type")
+            
+        username = payload.get("sub")
+        user = db.query(root_models.User).filter(root_models.User.username == username).first()
+        if not user or not user.email:
+            raise HTTPException(status_code=400, detail="Email not available for this user")
+            
+        # Generate 6-digit OTP
+        otp = "".join([str(secrets.randbelow(10)) for _ in range(6)])
+        user.email_otp = otp
+        user.email_otp_expires_at = datetime.utcnow() + timedelta(minutes=5)
+        db.commit()
+        
+        # Send Email
+        success = email_service.send_2fa_otp_email(user.email, user.username, otp)
+        if not success:
+            raise HTTPException(status_code=500, detail="Failed to send OTP email")
+            
+        return {"message": "Verification code sent to your registered email"}
+    except auth.JWTError:
+        raise HTTPException(status_code=401, detail="Session expired. Please log in again.")
+
+@router.post("/2fa/email-otp/verify")
+def verify_email_otp(req: root_schemas.Verify2FARequest, request: Request, response: Response, db: Session = Depends(get_db)):
+    """Verify backup email OTP and complete login"""
+    try:
+        payload = auth.jwt.decode(req.token, auth.SECRET_KEY, algorithms=[auth.ALGORITHM], options={"leeway": 60})
+        if payload.get("type") != "2fa_pre_auth":
+            raise HTTPException(status_code=401, detail="Invalid token type")
+            
+        username = payload.get("sub")
+        user = db.query(root_models.User).filter(root_models.User.username == username).first()
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+            
+        if not user.email_otp or not user.email_otp_expires_at:
+            raise HTTPException(status_code=400, detail="No OTP requested")
+            
+        if datetime.utcnow() > user.email_otp_expires_at:
+            raise HTTPException(status_code=400, detail="OTP has expired")
+            
+        if user.email_otp != req.code:
+            raise HTTPException(status_code=400, detail="Invalid verification code")
+            
+        # Success: Clear OTP
+        user.email_otp = None
+        user.email_otp_expires_at = None
+        db.commit()
+        
+        # Issue full tokens
+        access_token_expires = timedelta(minutes=auth.ACCESS_TOKEN_EXPIRE_MINUTES)
+        access_token = auth.create_access_token(
+            data={"sub": user.username}, expires_delta=access_token_expires
+        )
+        
+        # Create Session Log
+        new_log = create_login_log(user, request, db)
+        
+        # Send Security Alert Email
+        if user.email:
+            login_data = {
+                "device": new_log.device if new_log else "Unknown",
+                "browser": new_log.browser if new_log else "Unknown",
+                "location": new_log.location if new_log else "Unknown",
+                "ip_address": new_log.ip_address if new_log else "Unknown"
+            }
+            email_service.send_security_alert(user.email, user.username, login_data)
+
+        # Set Cookies
+        response.set_cookie(
+            key="access_token",
+            value=access_token,
+            httponly=True,
+            secure=True,
+            samesite="strict",
+            max_age=auth.ACCESS_TOKEN_EXPIRE_MINUTES * 60
+        )
+
+        return {
+            "access_token": access_token,
+            "token_type": "bearer",
+            "message": "Email verification successful",
+            "session_id": new_log.id if new_log else None
+        }
+    except auth.JWTError:
+        raise HTTPException(status_code=401, detail="Session expired. Please log in again.")
