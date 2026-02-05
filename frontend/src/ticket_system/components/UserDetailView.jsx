@@ -199,7 +199,7 @@ const UserDetailView = ({ userId, onClose, onUpdate }) => {
                     <div className="relative group">
                         <div className="w-14 h-14 rounded-2xl bg-primary/5 flex items-center justify-center text-primary font-bold text-xl overflow-hidden border-2 border-white shadow-sm transition-transform group-hover:scale-105">
                             {user?.avatar_url ? (
-                                <img src={`${baseURL}${user.avatar_url}`} alt={user.username} className="w-full h-full object-cover" />
+                                <img src={user.avatar_url.startsWith('http') ? user.avatar_url : `${baseURL}${user.avatar_url.startsWith('/') ? '' : '/'}${user.avatar_url}`} alt={user.username} className="w-full h-full object-cover" />
                             ) : (
                                 user?.username?.charAt(0).toUpperCase()
                             )}

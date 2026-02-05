@@ -141,7 +141,7 @@ const AdminUserViewPage = () => {
                         {/* Avatar */}
                         <div className="w-20 h-20 md:w-24 md:h-24 rounded-full bg-[#E0F2FE] text-[#0369A1] flex items-center justify-center text-2xl md:text-3xl font-bold shadow-sm">
                             {user.avatar_url ? (
-                                <img src={`${baseURL}${user.avatar_url}`} alt="" className="w-full h-full rounded-full object-cover" />
+                                <img src={user.avatar_url.startsWith('http') ? user.avatar_url : `${baseURL}${user.avatar_url.startsWith('/') ? '' : '/'}${user.avatar_url}`} alt="" className="w-full h-full rounded-full object-cover" />
                             ) : (
                                 initials
                             )}

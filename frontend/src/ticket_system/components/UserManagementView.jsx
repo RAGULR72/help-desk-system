@@ -286,7 +286,7 @@ const UserManagementView = () => {
                     <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold text-xs overflow-hidden">
                             {user.avatar_url ? (
-                                <img src={`${baseURL}${user.avatar_url}`} alt="" className="w-full h-full object-cover" />
+                                <img src={user.avatar_url?.startsWith('http') ? user.avatar_url : `${baseURL}${user.avatar_url?.startsWith('/') ? '' : '/'}${user.avatar_url}`} alt="" className="w-full h-full object-cover" />
                             ) : (
                                 (user.full_name || user.username).charAt(0).toUpperCase()
                             )}

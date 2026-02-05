@@ -577,14 +577,14 @@ const ChatPage = () => {
         if (!content && !attachment_url) return null;
 
         let type = message_type || 'text';
-        let url = attachment_url ? `${baseURL}${attachment_url.startsWith('/') ? '' : '/'}${attachment_url}` : null;
+        let url = getFullAvatarUrl(attachment_url);
 
         // Backward compatibility
         if (type === 'text' && content && content.startsWith('[')) {
             const match = content.match(/^\[(image|video|audio|file)\]:(.*)/);
             if (match) {
                 type = match[1];
-                url = `${baseURL}${match[2].startsWith('/') ? '' : '/'}${match[2]}`;
+                url = getFullAvatarUrl(match[2]);
             }
         }
 
@@ -1395,7 +1395,7 @@ const ChatPage = () => {
                                     <div key={p.user_id} className="flex items-center justify-between">
                                         <div className="flex items-center gap-3">
                                             <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
-                                                {p.avatar ? <img src={p.avatar} className="w-full h-full object-cover" /> : <span>{p.name[0]}</span>}
+                                                {p.avatar ? <img src={getFullAvatarUrl(p.avatar)} className="w-full h-full object-cover" /> : <span>{p.name[0]}</span>}
                                             </div>
                                             <span className="font-medium text-sm dark:text-gray-200">{p.name}</span>
                                         </div>
