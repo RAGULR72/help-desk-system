@@ -197,16 +197,26 @@ def health_check():
 
 @app.get("/api/health/status")
 def api_health_check(db: Session = Depends(get_db)):
+    from sqlalchemy import inspect
     try:
         # Check database connectivity
         db.execute(text("SELECT 1"))
         db_status = "connected"
+        
+        # Check columns for users table
+        inspector = inspect(engine)
+        user_cols = [c['name'] for c in inspector.get_columns('users')]
+        log_cols = [c['name'] for c in inspector.get_columns('login_logs')]
     except Exception as e:
         db_status = f"error: {str(e)}"
+        user_cols = []
+        log_cols = []
         
     return {
         "status": "ok" if db_status == "connected" else "degraded",
         "database": db_status,
+        "users_columns": user_cols,
+        "logs_columns": log_cols,
         "version": "1.0.0",
         "timestamp": datetime.utcnow().isoformat()
     }
