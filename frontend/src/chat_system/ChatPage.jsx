@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { IoSend, IoChatbubblesOutline, IoSearch, IoAdd, IoArrowBack, IoImage, IoVideocam, IoMic, IoClose, IoPeople, IoShieldCheckmark, IoCheckmark, IoCheckmarkDone, IoTrash, IoInformationCircle, IoCall, IoEllipse, IoCreate, IoCamera, IoAttach, IoDocument, IoDownload } from 'react-icons/io5';
+import { IoSend, IoChatbubblesOutline, IoSearch, IoAdd, IoArrowBack, IoImage, IoVideocam, IoMic, IoClose, IoPeople, IoShieldCheckmark, IoCheckmark, IoCheckmarkDone, IoTrash, IoInformationCircle, IoCall, IoEllipse, IoCreate, IoCamera, IoAttach, IoDocument, IoDownload, IoChevronBack, IoChevronForward, IoChevronDown } from 'react-icons/io5';
 import { useChat } from './ChatContext'; // Relative import after move
 import { useAuth } from '../context/AuthContext';
 import api, { baseURL } from '../api/axios';
