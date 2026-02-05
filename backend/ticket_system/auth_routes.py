@@ -50,7 +50,7 @@ def check_session_limit(user, db):
         admin_models.LoginLog.is_active == True
     ).order_by(admin_models.LoginLog.login_time.asc()).all()
     
-    if len(active_sessions) >= 5:
+    if len(active_sessions) >= 50:
         session_list = []
         for s in active_sessions:
             session_list.append({
