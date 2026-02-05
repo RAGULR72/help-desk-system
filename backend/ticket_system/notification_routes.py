@@ -111,12 +111,17 @@ manager = ConnectionManager()
 
 @router.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket, token: str, db: Session = Depends(get_db)):
+    # Accept immediately to establish connection and avoid "closed before established" errors
+    await websocket.accept()
+    
+    user_id = None
     try:
         # Validate token
         payload = auth.verify_access_token(token)
         if not payload:
             print("WS Error: Invalid or expired token")
-            await websocket.close(code=1008)
+            # Send close frame with policy violation code
+            await websocket.close(code=1008, reason="Invalid token")
             return
             
         username = payload.get("sub")
@@ -124,24 +129,34 @@ async def websocket_endpoint(websocket: WebSocket, token: str, db: Session = Dep
         
         if not user:
             print(f"WS Error: User not found for username '{username}'")
-            await websocket.close(code=1008)
+            await websocket.close(code=1008, reason="User not found")
             return
 
         print(f"WS Connected: {username} (ID: {user.id})")
-        await manager.connect(websocket, user.id)
+        user_id = user.id
+        
+        # We manually register the connection since we already accepted it
+        if user_id not in manager.active_connections:
+            manager.active_connections[user_id] = []
+        manager.active_connections[user_id].append(websocket)
         
         try:
             while True:
                 # Keep alive / listen for messages
                 data = await websocket.receive_text()
                 # We can handle ping/pong here if needed
+                if data == "ping":
+                    await websocket.send_text("pong")
         except WebSocketDisconnect:
             print(f"WS Disconnect: {username}")
-            manager.disconnect(websocket, user.id)
+            manager.disconnect(websocket, user_id)
             
     except Exception as e:
         print(f"WS Critical Error: {e}")
         try:
-            await websocket.close()
+            # properly formatted error closure
+            await websocket.close(code=1011, reason="Internal Server Error")
         except:
             pass
+        if user_id:
+            manager.disconnect(websocket, user_id)
