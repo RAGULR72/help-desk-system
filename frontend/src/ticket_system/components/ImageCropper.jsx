@@ -90,7 +90,7 @@ const ImageCropper = ({ imageSrc, onCropComplete, onCancel }) => {
                     showGrid={false}
                 />
             </div>
-            <div className="p-8 bg-white space-y-6">
+            <div className="p-4 bg-white space-y-4">
                 <div className="flex items-center gap-6">
                     <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">Zoom Level</span>
                     <input
