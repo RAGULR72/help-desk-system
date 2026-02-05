@@ -1659,20 +1659,31 @@ const TicketDetailView = () => {
                                     <h3 className="text-lg font-black text-gray-900 dark:text-white tracking-tight">Attachments</h3>
                                 </div>
                                 <div className="p-8 space-y-4">
-                                    {ticket.attachments && (typeof ticket.attachments === 'string' ? ticket.attachments.split(',') : ticket.attachments).map((file, i) => (
-                                        <div key={i} className="group p-4 bg-gray-50 dark:bg-slate-800 rounded-2xl border border-transparent hover:border-indigo-200 dark:hover:border-indigo-500/20 transition-all cursor-pointer flex items-center justify-between">
-                                            <div className="flex items-center gap-3 overflow-hidden">
-                                                <div className="w-10 h-10 rounded-xl bg-white dark:bg-slate-900 flex items-center justify-center text-gray-400 group-hover:text-indigo-600 transition-colors">
-                                                    <FiPaperclip />
+                                    {ticket.attachments && (typeof ticket.attachments === 'string' ? ticket.attachments.split(',') : ticket.attachments).map((file, i) => {
+                                        const cleanFile = file.trim();
+                                        const fileUrl = cleanFile.startsWith('http')
+                                            ? cleanFile
+                                            : `${api.defaults.baseURL}${cleanFile.startsWith('/') ? '' : '/'}${cleanFile}`;
+
+                                        return (
+                                            <div
+                                                key={i}
+                                                onClick={() => window.open(fileUrl, '_blank')}
+                                                className="group p-4 bg-gray-50 dark:bg-slate-800 rounded-2xl border border-transparent hover:border-indigo-200 dark:hover:border-indigo-500/20 transition-all cursor-pointer flex items-center justify-between"
+                                            >
+                                                <div className="flex items-center gap-3 overflow-hidden">
+                                                    <div className="w-10 h-10 rounded-xl bg-white dark:bg-slate-900 flex items-center justify-center text-gray-400 group-hover:text-indigo-600 transition-colors">
+                                                        <FiPaperclip />
+                                                    </div>
+                                                    <div className="overflow-hidden">
+                                                        <p className="text-xs font-black text-gray-900 dark:text-white truncate">{cleanFile.split('/').pop()}</p>
+                                                        <p className="text-[10px] font-bold text-gray-400 uppercase">Document Asset</p>
+                                                    </div>
                                                 </div>
-                                                <div className="overflow-hidden">
-                                                    <p className="text-xs font-black text-gray-900 dark:text-white truncate">{file}</p>
-                                                    <p className="text-[10px] font-bold text-gray-400 uppercase">Document Asset</p>
-                                                </div>
+                                                <FiDownload className="text-gray-400 group-hover:text-indigo-600 transition-colors shrink-0" />
                                             </div>
-                                            <FiDownload className="text-gray-400 group-hover:text-indigo-600 transition-colors shrink-0" />
-                                        </div>
-                                    ))}
+                                        );
+                                    })}
                                     {(!ticket.attachments || ticket.attachments.length === 0) && (
                                         <div className="text-center py-6 text-gray-400 text-[10px] font-black uppercase tracking-[0.2em] italic">
                                             No files attached
