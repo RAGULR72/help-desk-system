@@ -44,13 +44,13 @@ def ping():
     return {"message": "pong"}
 
 def check_session_limit(user, db):
-    """Check if user has reached the maximum of 2 active sessions"""
+    """Check if user has reached the maximum of 5 active sessions"""
     active_sessions = db.query(admin_models.LoginLog).filter(
         admin_models.LoginLog.user_id == user.id,
         admin_models.LoginLog.is_active == True
     ).order_by(admin_models.LoginLog.login_time.asc()).all()
     
-    if len(active_sessions) >= 2:
+    if len(active_sessions) >= 5:
         session_list = []
         for s in active_sessions:
             session_list.append({

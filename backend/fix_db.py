@@ -95,6 +95,14 @@ def fix_all_tables():
     for col, ctype in login_log_cols:
         add_column_if_missing(inspector, 'login_logs', col, ctype)
         
+    # RESET: Reset all old sessions to FALSE to avoid 409 Conflict for everyone.
+    try:
+        with engine.begin() as conn:
+            conn.execute(text("UPDATE login_logs SET is_active = FALSE WHERE login_time < current_timestamp - interval '1 hour'"))
+            logger.info("Historical login sessions reset to inactive.")
+    except Exception as e:
+        logger.error(f"Error resetting sessions: {e}")
+        
     # User Activity table
     user_activity_cols = [
         ("ip_address", "VARCHAR"),
