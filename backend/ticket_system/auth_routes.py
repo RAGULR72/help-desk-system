@@ -1393,18 +1393,30 @@ def verify_2fa(req: root_schemas.Verify2FARequest, request: Request, response: R
                 data={"sub": user.username}, expires_delta=access_token_expires
             )
             
+            )
+            
             # Create Session Log
-            new_log = create_login_log(user, request, db)
+            try:
+                new_log = create_login_log(user, request, db)
+            except Exception as e:
+                # Fallback if logging fails
+                import logging
+                logging.error(f"Login logging failed: {str(e)}")
+                # We still want to let the user in, just without a log if critical
+                new_log = None
             
             # Send Security Alert Email
-            if user.email:
-                login_data = {
-                    "device": new_log.device if new_log else "Unknown",
-                    "browser": new_log.browser if new_log else "Unknown",
-                    "location": new_log.location if new_log else "Unknown",
-                    "ip_address": new_log.ip_address if new_log else "Unknown"
-                }
-                email_service.send_security_alert(user.email, user.username, login_data)
+            if user.email and new_log:
+                try:
+                    login_data = {
+                        "device": new_log.device if new_log else "Unknown",
+                        "browser": new_log.browser if new_log else "Unknown",
+                        "location": new_log.location if new_log else "Unknown",
+                        "ip_address": new_log.ip_address if new_log else "Unknown"
+                    }
+                    email_service.send_security_alert(user.email, user.username, login_data)
+                except Exception:
+                    pass
             
             # Step 5: Secure Sessions (Set Cookies)
             response.set_cookie(
@@ -1426,6 +1438,11 @@ def verify_2fa(req: root_schemas.Verify2FARequest, request: Request, response: R
             raise HTTPException(status_code=400, detail="Invalid verification code")
     except auth.JWTError:
         raise HTTPException(status_code=401, detail="Token expired or invalid (check system time)")
+    except Exception as e:
+        # Catch all other errors and output them
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Server Error in 2FA: {str(e)}")
 
 @router.post("/2fa/email-otp/request")
 def request_email_otp(req: root_schemas.EmailOTPRequest, db: Session = Depends(get_db)):
