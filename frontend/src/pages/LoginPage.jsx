@@ -746,7 +746,7 @@ const LoginPage = () => {
                                         <FiAlertTriangle size={32} />
                                     </div>
                                     <h3 className="text-2xl font-black text-gray-900 mb-2">Maximum Sessions Reached</h3>
-                                    <p className="text-gray-500 font-medium">Neenga already 2 devices-la login panni irukeenga. Edhaavadhu oru session-ah logout panna dhaan ippo dashboard-ku poga mudiyum.</p>
+                                    <p className="text-gray-500 font-medium">You have reached the maximum active sessions limit. Please logout from at least one session to continue.</p>
                                 </div>
 
                                 <div className="bg-amber-50 border border-amber-100 p-4 rounded-xl mb-6">
@@ -805,7 +805,7 @@ const LoginPage = () => {
                                         <FiShield size={32} />
                                     </div>
                                     <h3 className="text-2xl font-black text-gray-900 mb-2">Two-Factor Authentication</h3>
-                                    <p className="text-gray-500 font-medium text-sm">Unga authenticator app-la irukkura 6-digit code-ah enter pannunga.</p>
+                                    <p className="text-gray-500 font-medium text-sm">Please enter the 6-digit code from your authenticator app.</p>
                                 </div>
 
                                 <form onSubmit={handleTwoFactorVerify} className="space-y-4">
@@ -835,7 +835,7 @@ const LoginPage = () => {
 
                                 {twoFactorMethod === 'app' ? (
                                     <div className="text-center">
-                                        <p className="text-xs text-gray-400 mb-3">Authenticator App work aagala ya?</p>
+                                        <p className="text-xs text-gray-400 mb-3">Authenticator app not working?</p>
                                         <button
                                             onClick={handleRequestEmailOTP}
                                             disabled={loading}
@@ -846,7 +846,7 @@ const LoginPage = () => {
                                     </div>
                                 ) : (
                                     <div className="text-center">
-                                        <p className="text-xs text-gray-400 mb-3">Email varala ya?</p>
+                                        <p className="text-xs text-gray-400 mb-3">Didn't receive the email?</p>
                                         <button
                                             onClick={() => { setTwoFactorMethod('app'); setTwoFactorCode(''); }}
                                             className="text-sm font-bold text-indigo-600 hover:text-indigo-800 flex items-center justify-center gap-2 mx-auto"
@@ -873,7 +873,7 @@ const LoginPage = () => {
                             >
                                 <div className="text-center">
                                     <h3 className="text-2xl font-black text-gray-900 mb-2">Secure Your Account</h3>
-                                    <p className="text-gray-500 font-medium text-sm mb-6">Security feature enable aagiruku. Scanning this QR code with Google Authenticator or Authy to setup 2FA.</p>
+                                    <p className="text-gray-500 font-medium text-sm mb-6">Security feature enabled. Scan this QR code with Google Authenticator or Authy to setup 2FA.</p>
 
                                     {twoFactorData ? (
                                         <div className="bg-white p-4 rounded-2xl border-2 border-dashed border-indigo-100 inline-block mb-6 shadow-sm">
