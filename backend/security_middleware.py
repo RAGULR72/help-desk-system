@@ -18,8 +18,8 @@ load_dotenv()
 RATE_LIMIT_ENABLED = os.getenv("RATE_LIMIT_ENABLED", "true").lower() == "true"
 RATE_LIMIT_REQUESTS = int(os.getenv("RATE_LIMIT_REQUESTS", "300"))  # requests per window
 RATE_LIMIT_WINDOW = int(os.getenv("RATE_LIMIT_WINDOW", "60"))  # seconds
-LOGIN_RATE_LIMIT = int(os.getenv("LOGIN_RATE_LIMIT", "5"))  # login attempts per window
-LOGIN_RATE_WINDOW = int(os.getenv("LOGIN_RATE_WINDOW", "300"))  # 5 minutes
+LOGIN_RATE_LIMIT = int(os.getenv("LOGIN_RATE_LIMIT", "25"))  # login attempts per window
+LOGIN_RATE_WINDOW = int(os.getenv("LOGIN_RATE_WINDOW", "60"))  # 1 minute
 MAX_FAILED_ATTEMPTS = int(os.getenv("MAX_FAILED_ATTEMPTS", "5"))  # before IP block
 IP_BLOCK_DURATION = int(os.getenv("IP_BLOCK_DURATION", "3600"))  # seconds (1 hour)
 ADMIN_IP_RESTRICT = os.getenv("ADMIN_IP_RESTRICT", "false").lower() == "true"
