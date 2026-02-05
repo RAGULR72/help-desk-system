@@ -1,4 +1,11 @@
 import os
+import logging
+import time
+import random
+from google.api_core import exceptions
+
+# Configure logging
+logger = logging.getLogger(__name__)
 import google.generativeai as genai
 from dotenv import load_dotenv
 import json
@@ -9,6 +16,28 @@ GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
 if GEMINI_API_KEY:
     genai.configure(api_key=GEMINI_API_KEY)
+
+
+def generate_content_with_retry(model, prompt):
+    """
+    Wraps model.generate_content with exponential backoff retry logic.
+    """
+    max_retries = 3
+    base_delay = 1
+
+    for attempt in range(max_retries):
+        try:
+            return model.generate_content(prompt)
+        except exceptions.ResourceExhausted as e:
+            if attempt == max_retries - 1:
+                raise e
+            sleep_time = base_delay * (2 ** attempt) + random.uniform(0, 1)
+            logger.warning(f"Gemini Rate Limit hit. Retrying in {sleep_time:.2f}s...")
+            time.sleep(sleep_time)
+        except Exception as e:
+            raise e
+
+    return None
 
 def generate_resolution_suggestion(ticket_subject, ticket_description, kb_articles, past_resolutions):
     """
@@ -56,7 +85,7 @@ RAW JSON ONLY. No markdown tags.
 """
 
     try:
-        response = model.generate_content(prompt)
+        response = generate_content_with_retry(model, prompt)
         return response.text
     except Exception as e:
         print(f"Gemini API Error: {e}")
@@ -83,7 +112,7 @@ def chat_with_context(user_message, context_articles):
     prompt = f"{context}\nUser Question: {user_message}\nAnswer:"
 
     try:
-        response = model.generate_content(prompt)
+        response = generate_content_with_retry(model, prompt)
         return response.text
     except Exception as e:
         print(f"Gemini Chat Error: {e}")
@@ -122,7 +151,7 @@ def polish_text(raw_text, context_type="general", additional_context=None):
     prompt = f"{system_instruction}\nInput: \"{raw_text}\"\n\nProfessional English Output:"
 
     try:
-        response = model.generate_content(prompt)
+        response = generate_content_with_retry(model, prompt)
         return response.text.strip().replace('"', '')
     except Exception as e:
         error_msg = f"AI Error: {str(e)}"
@@ -160,7 +189,7 @@ def generate_kb_article(ticket_subject, ticket_description, resolution_note, ste
     )
 
     try:
-        response = model.generate_content(prompt)
+        response = generate_content_with_retry(model, prompt)
         # Attempt to parse as JSON
         text = response.text.strip()
         # Clean potential markdown if AI ignored instruction
@@ -191,7 +220,7 @@ def categorize_ticket(subject, description=None):
     )
 
     try:
-        response = model.generate_content(prompt)
+        response = generate_content_with_retry(model, prompt)
         text = response.text.strip()
         if text.startswith("```json"):
             text = text.replace("```json", "").replace("```", "").strip()
@@ -222,7 +251,7 @@ def generate_dashboard_insights(stats_summary):
     )
 
     try:
-        response = model.generate_content(prompt)
+        response = generate_content_with_retry(model, prompt)
         text = response.text.strip()
         if text.startswith("```json"):
             text = text.replace("```json", "").replace("```", "").strip()
@@ -253,7 +282,7 @@ def analyze_ticket_sentiment(subject, description):
     )
 
     try:
-        response = model.generate_content(prompt)
+        response = generate_content_with_retry(model, prompt)
         text_res = response.text.strip()
         if text_res.startswith("```json"):
             text_res = text_res.replace("```json", "").replace("```", "").strip()
@@ -280,7 +309,7 @@ def summarize_ticket(subject, description):
     )
 
     try:
-        response = model.generate_content(prompt)
+        response = generate_content_with_retry(model, prompt)
         return response.text.strip()
     except Exception as e:
         print(f"Gemini Summarization Error: {e}")
@@ -317,7 +346,7 @@ def summarize_ticket_history_3_points(subject, description, comments):
     """
 
     try:
-        response = model.generate_content(prompt)
+        response = generate_content_with_retry(model, prompt)
         return response.text.strip()
     except Exception as e:
         print(f"Gemini 3-Point Summarization Error: {e}")
@@ -366,7 +395,7 @@ def generate_concierge_response(user_query, chat_history, kb_articles):
     )
 
     try:
-        response = model.generate_content(prompt)
+        response = generate_content_with_retry(model, prompt)
         text = response.text.strip()
         if text.startswith("```json"):
             text = text.replace("```json", "").replace("```", "").strip()
@@ -406,7 +435,7 @@ def detect_duplicate_tickets(new_ticket_data, recent_tickets_data):
     )
 
     try:
-        response = model.generate_content(prompt)
+        response = generate_content_with_retry(model, prompt)
         text = response.text.strip()
         if text.startswith("```json"):
             text = text.replace("```json", "").replace("```", "").strip()
@@ -442,7 +471,7 @@ def generate_ai_auto_reply(subject, description, kb_articles):
     )
 
     try:
-        response = model.generate_content(prompt)
+        response = generate_content_with_retry(model, prompt)
         return response.text.strip()
     except Exception as e:
         print(f"Gemini Auto-Reply Error: {e}")
@@ -487,7 +516,7 @@ Format: Use Markdown with clear headings (Diagnostics, Action Plan, Risk Level).
 """
 
     try:
-        response = model.generate_content(prompt)
+        response = generate_content_with_retry(model, prompt)
         return response.text.strip()
     except Exception as e:
         print(f"Gemini Tech Co-Pilot Error: {e}")
@@ -550,7 +579,7 @@ def generate_smart_suggestions(db, subject, description=None):
     )
 
     try:
-        response = model.generate_content(prompt)
+        response = generate_content_with_retry(model, prompt)
         return response.text.strip()
     except Exception as e:
         print(f"Smart Suggestions Error: {e}")
@@ -601,7 +630,7 @@ def generate_diagnostic_suggestion(db, subject, description, ticket_id):
     """
     
     try:
-        response = model.generate_content(prompt)
+        response = generate_content_with_retry(model, prompt)
         text = response.text.strip().replace("```json", "").replace("```", "")
         import json
         return json.loads(text)

@@ -16,7 +16,7 @@ load_dotenv()
 
 # Security Configuration
 RATE_LIMIT_ENABLED = os.getenv("RATE_LIMIT_ENABLED", "true").lower() == "true"
-RATE_LIMIT_REQUESTS = int(os.getenv("RATE_LIMIT_REQUESTS", "100"))  # requests per window
+RATE_LIMIT_REQUESTS = int(os.getenv("RATE_LIMIT_REQUESTS", "300"))  # requests per window
 RATE_LIMIT_WINDOW = int(os.getenv("RATE_LIMIT_WINDOW", "60"))  # seconds
 LOGIN_RATE_LIMIT = int(os.getenv("LOGIN_RATE_LIMIT", "5"))  # login attempts per window
 LOGIN_RATE_WINDOW = int(os.getenv("LOGIN_RATE_WINDOW", "300"))  # 5 minutes
@@ -52,7 +52,7 @@ class SecurityMiddleware(BaseHTTPMiddleware):
         
     def _load_whitelist(self) -> List[str]:
         """Load IP whitelist from environment"""
-        whitelist_str = os.getenv("WHITELIST_IPS", "127.0.0.1,localhost")
+        whitelist_str = os.getenv("WHITELIST_IPS", "127.0.0.1,localhost,::1")
         return [ip.strip() for ip in whitelist_str.split(",")]
     
     def _get_client_ip(self, request: Request) -> str:
