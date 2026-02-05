@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Request, Response
+from fastapi import APIRouter, Depends, HTTPException, status, Request, Response, BackgroundTasks
 from typing import List
 from sqlalchemy.orm import Session
 from sqlalchemy import or_, func
@@ -1366,7 +1366,7 @@ def setup_2fa_finalize(req: root_schemas.Verify2FARequest, request: Request, res
         raise HTTPException(status_code=401, detail="Token expired or invalid")
 
 @router.post("/2fa/verify")
-def verify_2fa(req: root_schemas.Verify2FARequest, request: Request, response: Response, db: Session = Depends(get_db)):
+def verify_2fa(req: root_schemas.Verify2FARequest, request: Request, response: Response, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
     """Verify 2FA code during login"""
     try:
         # Use leeway to handle small clock differences between servers
@@ -1405,7 +1405,7 @@ def verify_2fa(req: root_schemas.Verify2FARequest, request: Request, response: R
                 # We still want to let the user in, just without a log if critical
                 new_log = None
             
-            # Send Security Alert Email
+            # Send Security Alert Email (Background Task)
             if user.email and new_log:
                 try:
                     login_data = {
@@ -1414,9 +1414,9 @@ def verify_2fa(req: root_schemas.Verify2FARequest, request: Request, response: R
                         "location": new_log.location if new_log else "Unknown",
                         "ip_address": new_log.ip_address if new_log else "Unknown"
                     }
-                    email_service.send_security_alert(user.email, user.username, login_data)
-                except Exception:
-                    pass
+                    background_tasks.add_task(email_service.send_security_alert, user.email, user.username, login_data)
+                except Exception as e:
+                    print(f"Failed to schedule security alert email: {e}")
             
             # Step 5: Secure Sessions (Set Cookies)
             response.set_cookie(
