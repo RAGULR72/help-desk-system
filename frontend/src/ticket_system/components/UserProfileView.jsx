@@ -17,6 +17,7 @@ const UserProfileView = () => {
     const [profileImage, setProfileImage] = useState(null);
     const [showCropper, setShowCropper] = useState(false);
     const [tempImage, setTempImage] = useState(null);
+    const [imageError, setImageError] = useState(false);
     const [sessions, setSessions] = useState([]);
     const [activityData, setActivityData] = useState({
         recent_activity: [],
@@ -192,6 +193,7 @@ const UserProfileView = () => {
             }));
             if (user.avatar_url) {
                 setProfileImage(getFullAvatarUrl(user.avatar_url));
+                setImageError(false);
             }
 
         }
@@ -211,6 +213,7 @@ const UserProfileView = () => {
 
     const handleCropComplete = (croppedImg) => {
         setProfileImage(croppedImg);
+        setImageError(false);
         setShowCropper(false);
     };
 
@@ -323,11 +326,12 @@ const UserProfileView = () => {
                                         <div className="flex items-center gap-6">
                                             <div className="relative">
                                                 <div className="w-32 h-32 rounded-full overflow-hidden bg-gradient-to-br from-pink-100 to-pink-200 flex items-center justify-center">
-                                                    {profileImage ? (
+                                                    {profileImage && !imageError ? (
                                                         <img
                                                             src={profileImage}
                                                             alt="Profile"
                                                             className="w-full h-full object-cover"
+                                                            onError={() => setImageError(true)}
                                                         />
                                                     ) : (
                                                         <img
