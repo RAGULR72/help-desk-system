@@ -110,22 +110,24 @@ class ConnectionManager:
 manager = ConnectionManager()
 
 @router.websocket("/ws")
-async def websocket_endpoint(websocket: WebSocket, token: str):
+async def websocket_endpoint(websocket: WebSocket, token: str, db: Session = Depends(get_db)):
     try:
-        # Validate token manually since websockets don't support headers well in JS API
+        # Validate token
         payload = auth.verify_access_token(token)
         if not payload:
+            print("WS Error: Invalid or expired token")
             await websocket.close(code=1008)
             return
             
         username = payload.get("sub")
-        db = next(get_db())
         user = db.query(models.User).filter(models.User.username == username).first()
         
         if not user:
+            print(f"WS Error: User not found for username '{username}'")
             await websocket.close(code=1008)
             return
 
+        print(f"WS Connected: {username} (ID: {user.id})")
         await manager.connect(websocket, user.id)
         
         try:
@@ -134,10 +136,11 @@ async def websocket_endpoint(websocket: WebSocket, token: str):
                 data = await websocket.receive_text()
                 # We can handle ping/pong here if needed
         except WebSocketDisconnect:
+            print(f"WS Disconnect: {username}")
             manager.disconnect(websocket, user.id)
             
     except Exception as e:
-        print(f"WS Error: {e}")
+        print(f"WS Critical Error: {e}")
         try:
             await websocket.close()
         except:
