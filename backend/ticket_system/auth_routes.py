@@ -161,7 +161,7 @@ def register(user: root_schemas.UserCreate, db: Session = Depends(get_db)):
         # Auto-approve admin user for bootstrapping
         is_approved=(user.username == "admin"),
         role="admin" if user.username == "admin" else "user",
-        is_2fa_enabled=False
+        is_2fa_enabled=True
     )
     db.add(db_user)
     db.commit()
@@ -310,22 +310,27 @@ def login(user_credentials: root_schemas.UserLogin, request: Request, response: 
         user.locked_until = None
         db.commit()
         
-        # 2FA Check
-        if user.is_2fa_enabled:
-            pre_auth_token = auth.create_pre_auth_token(user.username)
-            if not user.is_2fa_setup:
-                return {
-                    "status": "2fa_setup_required",
-                    "message": "2FA setup is required for this account.",
-                    "username": user.username,
-                    "pre_auth_token": pre_auth_token
-                }
+        # 2FA Check - Enforced for EVERYONE
+        # Policy: If 2FA is NOT enabled (legacy users), force them to set it up.
+        # If 2FA IS enabled but not setup (new users), force them to set it up.
+        # If 2FA IS enabled and setup (regular flow), require code.
+        
+        pre_auth_token = auth.create_pre_auth_token(user.username)
+        
+        if not user.is_2fa_enabled or not user.is_2fa_setup:
             return {
-                "status": "2fa_required",
-                "message": "Two-factor authentication code required.",
+                "status": "2fa_setup_required",
+                "message": "Security Update: Two-Factor Authentication is now mandatory. Please set it up to continue.",
                 "username": user.username,
                 "pre_auth_token": pre_auth_token
             }
+            
+        return {
+            "status": "2fa_required",
+            "message": "Two-factor authentication code required.",
+            "username": user.username,
+            "pre_auth_token": pre_auth_token
+        }
 
         # Create token
         access_token_expires = timedelta(minutes=auth.ACCESS_TOKEN_EXPIRE_MINUTES)
