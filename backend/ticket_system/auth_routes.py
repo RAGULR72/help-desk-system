@@ -338,14 +338,18 @@ def login(user_credentials: root_schemas.UserLogin, request: Request, response: 
         new_log = create_login_log(user, request, db)
         
         # Send Security Alert Email
-        if user.email:
-            login_data = {
-                "device": new_log.device if new_log else "Unknown",
-                "browser": new_log.browser if new_log else "Unknown",
-                "location": new_log.location if new_log else "Unknown",
-                "ip_address": new_log.ip_address if new_log else "Unknown"
-            }
-            email_service.send_security_alert(user.email, user.username, login_data)
+        try:
+            if user.email:
+                login_data = {
+                    "device": new_log.device if new_log else "Unknown",
+                    "browser": new_log.browser if new_log else "Unknown",
+                    "location": new_log.location if new_log else "Unknown",
+                    "ip_address": new_log.ip_address if new_log else "Unknown"
+                }
+                # Non-blocking email send
+                BackgroundTasks().add_task(email_service.send_security_alert, user.email, user.username, login_data)
+        except Exception as e:
+            print(f"Failed to queue security alert email: {e}")
 
         # Log successful login to Audit Log
         AuditLogger.log_login_success(db, user.id, client_ip, device_type, browser_name)
