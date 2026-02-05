@@ -1393,7 +1393,7 @@ def verify_2fa(req: root_schemas.Verify2FARequest, request: Request, response: R
                 data={"sub": user.username}, expires_delta=access_token_expires
             )
             
-            )
+
             
             # Create Session Log
             try:
