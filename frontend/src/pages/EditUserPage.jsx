@@ -438,6 +438,27 @@ const EditUserPage = () => {
                             </div>
                         </div>
 
+                        {/* Force 2FA Toggle for Admins */}
+                        <div className="flex items-center justify-between py-6 border-b border-slate-50">
+                            <div className="space-y-0.5 text-left">
+                                <h3 className="text-[17px] font-semibold text-[#334155]">Force 2FA Status</h3>
+                                <p className="text-xs text-slate-400 font-medium">Manually enable/disable 2FA for this user (Admin Override)</p>
+                            </div>
+                            <div className="flex items-center gap-6">
+                                <span className={`text-[14px] font-medium ${formData.is_2fa_enabled ? 'text-emerald-600' : 'text-slate-400'}`}>
+                                    {formData.is_2fa_enabled ? 'Active' : 'Inactive'}
+                                </span>
+                                <button
+                                    onClick={() => setFormData({ ...formData, is_2fa_enabled: !formData.is_2fa_enabled })}
+                                    className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${formData.is_2fa_enabled ? 'bg-indigo-600' : 'bg-gray-200'}`}
+                                >
+                                    <span
+                                        className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${formData.is_2fa_enabled ? 'translate-x-5' : 'translate-x-0'}`}
+                                    />
+                                </button>
+                            </div>
+                        </div>
+
                         {/* Security Keys */}
                         <div className="flex items-center justify-between py-6 border-b border-slate-50">
                             <div className="space-y-0.5 text-left">
