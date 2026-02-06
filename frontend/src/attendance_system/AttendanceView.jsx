@@ -1012,6 +1012,13 @@ const AttendanceView = () => {
         );
     };
 
+    // Default to 'list' (Admin Dashboard) if user is admin
+    useEffect(() => {
+        if (userRole === 'admin') {
+            setActiveTab('list');
+        }
+    }, [userRole]);
+
     return (
         <div className="p-6 max-w-7xl mx-auto space-y-8 bg-slate-50/50 min-h-screen font-sans">
             <LeaveRequestModal isOpen={isLeaveModalOpen} onClose={() => setIsLeaveModalOpen(false)} onSubmitted={fetchMyLeaves} />
@@ -1034,7 +1041,7 @@ const AttendanceView = () => {
                     )}
                     {(userRole === 'admin' || userRole === 'manager') && (
                         <>
-                            <button onClick={() => setActiveTab('list')} className={`px-5 py-2.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-2 ${activeTab === 'list' ? 'bg-slate-900 text-white shadow-md' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'}`}>Staff List</button>
+                            <button onClick={() => setActiveTab('list')} className={`px-5 py-2.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-2 ${activeTab === 'list' ? 'bg-slate-900 text-white shadow-md' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'}`}>Admin Dashboard</button>
                             <button onClick={() => setActiveTab('report')} className={`px-5 py-2.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-2 ${activeTab === 'report' ? 'bg-slate-900 text-white shadow-md' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'}`}>Reports</button>
                             <button onClick={() => setActiveTab('manage_leaves')} className={`px-5 py-2.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-2 ${activeTab === 'manage_leaves' ? 'bg-slate-900 text-white shadow-md' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'}`}>Requests</button>
                             <button onClick={() => setIsHolidayModalOpen(true)} className="px-5 py-2.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-2 text-slate-500 hover:text-rose-600 hover:bg-rose-50">Holidays</button>
