@@ -718,6 +718,9 @@ const AttendanceView = () => {
                                                     <FiShield size={16} /> Shift Completed
                                                 </div>
                                             )}
+                                            <button onClick={() => setIsLeaveModalOpen(true)} className="bg-white border border-slate-200 text-slate-600 px-6 py-3 rounded-xl font-bold text-xs hover:bg-slate-50 transition-all flex items-center gap-2 active:scale-95">
+                                                <FiCalendar size={16} className="text-indigo-500" /> Apply Leave
+                                            </button>
                                             <button onClick={() => setIsRegModalOpen(true)} className="bg-white border border-slate-200 text-slate-600 px-6 py-3 rounded-xl font-bold text-xs hover:bg-slate-50 transition-all flex items-center gap-2 active:scale-95">
                                                 <FiZap size={16} className="text-amber-500" /> Regularize
                                             </button>
@@ -1102,8 +1105,8 @@ const AttendanceView = () => {
                                             </td>
                                             <td className="px-4 py-3">
                                                 <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-semibold ${log.status === 'Present' ? 'bg-emerald-50 text-emerald-600' :
-                                                        log.status === 'Late' ? 'bg-amber-50 text-amber-600' :
-                                                            'bg-rose-50 text-rose-600'
+                                                    log.status === 'Late' ? 'bg-amber-50 text-amber-600' :
+                                                        'bg-rose-50 text-rose-600'
                                                     }`}>
                                                     {log.status || 'Absent'}
                                                 </span>
@@ -1132,8 +1135,8 @@ const AttendanceView = () => {
                                     key={i}
                                     onClick={() => setCurrentPage(i + 1)}
                                     className={`w-7 h-7 rounded text-xs font-medium ${currentPage === i + 1
-                                            ? 'bg-emerald-500 text-white'
-                                            : 'text-slate-600 hover:bg-slate-100'
+                                        ? 'bg-emerald-500 text-white'
+                                        : 'text-slate-600 hover:bg-slate-100'
                                         }`}
                                 >
                                     {i + 1}
@@ -1183,11 +1186,7 @@ const AttendanceView = () => {
 
     return (
         <div className="p-6 max-w-7xl mx-auto space-y-8 bg-slate-50/50 min-h-screen font-sans">
-            <LeaveRequestModal isOpen={isLeaveModalOpen} onClose={() => setIsLeaveModalOpen(false)} onSubmitted={fetchMyLeaves} />
-            <RegularizationModal isOpen={isRegModalOpen} onClose={() => setIsRegModalOpen(false)} onSubmitted={fetchMyHistory} />
-            <LeaveActionModal isOpen={leaveActionModal.isOpen} leaveId={leaveActionModal.leaveId} actionType={leaveActionModal.type} onClose={() => setLeaveActionModal({ isOpen: false })} onSubmitted={fetchAllLeaves} />
-            <AdminEditLeaveModal isOpen={editLeaveModal.isOpen} leave={editLeaveModal.leave} onClose={() => setEditLeaveModal({ isOpen: false })} onSubmitted={fetchAllLeaves} />
-            <HolidayConfigModal isOpen={isHolidayModalOpen} onClose={() => setIsHolidayModalOpen(false)} />
+
 
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                 <div>
@@ -1440,6 +1439,13 @@ const AttendanceView = () => {
                     </div>
                 )}
             </div>
+
+            {/* Modals */}
+            <LeaveRequestModal isOpen={isLeaveModalOpen} onClose={() => setIsLeaveModalOpen(false)} onSubmitted={fetchMyLeaves} />
+            <RegularizationModal isOpen={isRegModalOpen} onClose={() => setIsRegModalOpen(false)} onSubmitted={fetchMyStatus} />
+            <LeaveActionModal isOpen={leaveActionModal.isOpen} onClose={() => setLeaveActionModal({ ...leaveActionModal, isOpen: false })} onSubmitted={fetchAllLeaves} leaveId={leaveActionModal.leaveId} actionType={leaveActionModal.type} />
+            <AdminEditLeaveModal isOpen={editLeaveModal.isOpen} onClose={() => setEditLeaveModal({ ...editLeaveModal, isOpen: false })} onSubmitted={fetchAllLeaves} leave={editLeaveModal.leave} />
+            <HolidayConfigModal isOpen={isHolidayModalOpen} onClose={() => setIsHolidayModalOpen(false)} />
         </div>
     );
 };
