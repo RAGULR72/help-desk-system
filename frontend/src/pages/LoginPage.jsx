@@ -55,7 +55,12 @@ const LoginPage = () => {
             setSuccessMessage("Verification code sent to your email!");
             setTwoFactorCode('');
         } catch (err) {
-            setError(err.response?.data?.detail || "Failed to send OTP to email.");
+            if (err.response?.status === 401) {
+                setError("Session expired. Please log in again.");
+                setTimeout(() => setForgotStep(0), 1500);
+            } else {
+                setError(err.response?.data?.detail || "Failed to send OTP to email.");
+            }
         } finally {
             setLoading(false);
         }
