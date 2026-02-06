@@ -23,6 +23,18 @@ if SQLALCHEMY_DATABASE_URL.startswith("sqlite"):
     )
 else:
     # Production Database (PostgreSQL/MySQL) with Connection Pooling
+    connect_args = {
+        "connect_timeout": 10,
+        "keepalives": 1,
+        "keepalives_idle": 30,
+        "keepalives_interval": 10,
+        "keepalives_count": 5,
+    }
+    
+    # Only enforce SSL if not running locally
+    if "localhost" not in SQLALCHEMY_DATABASE_URL and "127.0.0.1" not in SQLALCHEMY_DATABASE_URL:
+        connect_args["sslmode"] = "require"
+
     engine = create_engine(
         SQLALCHEMY_DATABASE_URL,
         pool_size=10,          # Reduced pool size for efficiency on Render
@@ -31,14 +43,7 @@ else:
         pool_pre_ping=True,    # Vital for handling dropped connections
         pool_timeout=30,
         echo=False,
-        connect_args={
-            "sslmode": "require",
-            "connect_timeout": 10,
-            "keepalives": 1,
-            "keepalives_idle": 30,
-            "keepalives_interval": 10,
-            "keepalives_count": 5,
-        } if "postgresql" in SQLALCHEMY_DATABASE_URL else {}
+        connect_args=connect_args if "postgresql" in SQLALCHEMY_DATABASE_URL else {}
     )
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)

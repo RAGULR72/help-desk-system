@@ -217,13 +217,12 @@ const CommandCenterView = () => {
                     </div>
                 </div>
             </div>
-        </div>
 
-            {/* Footer Aesthetic */ }
-    <div className="mt-12 pt-8 border-t border-slate-900 text-center opacity-30">
-        <p className="text-[10px] font-black uppercase tracking-[0.8em]">End of Transmission | Secure Protocol {lastUpdated.toLocaleTimeString()}</p>
-    </div>
-        </div >
+            {/* Footer Aesthetic */}
+            <div className="mt-12 pt-8 border-t border-slate-900 text-center opacity-30">
+                <p className="text-[10px] font-black uppercase tracking-[0.8em]">End of Transmission | Secure Protocol {lastUpdated.toLocaleTimeString()}</p>
+            </div>
+        </div>
     );
 };
 
