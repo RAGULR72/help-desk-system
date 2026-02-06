@@ -292,8 +292,14 @@ const LoginPage = () => {
                     });
                     setTwoFactorData(res.data);
                 } catch (err) {
-                    setError("Failed to initialize 2FA setup.");
-                    setForgotStep(0);
+                    console.error("2FA Setup Error:", err);
+                    setError(err.response?.data?.detail || "Failed to initialize 2FA setup.");
+                    // Don't reset step immediately so user can see error? 
+                    // Or maybe invalid token means we SHOULD reset.
+                    // If 500, we probably want to stay or retry.
+                    if (err.response?.status === 401) {
+                        setForgotStep(0);
+                    }
                 } finally {
                     setLoading(false);
                 }

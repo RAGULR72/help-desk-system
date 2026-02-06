@@ -1322,6 +1322,11 @@ def setup_2fa_initiate(req: root_schemas.Setup2FAInitiate, db: Session = Depends
         }
     except auth.JWTError:
         raise HTTPException(status_code=401, detail="Token expired or invalid")
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        print(f"2FA Setup Error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Internal Server Error: {str(e)}")
 
 @router.post("/2fa/setup/finalize")
 def setup_2fa_finalize(req: root_schemas.Verify2FARequest, request: Request, response: Response, db: Session = Depends(get_db)):
