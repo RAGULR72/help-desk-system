@@ -421,25 +421,15 @@ const LoginPage = () => {
                 session_id: sessionId
             });
 
-            setSuccessMessage("Session terminated! Logging you in now...");
+            setSuccessMessage("Session terminated! Please log in again.");
 
-            // Wait a second for success message then AUTO LOGIN
-            setTimeout(async () => {
-                const result = await login(formData.username, formData.password);
-                if (result.success) {
-                    navigate(`/dashboard/${result.user.role || 'user'}`);
-                } else if (result.type === '2fa_required') {
-                    setPreAuthToken(result.pre_auth_token);
-                    setForgotStep(5);
-                } else if (result.type === '2fa_setup_required') {
-                    setPreAuthToken(result.pre_auth_token);
-                    setForgotStep(6);
-                } else {
-                    setForgotStep(0);
-                    setError(result.error);
-                }
+            // Redirect to login to refresh captcha
+            setTimeout(() => {
+                setForgotStep(0);
+                generateCaptcha();
+                setError('Session limit resolved. Please sign in.');
                 setSuccessMessage('');
-            }, 1000);
+            }, 1500);
 
         } catch (err) {
             setError(err.response?.data?.detail || "Failed to terminate session.");
