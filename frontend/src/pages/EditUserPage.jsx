@@ -64,7 +64,7 @@ const EditUserPage = () => {
                 full_name: user.full_name || '',
                 email: user.email || '',
                 phone: user.phone || '',
-                location: user.location || 'Chicago',
+                location: user.location || '',
                 department: user.department || 'HR',
                 role: user.role || 'user',
                 status: user.status || 'Active',
