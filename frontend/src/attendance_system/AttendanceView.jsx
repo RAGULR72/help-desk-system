@@ -871,12 +871,12 @@ const AttendanceView = () => {
                                     <td className="px-8 py-6 text-sm">
                                         <div className="flex items-center gap-4">
                                             <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center font-black group-hover:scale-110 transition-transform shadow-inner">
-                                                {log.full_name?.charAt(0)}
+                                                {(log.full_name || log.employee_name || log.username || '?').charAt(0)}
                                             </div>
-                                            <span className="font-black text-main italic group-hover:text-primary transition-colors">{log.full_name}</span>
+                                            <span className="font-black text-main italic group-hover:text-primary transition-colors">{log.full_name || log.employee_name || log.username || 'Unknown'}</span>
                                         </div>
                                     </td>
-                                    <td className="px-8 py-6 text-[10px] font-bold text-muted">{log.dept || 'N/A'}</td>
+                                    <td className="px-8 py-6 text-[10px] font-bold text-muted">{log.dept || log.department || 'N/A'}</td>
                                     <td className="px-8 py-6">
                                         <span className={`px-4 py-1 rounded-full text-[10px] font-black border ${log.status === 'Present' ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-500' :
                                             log.status === 'Late' ? 'bg-amber-500/10 border-amber-500/30 text-amber-500' :
