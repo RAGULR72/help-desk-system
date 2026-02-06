@@ -107,34 +107,11 @@ const DashboardLayout = ({ children, activeTab = 'tickets', userRole, onTabChang
 
             connectWS();
 
-            // Background Geolocation Tracking for Technicians
-            let geoInterval;
-            if (userRole === 'technician') {
-                const trackLocation = async () => {
-                    if ("geolocation" in navigator) {
-                        navigator.geolocation.getCurrentPosition(async (position) => {
-                            try {
-                                await api.post('/api/map/update-location', null, {
-                                    params: {
-                                        lat: position.coords.latitude,
-                                        lng: position.coords.longitude
-                                    }
-                                });
-                            } catch (e) {
-                                // Silent fail for location updates
-                            }
-                        });
-                    }
-                };
 
-                // Track every 5 minutes to save battery
-                trackLocation();
-                geoInterval = setInterval(trackLocation, 300000);
-            }
 
             return () => {
                 clearInterval(interval);
-                if (geoInterval) clearInterval(geoInterval);
+
                 if (ws) ws.close();
             };
         }
