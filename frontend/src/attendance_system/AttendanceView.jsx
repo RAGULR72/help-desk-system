@@ -6,8 +6,9 @@ import {
     FiChevronLeft, FiChevronRight, FiEdit, FiClipboard,
     FiMessageSquare, FiSettings, FiPlus, FiTrash2,
     FiShield, FiActivity, FiCheckCircle, FiPieChart,
-    FiZap, FiPower, FiTarget, FiUsers
+    FiZap, FiPower, FiTarget, FiUsers, FiSearch, FiMoreHorizontal
 } from 'react-icons/fi';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, RadialBarChart, RadialBar, PolarAngleAxis } from 'recharts';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from '../context/TranslationContext';
 import { useAuth } from '../context/AuthContext';
@@ -58,65 +59,65 @@ const LeaveRequestModal = ({ isOpen, onClose, onSubmitted }) => {
     };
 
     return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xl">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-md">
             <motion.div
                 initial={{ opacity: 0, scale: 0.9, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
-                className="glass-card border-none bg-white/10 w-full max-w-lg rounded-[2.5rem] shadow-2xl relative overflow-hidden"
+                className="bg-white w-full max-w-lg rounded-3xl shadow-2xl relative overflow-hidden ring-1 ring-slate-200"
             >
-                <div className="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-emerald-500/50 via-emerald-500 to-emerald-500/50"></div>
-                <div className="p-8 border-b border-card-border/30 flex items-center justify-between bg-emerald-500/5 relative z-10">
+                <div className="absolute inset-x-0 top-0 h-1 bg-emerald-500"></div>
+                <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50 relative z-10">
                     <div>
-                        <h3 className="text-xl font-black text-main tracking-tight">Leave request</h3>
-                        <p className="text-[10px] font-bold text-muted leading-none mt-1">Leave submission protocol</p>
+                        <h3 className="text-lg font-bold text-slate-800">Leave Request</h3>
+                        <p className="text-xs font-semibold text-slate-500 mt-1">Submit your time-off application</p>
                     </div>
-                    <button onClick={onClose} className="p-2.5 hover:bg-white/10 rounded-xl transition-all text-muted hover:text-main">
-                        <FiX size={20} />
+                    <button onClick={onClose} className="p-2 hover:bg-white rounded-lg transition-all text-slate-400 hover:text-slate-600 shadow-sm border border-transparent hover:border-slate-100">
+                        <FiX size={18} />
                     </button>
                 </div>
 
-                <form onSubmit={handleSubmit} className="p-8 space-y-8 relative z-10">
-                    <div className="grid grid-cols-2 gap-6">
-                        <div className="space-y-2">
-                            <label className="text-[10px] font-bold text-muted ml-1">Start date</label>
+                <form onSubmit={handleSubmit} className="p-8 space-y-6 relative z-10">
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-1.5">
+                            <label className="text-xs font-bold text-slate-600 ml-1">Start Date</label>
                             <input
                                 type="date"
                                 required
                                 value={formData.start_date}
                                 onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
-                                className="w-full bg-white/5 border border-card-border/50 rounded-2xl px-5 py-3.5 text-sm font-bold text-main focus:ring-2 focus:ring-emerald-500/20 transition-all outline-none hover:border-emerald-500/30"
+                                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-semibold text-slate-700 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all outline-none"
                             />
                         </div>
-                        <div className="space-y-2">
-                            <label className="text-[10px] font-bold text-muted ml-1">End date</label>
+                        <div className="space-y-1.5">
+                            <label className="text-xs font-bold text-slate-600 ml-1">End Date</label>
                             <input
                                 type="date"
                                 required
                                 value={formData.end_date}
                                 onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
-                                className="w-full bg-white/5 border border-card-border/50 rounded-2xl px-5 py-3.5 text-sm font-bold text-main focus:ring-2 focus:ring-emerald-500/20 transition-all outline-none hover:border-emerald-500/30"
+                                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-semibold text-slate-700 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all outline-none"
                             />
                         </div>
                     </div>
 
-                    <div className="space-y-2">
-                        <label className="text-[10px] font-bold text-muted ml-1">Leave type</label>
+                    <div className="space-y-1.5">
+                        <label className="text-xs font-bold text-slate-600 ml-1">Leave Type</label>
                         <select
                             value={formData.leave_type}
                             onChange={(e) => setFormData({ ...formData, leave_type: e.target.value })}
-                            className="w-full bg-white/5 border border-card-border/50 rounded-2xl px-5 py-3.5 text-sm font-bold text-main focus:ring-2 focus:ring-emerald-500/20 transition-all outline-none appearance-none cursor-pointer hover:border-emerald-500/30"
+                            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-semibold text-slate-700 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all outline-none appearance-none cursor-pointer"
                         >
-                            <option className="bg-slate-900">Sick Leave</option>
-                            <option className="bg-slate-900">Casual Leave</option>
-                            <option className="bg-slate-900">Earned Leave</option>
-                            <option className="bg-slate-900">Work From Home</option>
-                            <option className="bg-slate-900">Other</option>
+                            <option>Sick Leave</option>
+                            <option>Casual Leave</option>
+                            <option>Earned Leave</option>
+                            <option>Work From Home</option>
+                            <option>Other</option>
                         </select>
                     </div>
 
-                    <div className="space-y-2">
+                    <div className="space-y-1.5">
                         <div className="flex justify-between items-center ml-1">
-                            <label className="text-[10px] font-bold text-muted">Reason</label>
+                            <label className="text-xs font-bold text-slate-600">Reason</label>
                             <AIAssistantButton
                                 text={formData.reason}
                                 onPolished={(val) => setFormData(prev => ({ ...prev, reason: val }))}
@@ -125,21 +126,21 @@ const LeaveRequestModal = ({ isOpen, onClose, onSubmitted }) => {
                         </div>
                         <textarea
                             required
-                            rows="4"
-                            placeholder="State your rationale for deployment recess..."
+                            rows="3"
+                            placeholder="Please state your reason..."
                             value={formData.reason}
                             onChange={(e) => setFormData({ ...formData, reason: e.target.value })}
-                            className="w-full bg-white/5 border border-card-border/50 rounded-2xl px-5 py-3.5 text-sm font-bold text-main focus:ring-2 focus:ring-emerald-500/20 transition-all outline-none resize-none hover:border-emerald-500/30"
+                            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium text-slate-700 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all outline-none resize-none"
                         ></textarea>
                     </div>
 
                     <button
                         type="submit"
                         disabled={isSubmitting}
-                        className="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-4.5 rounded-2xl font-black text-[10px] shadow-[0_15px_30px_-10px_rgba(16,185,129,0.5)] transition-all flex items-center justify-center gap-3 active:scale-95 disabled:opacity-50"
+                        className="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3.5 rounded-xl font-bold text-xs shadow-lg shadow-emerald-100 transition-all flex items-center justify-center gap-2 active:scale-95 disabled:opacity-50"
                     >
                         {isSubmitting ? <FiActivity className="animate-spin" /> : <FiUpload />}
-                        Submit request
+                        Submit Request
                     </button>
                 </form>
             </motion.div>
@@ -171,38 +172,41 @@ const LeaveActionModal = ({ isOpen, onClose, onSubmitted, leaveId, actionType })
     };
 
     return (
-        <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xl">
-            <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="glass-card border-none bg-white/10 w-full max-w-md rounded-[2.5rem] p-10 shadow-2xl relative overflow-hidden">
-                <div className={`absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r ${actionType === 'Approved' ? 'from-emerald-500/50 via-emerald-500 to-emerald-500/50' : 'from-rose-500/50 via-rose-500 to-rose-500/50'}`}></div>
-                <h3 className="text-xl font-black text-main tracking-tight mb-2">
-                    {actionType === 'Approved' ? 'Approve leave' : 'Reject leave'}
+        <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-md">
+            <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="bg-white w-full max-w-md rounded-3xl p-8 shadow-2xl relative overflow-hidden ring-1 ring-slate-200">
+                <div className={`absolute inset-x-0 top-0 h-1 bg-gradient-to-r ${actionType === 'Approved' ? 'from-emerald-500 to-emerald-600' : 'from-rose-500 to-rose-600'}`}></div>
+                <h3 className="text-xl font-bold text-slate-800 tracking-tight mb-2">
+                    {actionType === 'Approved' ? 'Approve Leave' : 'Reject Leave'}
                 </h3>
-                <p className="text-[10px] font-bold text-muted mb-8">Approval process</p>
-                <form onSubmit={handleSubmit} className="space-y-8 relative z-10">
-                    <div className="flex justify-between items-center px-1">
-                        <span className="text-[10px] font-bold text-muted">Admin notes</span>
-                        <AIAssistantButton
-                            text={adminReason}
-                            onPolished={setAdminReason}
-                            contextType="leave_request"
-                        />
+                <p className="text-xs font-semibold text-slate-500 mb-6">Please provide a reason for this decision.</p>
+                <form onSubmit={handleSubmit} className="space-y-6 relative z-10">
+                    <div className="space-y-1.5">
+                        <div className="flex justify-between items-center px-1">
+                            <span className="text-xs font-bold text-slate-600">Admin Notes</span>
+                            <AIAssistantButton
+                                text={adminReason}
+                                onPolished={setAdminReason}
+                                contextType="leave_request"
+                            />
+                        </div>
+                        <textarea
+                            required={actionType === 'Rejected'}
+                            value={adminReason}
+                            onChange={(e) => setAdminReason(e.target.value)}
+                            placeholder={actionType === 'Rejected' ? "Reason for rejection required..." : "Optional verification notes..."}
+                            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium text-slate-700 outline-none focus:ring-2 focus:ring-slate-200 transition-all resize-none"
+                            rows="4"
+                        ></textarea>
                     </div>
-                    <textarea
-                        required={actionType === 'Rejected'}
-                        value={adminReason}
-                        onChange={(e) => setAdminReason(e.target.value)}
-                        placeholder={actionType === 'Rejected' ? "State the reason for rejection..." : "Optional verification notes..."}
-                        className="w-full bg-white/5 border border-card-border/50 rounded-2xl px-5 py-4 text-sm font-bold text-main outline-none focus:ring-2 focus:ring-primary/20 transition-all resize-none hover:border-primary/30"
-                        rows="5"
-                    ></textarea>
-                    <div className="flex gap-4">
-                        <button type="button" onClick={onClose} className="flex-1 px-4 py-4 bg-white/5 border border-card-border/50 text-muted hover:text-main rounded-2xl font-black text-[10px] transition-all active:scale-95">Cancel</button>
+                    <div className="flex gap-3">
+                        <button type="button" onClick={onClose} className="flex-1 px-4 py-3 bg-slate-50 border border-slate-200 text-slate-600 hover:bg-slate-100 rounded-xl font-bold text-xs transition-all active:scale-95">Cancel</button>
                         <button
                             type="submit"
                             disabled={isSubmitting}
-                            className={`flex-1 px-4 py-4 ${actionType === 'Approved' ? 'bg-emerald-600 shadow-[0_15px_30px_-10px_rgba(16,185,129,0.5)]' : 'bg-rose-600 shadow-[0_15px_30px_-10px_rgba(244,63,94,0.5)]'} text-white rounded-2xl font-black text-[10px] transition-all active:scale-95 disabled:opacity-50`}
+                            className={`flex-1 px-4 py-3 text-white rounded-xl font-bold text-xs transition-all shadow-md active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2 ${actionType === 'Approved' ? 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-100' : 'bg-rose-600 hover:bg-rose-700 shadow-rose-100'}`}
                         >
-                            {isSubmitting ? <FiActivity className="animate-spin mx-auto" /> : `${actionType === 'Approved' ? 'Approve' : 'Reject'}`}
+                            {isSubmitting ? <FiActivity className="animate-spin" /> : actionType === 'Approved' ? <FiCheck /> : <FiX />}
+                            {actionType}
                         </button>
                     </div>
                 </form>
@@ -250,42 +254,41 @@ const AdminEditLeaveModal = ({ isOpen, onClose, onSubmitted, leave }) => {
     };
 
     return (
-        <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xl">
-            <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="glass-card border-none bg-white/10 w-full max-w-lg rounded-[2.5rem] p-10 shadow-2xl relative overflow-y-auto max-h-[90vh]">
-                <div className="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-primary/50 via-primary to-primary/50"></div>
-                <h3 className="text-xl font-black text-main tracking-tight mb-2">Edit leave request</h3>
-                <p className="text-[10px] font-bold text-muted mb-10">Administrative access</p>
-                <form onSubmit={handleSubmit} className="space-y-8 relative z-10">
-                    <div className="grid grid-cols-2 gap-6">
-                        <div className="space-y-2">
-                            <label className="text-[10px] font-bold text-muted ml-1">Start date</label>
-                            <input type="date" value={formData.start_date} onChange={(e) => setFormData({ ...formData, start_date: e.target.value })} className="w-full bg-white/5 border border-card-border/50 rounded-2xl px-5 py-3.5 text-sm font-bold text-main outline-none focus:ring-2 focus:ring-primary/20 transition-all" />
+        <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-md">
+            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-white w-full max-w-lg rounded-3xl p-8 shadow-2xl relative overflow-y-auto max-h-[90vh] ring-1 ring-slate-200">
+                <div className="absolute top-0 right-0 p-6 opacity-5 text-slate-800 pointer-events-none"><FiEdit size={120} /></div>
+                <h3 className="text-xl font-bold text-slate-800 mb-6 flex items-center gap-2 relative z-10"><FiEdit /> Edit Request</h3>
+                <form onSubmit={handleSubmit} className="space-y-6 relative z-10">
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-1.5">
+                            <label className="text-xs font-bold text-slate-600 ml-1">Start Date</label>
+                            <input type="date" value={formData.start_date} onChange={e => setFormData({ ...formData, start_date: e.target.value })} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-semibold text-slate-700 focus:ring-2 focus:ring-slate-200 transition-all outline-none" required />
                         </div>
-                        <div className="space-y-2">
-                            <label className="text-[10px] font-bold text-muted ml-1">End date</label>
-                            <input type="date" value={formData.end_date} onChange={(e) => setFormData({ ...formData, end_date: e.target.value })} className="w-full bg-white/5 border border-card-border/50 rounded-2xl px-5 py-3.5 text-sm font-bold text-main outline-none focus:ring-2 focus:ring-primary/20 transition-all" />
+                        <div className="space-y-1.5">
+                            <label className="text-xs font-bold text-slate-600 ml-1">End Date</label>
+                            <input type="date" value={formData.end_date} onChange={e => setFormData({ ...formData, end_date: e.target.value })} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-semibold text-slate-700 focus:ring-2 focus:ring-slate-200 transition-all outline-none" required />
                         </div>
                     </div>
-                    <div className="space-y-2">
-                        <label className="text-[10px] font-bold text-muted ml-1">Leave type</label>
-                        <select value={formData.leave_type} onChange={e => setFormData({ ...formData, leave_type: e.target.value })} className="w-full bg-white/5 border border-card-border/50 rounded-2xl px-5 py-3.5 text-sm font-bold text-main outline-none focus:ring-2 focus:ring-primary/20 transition-all appearance-none cursor-pointer">
-                            <option className="bg-slate-900">Sick Leave</option><option className="bg-slate-900">Casual Leave</option><option className="bg-slate-900">Earned Leave</option><option className="bg-slate-900">Work From Home</option><option className="bg-slate-900">Other</option>
+                    <div className="space-y-1.5">
+                        <label className="text-xs font-bold text-slate-600 ml-1">Leave Type</label>
+                        <select value={formData.leave_type} onChange={e => setFormData({ ...formData, leave_type: e.target.value })} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-semibold text-slate-700 focus:ring-2 focus:ring-slate-200 transition-all outline-none appearance-none cursor-pointer">
+                            <option>Sick Leave</option><option>Casual Leave</option><option>Earned Leave</option><option>Work From Home</option><option>Other</option>
                         </select>
                     </div>
-                    <div className="space-y-2">
+                    <div className="space-y-1.5">
                         <div className="flex justify-between items-center ml-1">
-                            <label className="text-[10px] font-bold text-muted">User reason</label>
+                            <label className="text-xs font-bold text-slate-600">User Reason</label>
                             <AIAssistantButton
                                 text={formData.reason}
                                 onPolished={(val) => setFormData(prev => ({ ...prev, reason: val }))}
                                 contextType="leave_request"
                             />
                         </div>
-                        <textarea value={formData.reason} onChange={e => setFormData({ ...formData, reason: e.target.value })} className="w-full bg-white/5 border border-card-border/50 rounded-2xl px-5 py-3.5 text-sm font-bold text-main outline-none resize-none" rows="2" />
+                        <textarea value={formData.reason} onChange={e => setFormData({ ...formData, reason: e.target.value })} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium text-slate-700 outline-none resize-none" rows="3" />
                     </div>
-                    <div className="space-y-2">
+                    <div className="space-y-1.5">
                         <div className="flex justify-between items-center ml-1">
-                            <label className="text-[10px] font-bold text-primary">Admin notes</label>
+                            <label className="text-xs font-bold text-slate-600">Admin Notes</label>
                             <AIAssistantButton
                                 text={formData.admin_notes}
                                 onPolished={(val) => setFormData(prev => ({ ...prev, admin_notes: val }))}
@@ -293,11 +296,11 @@ const AdminEditLeaveModal = ({ isOpen, onClose, onSubmitted, leave }) => {
                                 additionalContext="Administrative override of a leave request."
                             />
                         </div>
-                        <textarea required placeholder="Provide a reason for this administrative edit..." value={formData.admin_notes} onChange={e => setFormData({ ...formData, admin_notes: e.target.value })} className="w-full bg-primary/5 border border-primary/30 rounded-2xl px-5 py-3.5 text-sm font-bold text-main outline-none focus:ring-2 focus:ring-primary/20 transition-all" rows="4" />
+                        <textarea required placeholder="Provide a reason for this administrative edit..." value={formData.admin_notes} onChange={e => setFormData({ ...formData, admin_notes: e.target.value })} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium text-slate-700 outline-none focus:ring-2 focus:ring-slate-200 transition-all" rows="4" />
                     </div>
-                    <div className="flex gap-4 pt-4">
-                        <button type="button" onClick={onClose} className="flex-1 px-4 py-4 bg-white/5 border border-card-border/50 text-muted hover:text-main rounded-2xl font-black text-[10px] transition-all active:scale-95">Cancel</button>
-                        <button type="submit" disabled={isSubmitting} className="flex-1 px-4 py-4 bg-primary text-white rounded-2xl font-black text-[10px] transition-all active:scale-95 shadow-[0_15px_30px_-10px_rgba(var(--primary-rgb),0.5)]">Save changes</button>
+                    <div className="flex justify-end gap-3 pt-2">
+                        <button type="button" onClick={onClose} className="px-6 py-3 bg-slate-50 text-slate-600 hover:bg-slate-100 rounded-xl font-bold text-xs transition-all">Cancel</button>
+                        <button type="submit" disabled={isSubmitting} className="px-6 py-3 bg-slate-900 text-white hover:bg-slate-800 rounded-xl font-bold text-xs shadow-lg shadow-slate-200 transition-all">Save Changes</button>
                     </div>
                 </form>
             </motion.div>
@@ -313,7 +316,6 @@ const RegularizationModal = ({ isOpen, onClose, onSubmitted }) => {
         reason: ''
     });
     const [isSubmitting, setIsSubmitting] = useState(false);
-
     if (!isOpen) return null;
 
     const handleSubmit = async (e) => {
@@ -327,56 +329,113 @@ const RegularizationModal = ({ isOpen, onClose, onSubmitted }) => {
                 date: `${formData.date}T00:00:00`
             };
             await api.post('/api/attendance/regularization', payload);
-            onSubmitted();
-            onClose();
-        } catch (err) {
-            alert(err.response?.data?.detail || "Failed to submit regularization request");
-        } finally {
-            setIsSubmitting(false);
-        }
+            alert("Regularization request sent.");
+            onSubmitted(); onClose();
+        } catch (err) { alert(err.response?.data?.detail || "Failed."); }
+        finally { setIsSubmitting(false); }
     };
 
     return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xl">
-            <motion.div initial={{ opacity: 0, scale: 0.9, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} className="glass-card border-none bg-white/10 w-full max-w-lg rounded-[2.5rem] shadow-2xl relative overflow-hidden">
-                <div className="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-amber-500/50 via-amber-500 to-amber-500/50"></div>
-                <div className="p-10 border-b border-card-border/30 flex items-center justify-between bg-amber-500/5 relative z-10">
-                    <div>
-                        <h3 className="text-xl font-black text-main tracking-tight">Regularization</h3>
-                        <p className="text-[10px] font-bold text-muted leading-none mt-1">Attendance correction request</p>
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-md">
+            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-white w-full max-w-md rounded-3xl p-8 shadow-2xl ring-1 ring-slate-200">
+                <h3 className="text-xl font-bold text-slate-800 mb-6 flex items-center gap-2"><FiZap className="text-amber-500" /> Regularize Attendance</h3>
+                <form onSubmit={handleSubmit} className="space-y-6">
+                    <div className="space-y-1.5">
+                        <label className="text-xs font-bold text-slate-600 ml-1">Date</label>
+                        <input type="date" required value={formData.date} onChange={e => setFormData({ ...formData, date: e.target.value })} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-semibold text-slate-700 focus:ring-2 focus:ring-amber-500/20 transition-all outline-none" />
                     </div>
-                    <button onClick={onClose} className="p-2.5 hover:bg-white/10 rounded-xl transition-all text-muted hover:text-main"><FiX size={20} /></button>
-                </div>
-                <form onSubmit={handleSubmit} className="p-10 space-y-8 relative z-10">
-                    <div className="space-y-2">
-                        <label className="text-[10px] font-bold text-muted ml-1">Date</label>
-                        <input type="date" required value={formData.date} onChange={(e) => setFormData({ ...formData, date: e.target.value })} className="w-full bg-white/5 border border-card-border/50 rounded-2xl px-5 py-3.5 text-sm font-bold text-main focus:ring-2 focus:ring-amber-500/20 transition-all outline-none" />
-                    </div>
-                    <div className="grid grid-cols-2 gap-6">
-                        <div className="space-y-2">
-                            <label className="text-[10px] font-bold text-muted ml-1">Check-in time</label>
-                            <input type="time" required value={formData.correct_in_time} onChange={(e) => setFormData({ ...formData, correct_in_time: e.target.value })} className="w-full bg-white/5 border border-card-border/50 rounded-2xl px-5 py-3.5 text-sm font-bold text-main focus:ring-2 focus:ring-amber-500/20 transition-all outline-none" />
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-1.5">
+                            <label className="text-xs font-bold text-slate-600 ml-1">Check-in</label>
+                            <input type="time" required value={formData.correct_in_time} onChange={(e) => setFormData({ ...formData, correct_in_time: e.target.value })} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-semibold text-slate-700 focus:ring-2 focus:ring-amber-500/20 transition-all outline-none" />
                         </div>
-                        <div className="space-y-2">
-                            <label className="text-[10px] font-bold text-muted ml-1">Check-out time</label>
-                            <input type="time" required value={formData.correct_out_time} onChange={(e) => setFormData({ ...formData, correct_out_time: e.target.value })} className="w-full bg-white/5 border border-card-border/50 rounded-2xl px-5 py-3.5 text-sm font-bold text-main focus:ring-2 focus:ring-amber-500/20 transition-all outline-none" />
+                        <div className="space-y-1.5">
+                            <label className="text-xs font-bold text-slate-600 ml-1">Check-out</label>
+                            <input type="time" required value={formData.correct_out_time} onChange={(e) => setFormData({ ...formData, correct_out_time: e.target.value })} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-semibold text-slate-700 focus:ring-2 focus:ring-amber-500/20 transition-all outline-none" />
                         </div>
                     </div>
-                    <div className="space-y-2">
-                        <div className="flex justify-between items-center ml-1">
-                            <label className="text-[10px] font-bold text-muted">Reason</label>
-                            <AIAssistantButton
-                                text={formData.reason}
-                                onPolished={(val) => setFormData(prev => ({ ...prev, reason: val }))}
-                            />
-                        </div>
-                        <textarea required rows="4" placeholder="Brief the reason for regularization request..." value={formData.reason} onChange={(e) => setFormData({ ...formData, reason: e.target.value })} className="w-full bg-white/5 border border-card-border/50 rounded-2xl px-5 py-3.5 text-sm font-bold text-main focus:ring-2 focus:ring-amber-500/20 transition-all outline-none resize-none"></textarea>
+                    <div className="space-y-1.5">
+                        <label className="text-xs font-bold text-slate-600 ml-1">Reason</label>
+                        <textarea required rows="3" value={formData.reason} onChange={e => setFormData({ ...formData, reason: e.target.value })} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium text-slate-700 focus:ring-2 focus:ring-amber-500/20 transition-all outline-none resize-none"></textarea>
                     </div>
-                    <button type="submit" disabled={isSubmitting} className="w-full bg-amber-600 hover:bg-amber-700 text-white py-4.5 rounded-2xl font-black text-[10px] shadow-[0_15px_30px_-10px_rgba(245,158,11,0.5)] transition-all flex items-center justify-center gap-3 disabled:opacity-50 active:scale-95">
-                        {isSubmitting ? <FiActivity className="animate-spin" /> : <FiUpload />}
-                        Submit request
-                    </button>
+                    <div className="flex gap-3 pt-2">
+                        <button type="button" onClick={onClose} className="flex-1 py-3 bg-slate-50 text-slate-600 hover:bg-slate-100 rounded-xl font-bold text-xs transition-all">Cancel</button>
+                        <button type="submit" disabled={isSubmitting} className="flex-1 py-3 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-bold text-xs shadow-lg shadow-amber-100 transition-all">{isSubmitting ? 'Sending...' : 'Submit'}</button>
+                    </div>
                 </form>
+            </motion.div>
+        </div>
+    );
+};
+
+const HolidayConfigModal = ({ isOpen, onClose }) => {
+    const [holidays, setHolidays] = useState([]);
+    const [newHoliday, setNewHoliday] = useState({ date: '', name: '', type: 'Public Holiday' });
+
+    useEffect(() => {
+        if (isOpen) fetchHolidays();
+    }, [isOpen]);
+
+    const fetchHolidays = async () => {
+        try {
+            const res = await api.get('/api/attendance/holidays');
+            setHolidays(res.data);
+        } catch (err) { }
+    };
+
+    const handleAdd = async () => {
+        if (!newHoliday.date || !newHoliday.name) return;
+        try {
+            await api.post('/api/attendance/holidays', newHoliday);
+            setNewHoliday({ date: '', name: '', type: 'Public Holiday' });
+            fetchHolidays();
+        } catch (err) {
+            alert(err.response?.data?.detail || "Failed to add holiday");
+        }
+    };
+
+    const handleDelete = async (id) => {
+        if (!confirm("Are you sure?")) return;
+        try {
+            await api.delete(`/api/attendance/holidays/${id}`);
+            fetchHolidays();
+        } catch (err) { }
+    };
+
+    if (!isOpen) return null;
+
+    return (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-md">
+            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-white w-full max-w-2xl rounded-3xl p-8 shadow-2xl ring-1 ring-slate-200 h-[600px] flex flex-col">
+                <div className="flex items-center justify-between mb-8">
+                    <h3 className="text-xl font-bold text-slate-800">Holiday Configuration</h3>
+                    <button onClick={onClose}><FiX className="text-slate-400 hover:text-slate-600" size={24} /></button>
+                </div>
+
+                <div className="flex gap-4 mb-8 bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                    <input type="date" value={newHoliday.date} onChange={e => setNewHoliday({ ...newHoliday, date: e.target.value })} className="bg-white border border-slate-200 rounded-xl px-4 py-2 text-sm font-semibold text-slate-700 outline-none focus:border-slate-400" />
+                    <input type="text" placeholder="Holiday Name" value={newHoliday.name} onChange={e => setNewHoliday({ ...newHoliday, name: e.target.value })} className="flex-1 bg-white border border-slate-200 rounded-xl px-4 py-2 text-sm font-semibold text-slate-700 outline-none focus:border-slate-400" />
+                    <button onClick={handleAdd} className="bg-slate-900 text-white px-6 py-2 rounded-xl font-bold text-xs hover:bg-slate-800 transition-all"><FiPlus size={16} /></button>
+                </div>
+
+                <div className="flex-1 overflow-y-auto pr-2 space-y-3">
+                    {holidays.length === 0 ? (
+                        <div className="text-center py-20 text-slate-400 text-sm font-medium">No holidays configured yet.</div>
+                    ) : holidays.map(h => (
+                        <div key={h.id} className="flex items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-100 group hover:border-slate-200 transition-all">
+                            <div className="flex items-center gap-4">
+                                <div className="w-10 h-10 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-xs">
+                                    {new Date(h.date).getDate()}
+                                </div>
+                                <div>
+                                    <p className="text-sm font-bold text-slate-700">{h.name}</p>
+                                    <p className="text-xs font-medium text-slate-400">{new Date(h.date).toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long' })}</p>
+                                </div>
+                            </div>
+                            <button onClick={() => handleDelete(h.id)} className="text-slate-300 hover:text-rose-500 transition-colors p-2"><FiTrash2 /></button>
+                        </div>
+                    ))}
+                </div>
             </motion.div>
         </div>
     );
@@ -393,38 +452,38 @@ const AttendanceCalendarComp = ({ month, year, calendarData, onPrev, onNext }) =
     for (let i = 1; i <= daysInMonth; i++) days.push(i);
 
     return (
-        <div className="glass-card border-none bg-white/5 rounded-[2.5rem] p-10 shadow-sm relative overflow-hidden group">
-            <div className="absolute top-0 right-0 p-8 opacity-5 pointer-events-none group-hover:text-primary transition-colors">
+        <div className="bg-white rounded-3xl p-8 shadow-sm border border-slate-100 relative overflow-hidden group">
+            <div className="absolute top-0 right-0 p-8 opacity-5 pointer-events-none group-hover:text-slate-900 transition-colors">
                 <FiCalendar size={120} />
             </div>
-            <div className="flex items-center justify-between mb-10 relative z-10">
-                <h3 className="text-xl font-black text-main tracking-tighter flex items-center gap-3">
-                    <FiCalendar className="text-primary" />
-                    Attendance calendar
+            <div className="flex items-center justify-between mb-8 relative z-10">
+                <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
+                    <FiCalendar className="text-slate-500" />
+                    Attendance Calendar
                 </h3>
-                <div className="flex items-center bg-white/5 border border-card-border/30 rounded-2xl p-1 gap-4">
-                    <button onClick={onPrev} className="p-2.5 hover:bg-white/10 rounded-xl transition-all text-muted hover:text-primary"><FiChevronLeft /></button>
-                    <span className="text-[10px] font-black text-main w-32 text-center">{monthName} {year}</span>
-                    <button onClick={onNext} className="p-2.5 hover:bg-white/10 rounded-xl transition-all text-muted hover:text-primary"><FiChevronRight /></button>
+                <div className="flex items-center bg-slate-50 border border-slate-200 rounded-xl p-1 gap-2">
+                    <button onClick={onPrev} className="p-2 hover:bg-white rounded-lg transition-all text-slate-500 hover:text-slate-900 hover:shadow-sm"><FiChevronLeft /></button>
+                    <span className="text-xs font-bold text-slate-700 w-28 text-center">{monthName} {year}</span>
+                    <button onClick={onNext} className="p-2 hover:bg-white rounded-lg transition-all text-slate-500 hover:text-slate-900 hover:shadow-sm"><FiChevronRight /></button>
                 </div>
             </div>
 
-            <div className="grid grid-cols-7 gap-3 mb-8 relative z-10">
-                {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(d => (<div key={d} className="text-center text-[10px] font-black text-muted py-2">{d}</div>))}
+            <div className="grid grid-cols-7 gap-2 mb-6 relative z-10">
+                {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(d => (<div key={d} className="text-center text-[10px] font-bold text-slate-400 py-2 uppercase tracking-wider">{d}</div>))}
                 {days.map((day, idx) => {
                     if (day === null) return <div key={`empty-${idx}`} />;
                     const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
                     const dayData = calendarData[dateStr];
-                    let bgColor = "bg-white/5 hover:bg-white/10";
-                    let textColor = "text-muted hover:text-main";
+                    let bgColor = "bg-slate-50 hover:bg-slate-100 text-slate-500";
+                    let ringColor = "";
 
                     if (dayData) {
                         if (dayData.status === 'Present' || dayData.status === 'Late') {
-                            bgColor = "bg-primary/20 text-primary border border-primary/30";
+                            bgColor = "bg-emerald-50 text-emerald-600 border border-emerald-100";
                         } else if (dayData.status === 'Leave') {
-                            bgColor = "bg-emerald-500/20 text-emerald-500 border border-emerald-500/30";
+                            bgColor = "bg-indigo-50 text-indigo-600 border border-indigo-100";
                         } else if (dayData.status === 'Absent') {
-                            bgColor = "bg-rose-500/20 text-rose-500 border border-rose-500/30";
+                            bgColor = "bg-rose-50 text-rose-600 border border-rose-100";
                         }
                     }
 
@@ -436,11 +495,11 @@ const AttendanceCalendarComp = ({ month, year, calendarData, onPrev, onNext }) =
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
                             onClick={() => setSelectedDay(isSelected ? null : dateStr)}
-                            className={`h-14 flex flex-col items-center justify-center rounded-2xl text-sm font-black transition-all cursor-pointer relative ${bgColor} ${textColor} ${isSelected ? 'ring-2 ring-primary ring-offset-4 ring-offset-slate-900 z-10' : ''}`}
+                            className={`h-12 flex flex-col items-center justify-center rounded-xl text-xs font-bold transition-all cursor-pointer relative ${bgColor} ${isSelected ? 'ring-2 ring-slate-800 ring-offset-2 z-10' : ''}`}
                         >
                             {day}
                             {dayData?.hours > 0 && !isSelected && (
-                                <div className="absolute top-2 right-2 w-1.5 h-1.5 rounded-full bg-primary shadow-[0_0_8px_rgba(var(--primary-rgb),0.8)]"></div>
+                                <div className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-current opacity-50"></div>
                             )}
                         </motion.div>
                     );
@@ -455,23 +514,22 @@ const AttendanceCalendarComp = ({ month, year, calendarData, onPrev, onNext }) =
                         exit={{ height: 0, opacity: 0 }}
                         className="mt-4 overflow-hidden"
                     >
-                        <div className="bg-white/5 backdrop-blur-md rounded-3xl p-8 border border-card-border/50 shadow-inner relative overflow-hidden">
-                            <div className="absolute top-0 left-0 w-1.5 h-full bg-primary/50"></div>
-                            <div className="flex items-center justify-between mb-6">
-                                <p className="text-[10px] font-bold text-muted">Log summary for {selectedDay}</p>
-                                <span className={`px-4 py-1 rounded-full text-[10px] font-black border ${calendarData[selectedDay].status === 'Present' ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-500' : 'bg-amber-500/10 border-amber-500/30 text-amber-500'}`}>{calendarData[selectedDay].status}</span>
+                        <div className="bg-slate-50 rounded-2xl p-6 border border-slate-100 shadow-inner relative overflow-hidden">
+                            <div className="flex items-center justify-between mb-4">
+                                <p className="text-xs font-semibold text-slate-500">Log Summary: {selectedDay}</p>
+                                <span className={`px-3 py-1 rounded-full text-[10px] font-bold border ${calendarData[selectedDay].status === 'Present' ? 'bg-emerald-100 border-emerald-200 text-emerald-700' : 'bg-amber-100 border-amber-200 text-amber-700'}`}>{calendarData[selectedDay].status}</span>
                             </div>
-                            <div className="flex items-center gap-12">
+                            <div className="flex items-center gap-8">
                                 <div>
-                                    <p className="text-[10px] font-bold text-muted mb-2">Check-in/out</p>
-                                    <p className="text-xl font-black text-main italic">
-                                        {calendarData[selectedDay].check_in || '--:--'} <FiArrowRight className="inline text-primary mx-2" /> {calendarData[selectedDay].check_out || '--:--'}
+                                    <p className="text-[10px] font-bold text-slate-400 mb-1 uppercase tracking-wider">Timing</p>
+                                    <p className="text-base font-bold text-slate-800">
+                                        {calendarData[selectedDay].check_in || '--:--'} <span className="text-slate-400 mx-1">→</span> {calendarData[selectedDay].check_out || '--:--'}
                                     </p>
                                 </div>
                                 <div className="text-right ml-auto">
-                                    <p className="text-[10px] font-bold text-muted mb-2">Total hours</p>
-                                    <p className="text-3xl font-black text-primary">
-                                        {calendarData[selectedDay].hours || '0.0'} <span className="text-xs font-bold text-muted">Hrs</span>
+                                    <p className="text-[10px] font-bold text-slate-400 mb-1 uppercase tracking-wider">Duration</p>
+                                    <p className="text-xl font-bold text-slate-800">
+                                        {calendarData[selectedDay].hours || '0.0'} <span className="text-xs font-bold text-slate-500">h</span>
                                     </p>
                                 </div>
                             </div>
@@ -480,100 +538,16 @@ const AttendanceCalendarComp = ({ month, year, calendarData, onPrev, onNext }) =
                 )}
             </AnimatePresence>
 
-            <div className="mt-10 flex items-center justify-center gap-8 border-t border-card-border/30 pt-8">
-                <div className="flex items-center gap-3"><div className="w-2.5 h-2.5 rounded-full bg-primary shadow-[0_0_8px_rgba(var(--primary-rgb),0.5)]"></div><span className="text-[10px] font-bold text-muted">Active</span></div>
-                <div className="flex items-center gap-3"><div className="w-2.5 h-2.5 rounded-full bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.5)]"></div><span className="text-[10px] font-bold text-muted">Breached</span></div>
-                <div className="flex items-center gap-3"><div className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></div><span className="text-[10px] font-bold text-muted">Leave</span></div>
+            <div className="mt-8 flex items-center justify-center gap-6 border-t border-slate-100 pt-6">
+                <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-emerald-500"></div><span className="text-xs font-medium text-slate-500">Present</span></div>
+                <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-rose-500"></div><span className="text-xs font-medium text-slate-500">Absent</span></div>
+                <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-indigo-500"></div><span className="text-xs font-medium text-slate-500">Leave</span></div>
             </div>
         </div>
     );
 };
 
-const HolidayConfigModal = ({ isOpen, onClose }) => {
-    const [holidays, setHolidays] = useState([]);
-    const [newHoliday, setNewHoliday] = useState({ name: '', date: '', type: 'Public Holiday' });
 
-    const fetchHolidays = async () => {
-        try { const res = await api.get('/api/attendance/holidays'); setHolidays(res.data); } catch (err) { }
-    };
-
-    useEffect(() => { if (isOpen) fetchHolidays(); }, [isOpen]);
-
-    const handleAdd = async (e) => {
-        e.preventDefault();
-        try {
-            await api.post('/api/attendance/holidays', newHoliday);
-            setNewHoliday({ name: '', date: '', type: 'Public Holiday' });
-            fetchHolidays();
-        } catch (err) { alert(err.response?.data?.detail || "Failed to add holiday"); }
-    };
-
-    const handleDelete = async (id) => {
-        if (!confirm("Are you sure?")) return;
-        try { await api.delete(`/api/attendance/holidays/${id}`); fetchHolidays(); } catch (err) { }
-    };
-
-    if (!isOpen) return null;
-
-    return (
-        <AnimatePresence>
-            <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xl">
-                <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="glass-card border-none bg-white/10 rounded-[2.5rem] w-full max-w-2xl max-h-[85vh] overflow-hidden shadow-2xl flex flex-col relative">
-                    <div className="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-rose-500/50 via-rose-500 to-rose-500/50"></div>
-                    <div className="p-8 border-b border-card-border/30 flex justify-between items-center bg-rose-500/5">
-                        <div>
-                            <h3 className="text-2xl font-black text-main tracking-tighter italic">Holiday <span className="text-rose-500">config</span></h3>
-                            <p className="text-[10px] font-bold text-muted leading-none mt-1">Operational holiday calendar</p>
-                        </div>
-                        <button onClick={onClose} className="w-10 h-10 rounded-2xl bg-white/5 border border-card-border/50 flex items-center justify-center text-muted hover:text-rose-500 transition-all"><FiX size={20} /></button>
-                    </div>
-                    <div className="overflow-y-auto p-10 space-y-10">
-                        <form onSubmit={handleAdd} className="grid grid-cols-1 md:grid-cols-4 gap-6 items-end bg-white/5 p-8 rounded-3xl border border-dashed border-card-border/50">
-                            <div className="md:col-span-2 space-y-2">
-                                <label className="text-[10px] font-bold text-muted pl-1">Holiday name</label>
-                                <input required type="text" placeholder="e.g. System Override" value={newHoliday.name} onChange={e => setNewHoliday({ ...newHoliday, name: e.target.value })} className="w-full bg-white/5 border border-card-border/50 rounded-2xl px-5 py-3.5 text-sm font-bold text-main focus:ring-2 focus:ring-rose-500/20 transition-all outline-none" />
-                            </div>
-                            <div className="space-y-2">
-                                <label className="text-[10px] font-bold text-muted pl-1">Date</label>
-                                <input required type="date" value={newHoliday.date} onChange={e => setNewHoliday({ ...newHoliday, date: e.target.value })} className="w-full bg-white/5 border border-card-border/50 rounded-2xl px-5 py-3.5 text-sm font-bold text-main focus:ring-2 focus:ring-rose-500/20 transition-all outline-none" />
-                            </div>
-                            <button type="submit" className="bg-rose-600 text-white h-[52px] rounded-2xl font-black text-[10px] hover:bg-rose-700 transition-all shadow-[0_15px_30px_-10px_rgba(244,63,94,0.5)] flex items-center justify-center gap-2 active:scale-95"><FiPlus size={18} /> Add holiday</button>
-                        </form>
-
-                        <div className="space-y-6">
-                            <h4 className="text-[10px] font-bold text-muted flex items-center gap-3">
-                                <FiActivity className="text-rose-500" />
-                                Scheduled holidays
-                            </h4>
-                            <div className="space-y-4">
-                                {holidays.length === 0 ? (
-                                    <div className="text-center py-10 bg-white/5 rounded-3xl border border-card-border/30">
-                                        <p className="text-[10px] font-bold text-muted">No holidays found</p>
-                                    </div>
-                                ) : holidays.map(h => (
-                                    <div key={h.id} className="flex items-center justify-between p-5 bg-white/5 rounded-3xl border border-card-border/30 hover:border-primary/50 transition-all group overflow-hidden relative">
-                                        <div className="absolute top-0 left-0 w-1 h-full bg-rose-500 opacity-50 group-hover:opacity-100 transition-opacity"></div>
-                                        <div className="flex items-center gap-6">
-                                            <div className="w-14 h-14 rounded-2xl bg-rose-500/10 flex flex-col items-center justify-center text-rose-500 border border-rose-500/20 shadow-inner">
-                                                <span className="text-[10px] font-bold leading-none mb-1">{new Date(h.date).toLocaleString('default', { month: 'short' })}</span>
-                                                <span className="text-xl font-black leading-none">{new Date(h.date).getDate()}</span>
-                                            </div>
-                                            <div>
-                                                <h5 className="font-black text-main text-sm">{h.name}</h5>
-                                                <span className="text-[10px] font-bold text-primary">{h.type}</span>
-                                            </div>
-                                        </div>
-                                        <button onClick={() => handleDelete(h.id)} className="w-10 h-10 rounded-xl bg-white/5 text-muted hover:bg-rose-500 hover:text-white transition-all flex items-center justify-center active:scale-90"><FiTrash2 size={16} /></button>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    </div>
-                </motion.div>
-            </div>
-        </AnimatePresence>
-    );
-};
 
 const AttendanceView = () => {
     const { t } = useTranslation();
@@ -700,16 +674,16 @@ const AttendanceView = () => {
     const handleCheckOut = async () => { setIsLoading(true); try { await api.post('/api/attendance/check-out'); await fetchMyStatus(); fetchMyHistory(); } catch (err) { alert(err.response?.data?.detail || "Check-out failed"); } finally { setIsLoading(false); } };
 
     const StatCard = ({ label, value, icon: Icon, color }) => (
-        <div className="glass-card border-none bg-white/5 p-8 rounded-[2rem] shadow-sm flex items-center justify-between group hover:shadow-xl transition-all relative overflow-hidden">
-            <div className={`absolute top-0 right-0 p-8 opacity-5 text-${color}-500 pointer-events-none group-hover:scale-110 transition-transform`}>
-                <Icon size={120} />
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between group hover:shadow-md transition-all relative overflow-hidden">
+            <div className={`absolute top-0 right-0 p-6 opacity-5 text-${color}-600 pointer-events-none group-hover:scale-110 transition-transform`}>
+                <Icon size={80} />
             </div>
             <div className="relative z-10">
-                <p className="text-[10px] font-bold text-muted mb-3 group-hover:text-main transition-colors">{label}</p>
-                <h4 className="text-3xl font-black text-main tracking-tighter italic">{value}</h4>
+                <p className="text-xs font-semibold text-slate-500 mb-2 group-hover:text-slate-800 transition-colors uppercase tracking-wider">{label}</p>
+                <h4 className="text-2xl font-bold text-slate-800 tracking-tight">{value}</h4>
             </div>
-            <div className={`relative z-10 w-16 h-16 rounded-2xl bg-${color}-500/10 border border-${color}-500/20 text-${color}-500 flex items-center justify-center group-hover:bg-${color}-500 group-hover:text-white transition-all shadow-lg`}>
-                <Icon size={28} />
+            <div className={`relative z-10 w-12 h-12 rounded-xl bg-${color}-50 text-${color}-600 flex items-center justify-center group-hover:bg-${color}-600 group-hover:text-white transition-all shadow-sm`}>
+                <Icon size={20} />
             </div>
         </div>
     );
@@ -718,68 +692,66 @@ const AttendanceView = () => {
         const checkInTimeDisp = status.checkInTime ? new Date(status.checkInTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '--:--';
         const checkOutTimeDisp = status.checkOutTime ? new Date(status.checkOutTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '--:--';
         return (
-            <div className="space-y-10 p-2">
-                <div className="flex flex-col xl:flex-row gap-8">
-                    <div className="flex-1 space-y-10">
-                        {/* Conditionally render Punch The Clock section - Hide for admin */}
+            <div className="space-y-6">
+                <div className="flex flex-col xl:flex-row gap-6">
+                    <div className="flex-1 space-y-6">
                         {userRole !== 'admin' && (
-                            <div className="flex flex-col md:flex-row gap-8">
-                                <div className="flex-[1.5] glass-card border-none bg-white/5 rounded-[2.5rem] p-10 text-main relative overflow-hidden shadow-2xl group">
-                                    <div className="absolute top-0 right-0 p-12 opacity-5 text-emerald-500 pointer-events-none group-hover:scale-110 transition-transform">
-                                        <FiClock size={200} />
+                            <div className="flex flex-col md:flex-row gap-6">
+                                <div className="flex-[1.5] bg-white rounded-3xl p-8 border border-slate-100 shadow-sm relative overflow-hidden group">
+                                    <div className="absolute top-0 right-0 p-8 opacity-5 text-emerald-600 pointer-events-none group-hover:scale-110 transition-transform">
+                                        <FiClock size={160} />
                                     </div>
                                     <div className="relative z-10">
-                                        <h2 className="text-4xl font-black mb-3 italic tracking-tighter">Status: <span className="text-emerald-500">{status.status}</span></h2>
-                                        <p className="text-muted font-bold mb-10 text-sm max-w-md opacity-60">Synchronize your attendance for high-fidelity operations.</p>
-                                        <div className="flex flex-wrap gap-5">
+                                        <h2 className="text-2xl font-bold text-slate-800 mb-2">Status: <span className="text-emerald-600">{status.status}</span></h2>
+                                        <p className="text-xs font-medium text-slate-500 mb-8 max-w-md">Synchronize your attendance for accurate tracking.</p>
+                                        <div className="flex flex-wrap gap-4">
                                             {!status.isCheckedIn ? (
-                                                <button onClick={handleCheckIn} disabled={isLoading} className="bg-emerald-600 text-white px-10 py-4.5 rounded-2xl font-black text-[10px] hover:bg-emerald-700 transition-all flex items-center gap-3 shadow-[0_15px_30px_-10px_rgba(16,185,129,0.5)] active:scale-95 disabled:opacity-50">
-                                                    <FiTarget size={20} /> Check in
+                                                <button onClick={handleCheckIn} disabled={isLoading} className="bg-emerald-600 text-white px-8 py-3 rounded-xl font-bold text-xs hover:bg-emerald-700 transition-all flex items-center gap-2 shadow-lg shadow-emerald-100 active:scale-95 disabled:opacity-50">
+                                                    <FiTarget size={16} /> Check In
                                                 </button>
                                             ) : !status.isCheckedOut ? (
-                                                <button onClick={handleCheckOut} disabled={isLoading} className="bg-rose-600 text-white px-10 py-4.5 rounded-2xl font-black text-[10px] hover:bg-rose-700 transition-all flex items-center gap-3 shadow-[0_15px_30px_-10px_rgba(225,29,72,0.5)] active:scale-95 disabled:opacity-50">
-                                                    <FiPower size={20} /> Check out
+                                                <button onClick={handleCheckOut} disabled={isLoading} className="bg-rose-600 text-white px-8 py-3 rounded-xl font-bold text-xs hover:bg-rose-700 transition-all flex items-center gap-2 shadow-lg shadow-rose-100 active:scale-95 disabled:opacity-50">
+                                                    <FiPower size={16} /> Check Out
                                                 </button>
                                             ) : (
-                                                <div className="bg-emerald-500/10 border border-emerald-500/30 text-emerald-500 px-10 py-4.5 rounded-2xl font-black text-[10px] flex items-center gap-3 shadow-inner">
-                                                    <FiShield size={20} /> Shift completed
+                                                <div className="bg-emerald-50 border border-emerald-100 text-emerald-600 px-8 py-3 rounded-xl font-bold text-xs flex items-center gap-2">
+                                                    <FiShield size={16} /> Shift Completed
                                                 </div>
                                             )}
-                                            <button onClick={() => setIsRegModalOpen(true)} className="bg-white/5 border border-card-border/50 text-main px-8 py-4.5 rounded-2xl font-black text-[10px] hover:bg-white/10 transition-all flex items-center gap-3 active:scale-95">
-                                                <FiZap size={18} className="text-amber-500" /> Regularize
+                                            <button onClick={() => setIsRegModalOpen(true)} className="bg-white border border-slate-200 text-slate-600 px-6 py-3 rounded-xl font-bold text-xs hover:bg-slate-50 transition-all flex items-center gap-2 active:scale-95">
+                                                <FiZap size={16} className="text-amber-500" /> Regularize
                                             </button>
                                         </div>
                                     </div>
                                 </div>
-                                <div className="flex-1 glass-card border-none bg-white/5 rounded-[2.5rem] p-10 shadow-xl flex flex-col justify-center relative group overflow-hidden">
-                                    <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent pointer-events-none"></div>
-                                    <div className="space-y-8 relative z-10">
+                                <div className="flex-1 bg-white rounded-3xl p-8 border border-slate-100 shadow-sm flex flex-col justify-center relative group overflow-hidden">
+                                    <div className="space-y-6 relative z-10 w-full">
                                         <div className="flex items-center justify-between">
                                             <div>
-                                                <p className="text-[10px] font-bold text-muted mb-2">Check in</p>
-                                                <p className="text-2xl font-black text-main italic tracking-tighter">{checkInTimeDisp}</p>
+                                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Check In</p>
+                                                <p className="text-xl font-bold text-slate-800">{checkInTimeDisp}</p>
                                             </div>
-                                            <div className="w-14 h-14 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shadow-inner group-hover:scale-110 transition-transform">
-                                                <FiArrowRight size={24} />
+                                            <div className="w-10 h-10 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400">
+                                                <FiArrowRight size={20} />
                                             </div>
                                             <div className="text-right">
-                                                <p className="text-[10px] font-bold text-muted mb-2">Check out</p>
-                                                <p className="text-2xl font-black text-main italic tracking-tighter">{checkOutTimeDisp}</p>
+                                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Check Out</p>
+                                                <p className="text-xl font-bold text-slate-800">{checkOutTimeDisp}</p>
                                             </div>
                                         </div>
-                                        <div className="h-2.5 bg-white/5 rounded-full overflow-hidden border border-card-border/30 p-0.5">
+                                        <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
                                             <motion.div
                                                 initial={{ width: 0 }}
                                                 animate={{ width: status.isCheckedIn && !status.isCheckedOut ? Math.min((status.stats?.todayHours / 9) * 100, 100) + '%' : status.isCheckedOut ? '100%' : '0%' }}
-                                                className="h-full bg-gradient-to-r from-primary via-primary-hover to-primary rounded-full shadow-[0_0_10px_rgba(var(--primary-rgb),0.5)]"
+                                                className="h-full bg-slate-800 rounded-full"
                                             ></motion.div>
                                         </div>
-                                        <p className="text-center text-[10px] font-bold text-muted">
-                                            Shift efficiency: <span className="text-primary italic">
+                                        <p className="text-center text-xs font-semibold text-slate-500">
+                                            Efficiency: <span className="text-slate-900">
                                                 {status.isCheckedIn ? (
                                                     status.stats?.todayHours >= 1
-                                                        ? `${status.stats.todayHours} hours output`
-                                                        : `${Math.round((status.stats?.todayHours || 0) * 60)} mins duration`
+                                                        ? `${status.stats.todayHours} hrs`
+                                                        : `${Math.round((status.stats?.todayHours || 0) * 60)} mins`
                                                 ) : 'Idle'}
                                             </span>
                                         </p>
@@ -789,31 +761,28 @@ const AttendanceView = () => {
                         )}
                         <AttendanceCalendarComp month={calDate.month} year={calDate.year} calendarData={calendarData} onPrev={() => setCalDate(d => d.month === 1 ? { month: 12, year: d.year - 1 } : { ...d, month: d.month - 1 })} onNext={() => setCalDate(d => d.month === 12 ? { month: 1, year: d.year + 1 } : { ...d, month: d.month + 1 })} />
                     </div>
-                    <div className="w-full xl:w-[400px] space-y-8">
-                        <div className="glass-card border-none bg-white/5 rounded-[2.5rem] p-10 shadow-sm relative overflow-hidden group">
-                            <div className="absolute top-0 right-0 p-8 opacity-5 text-primary pointer-events-none group-hover:rotate-12 transition-transform">
-                                <FiActivity size={100} />
-                            </div>
-                            <h3 className="text-xl font-black text-main mb-10 italic tracking-tighter flex items-center gap-3">
-                                <FiPieChart className="text-primary" />
+                    <div className="w-full xl:w-80 space-y-6">
+                        <div className="bg-white rounded-3xl p-8 border border-slate-100 shadow-sm relative overflow-hidden group">
+                            <h3 className="text-lg font-bold text-slate-800 mb-6 flex items-center gap-2">
+                                <FiPieChart className="text-slate-400" />
                                 Statistics
                             </h3>
-                            <div className="space-y-8 relative z-10">
+                            <div className="space-y-6 relative z-10">
                                 {[
-                                    { label: 'Working days', value: summary.totalWorkingDays, icon: FiClipboard, color: 'primary' },
+                                    { label: 'Working Days', value: summary.totalWorkingDays, icon: FiClipboard, color: 'slate' },
                                     { label: 'Present', value: summary.presentDays, icon: FiCheck, color: 'emerald' },
                                     { label: 'Absent', value: summary.absentDays, icon: FiX, color: 'rose' },
                                     { label: 'Leave', value: summary.leaveDays, icon: FiCalendar, color: 'indigo' },
-                                    { label: 'Efficiency', value: summary.avgHours, icon: FiClock, color: 'amber' }
+                                    { label: 'Avg Hrs/Day', value: summary.avgHours, icon: FiClock, color: 'amber' }
                                 ].map((item, idx) => (
                                     <div key={idx} className="flex items-center justify-between group/stat">
-                                        <div className="flex items-center gap-4">
-                                            <div className={`w-10 h-10 rounded-xl bg-${item.color}-500/10 text-${item.color}-500 flex items-center justify-center group-hover/stat:bg-${item.color}-500 group-hover/stat:text-white transition-all`}>
-                                                <item.icon size={20} />
+                                        <div className="flex items-center gap-3">
+                                            <div className={`w-8 h-8 rounded-lg bg-${item.color}-50 text-${item.color}-600 flex items-center justify-center group-hover/stat:bg-${item.color}-600 group-hover/stat:text-white transition-all`}>
+                                                <item.icon size={14} />
                                             </div>
-                                            <span className="text-[10px] font-bold text-muted group-hover/stat:text-main transition-colors">{item.label}</span>
+                                            <span className="text-xs font-medium text-slate-500 group-hover/stat:text-slate-900 transition-colors">{item.label}</span>
                                         </div>
-                                        <span className="text-sm font-black text-main tracking-tighter italic">{item.value}</span>
+                                        <span className="text-sm font-bold text-slate-800">{item.value}</span>
                                     </div>
                                 ))}
                             </div>
@@ -824,183 +793,329 @@ const AttendanceView = () => {
         );
     };
 
-    const AdminListView = () => (
-        <div className="space-y-10 animate-in fade-in slide-in-from-bottom-5 duration-700">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <StatCard label="Total staff" value={attendanceData.length} icon={FiUsers} color="primary" />
-                <StatCard label="Present" value={attendanceData.filter(l => l.status === 'Present').length} icon={FiCheckCircle} color="emerald" />
-                <StatCard label="Absent" value={attendanceData.filter(l => l.status === 'Absent').length} icon={FiAlertCircle} color="rose" />
-                <StatCard label="Late" value={attendanceData.filter(l => l.status === 'Late').length} icon={FiClock} color="amber" />
-            </div>
+    const AdminListView = () => {
+        // Calculate Stats
+        const totalStaff = attendanceData.length || 1;
+        const presentCount = attendanceData.filter(l => l.status === 'Present').length;
+        const lateCount = attendanceData.filter(l => l.status === 'Late').length;
+        const absentCount = attendanceData.filter(l => l.status === 'Absent').length;
+        const attendanceRate = Math.round(((presentCount + lateCount) / totalStaff) * 100) || 0;
 
-            <div className="glass-card border-none bg-white/5 rounded-[2.5rem] shadow-2xl overflow-hidden relative">
-                <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary/50 via-primary to-primary/50"></div>
-                <div className="p-8 border-b border-card-border/30 flex flex-col md:flex-row md:items-center justify-between gap-6 bg-white/5">
-                    <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary shadow-inner">
-                            <FiActivity size={24} />
+        // Mock data for visualizations based on real counts
+        const barData = [
+            { name: 'On-Time', value: presentCount, color: '#3b82f6' },
+            { name: 'Late', value: lateCount, color: '#f59e0b' },
+            { name: 'Not Attend', value: absentCount, color: '#ef4444' }
+        ];
+
+        const radialData = [
+            { name: 'Performance', value: attendanceRate, fill: '#ef4444' }
+        ];
+
+        // Pagination State (Visual only for now since API returns all)
+        const [currentPage, setCurrentPage] = useState(1);
+        const rowsPerPage = 10;
+        const totalPages = Math.ceil(attendanceData.length / rowsPerPage);
+        const currentData = attendanceData.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
+
+        return (
+            <div className="space-y-8 animate-in fade-in slide-in-from-bottom-5 duration-700">
+
+                {/* Dashboard Widgets */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    {/* Widget 1: Today's Attendance */}
+                    <div className="bg-white p-6 rounded-[20px] border border-slate-100 shadow-sm col-span-1 lg:col-span-2 flex flex-col justify-between">
+                        <div className="flex items-start justify-between mb-2">
+                            <div className="flex items-center gap-2">
+                                <div className="p-2 bg-slate-50 rounded-lg text-slate-600"><FiClipboard size={18} /></div>
+                                <h3 className="font-bold text-slate-800">Today's Attendance</h3>
+                            </div>
                         </div>
-                        <div>
-                            <h3 className="text-xl font-black text-main tracking-tighter italic">Live attendance stream</h3>
-                            <p className="text-[10px] font-bold text-muted">Real-time attendance monitoring</p>
+
+                        <div className="flex items-end gap-3 mb-6">
+                            <h2 className="text-4xl font-bold text-slate-800">{attendanceRate}%</h2>
+                            <span className="mb-1.5 px-2 py-0.5 bg-emerald-50 text-emerald-600 text-[10px] font-bold rounded-md">+2.8%</span>
+                            <span className="mb-1.5 text-xs font-semibold text-slate-400">Attendance Rate</span>
+                        </div>
+
+                        <div className="h-24 w-full">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <BarChart data={barData} layout="vertical" barSize={20}>
+                                    <XAxis type="number" hide />
+                                    <YAxis type="category" dataKey="name" hide />
+                                    <Tooltip cursor={{ fill: 'transparent' }} contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }} />
+                                    <Bar dataKey="value" radius={[4, 4, 4, 4]}>
+                                        {barData.map((entry, index) => (
+                                            <Cell key={`cell-${index}`} fill={entry.color} />
+                                        ))}
+                                    </Bar>
+                                </BarChart>
+                            </ResponsiveContainer>
+                        </div>
+
+                        <div className="flex justify-between mt-4 text-center">
+                            {barData.map((item, i) => (
+                                <div key={i}>
+                                    <div className="text-[10px] font-bold text-slate-400 mb-1 flex items-center justify-center gap-1">
+                                        <div className="w-2 h-2 rounded-full" style={{ backgroundColor: item.color }}></div>
+                                        {item.name}
+                                    </div>
+                                    <div className="text-sm font-bold text-slate-800">{item.value}</div>
+                                </div>
+                            ))}
                         </div>
                     </div>
-                    <div className="flex items-center gap-4">
-                        <label className="text-[10px] font-bold text-muted">Date filter</label>
-                        <input type="date" value={selectedDateFilter} onChange={(e) => setSelectedDateFilter(e.target.value)} className="bg-white/5 border border-card-border/50 rounded-xl text-[10px] font-black text-main px-5 py-2.5 focus:ring-2 focus:ring-primary/20 transition-all outline-none hover:border-primary/50" />
+
+                    {/* Widget 2 & 3: Counts & Hours */}
+                    <div className="flex flex-col gap-6">
+                        <div className="bg-white p-6 rounded-[20px] border border-slate-100 shadow-sm flex-1 flex flex-col justify-between group hover:border-blue-200 transition-colors">
+                            <div className="flex items-center gap-3 mb-2">
+                                <div className="p-2 bg-blue-50 text-blue-600 rounded-lg group-hover:bg-blue-600 group-hover:text-white transition-all"><FiUsers size={18} /></div>
+                                <h3 className="font-bold text-slate-700 text-sm">Employee Attend</h3>
+                            </div>
+                            <div>
+                                <div className="text-2xl font-bold text-slate-800 mb-1">{presentCount + lateCount} <span className="text-sm font-semibold text-slate-300">/ {totalStaff}</span></div>
+                                <div className="flex items-center gap-1 text-[10px] font-bold text-emerald-500"><FiTrendingUp /> +2.8% <span className="text-slate-400 font-medium">Last Week</span></div>
+                            </div>
+                        </div>
+
+                        <div className="bg-white p-6 rounded-[20px] border border-slate-100 shadow-sm flex-1 flex flex-col justify-between group hover:border-amber-200 transition-colors">
+                            <div className="flex items-center gap-3 mb-2">
+                                <div className="p-2 bg-amber-50 text-amber-600 rounded-lg group-hover:bg-amber-600 group-hover:text-white transition-all"><FiClock size={18} /></div>
+                                <h3 className="font-bold text-slate-700 text-sm">Total Log Hours</h3>
+                            </div>
+                            <div>
+                                <div className="text-2xl font-bold text-slate-800 mb-1">104:20:10 <span className="text-sm font-semibold text-slate-300">/ 300h</span></div>
+                                <div className="flex items-center gap-1 text-[10px] font-bold text-rose-500"><FiTrendingUp className="rotate-180" /> -0.5% <span className="text-slate-400 font-medium">Last Week</span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Widget 4: Radial Performance */}
+                    <div className="bg-white p-6 rounded-[20px] border border-slate-100 shadow-sm flex flex-col items-center justify-center text-center relative overflow-hidden">
+                        <h3 className="w-full text-left font-bold text-slate-800 text-sm mb-4 flex items-center gap-2"><FiPieChart className="text-slate-400" /> Perf. Metric</h3>
+                        <div className="relative w-40 h-40">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <RadialBarChart cx="50%" cy="50%" innerRadius="70%" outerRadius="100%" barSize={10} data={[{ value: 100, fill: '#f1f5f9' }, { value: attendanceRate, fill: '#ef4444' }]} startAngle={180} endAngle={0}>
+                                    <RadialBar background clockWise dataKey="value" cornerRadius={10} />
+                                </RadialBarChart>
+                            </ResponsiveContainer>
+                            <div className="absolute inset-0 flex flex-col items-center justify-center pt-8">
+                                <span className="text-3xl font-bold text-slate-800">{attendanceRate}%</span>
+                                <span className="text-[10px] font-bold text-slate-400">Great!</span>
+                            </div>
+                        </div>
+                        <div className="flex w-full justify-between mt-6 px-2">
+                            <div className="text-left">
+                                <div className="text-[10px] font-bold text-slate-400 uppercase">Rate</div>
+                                <div className="text-sm font-bold text-slate-800">{attendanceRate}%</div>
+                            </div>
+                            <div className="text-right">
+                                <div className="text-[10px] font-bold text-slate-400 uppercase">Target</div>
+                                <div className="text-sm font-bold text-slate-800">95%</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div className="overflow-x-auto">
-                    <table className="w-full border-collapse">
-                        <thead>
-                            <tr className="bg-white/5 border-b border-card-border/30 text-left">
-                                <th className="px-8 py-6 text-[10px] font-black text-muted">ID</th>
-                                <th className="px-8 py-6 text-[10px] font-black text-muted">Name</th>
-                                <th className="px-8 py-6 text-[10px] font-black text-muted">Department</th>
-                                <th className="px-8 py-6 text-[10px] font-black text-muted">Status</th>
-                                <th className="px-8 py-6 text-[10px] font-black text-muted">Check-in</th>
-                                <th className="px-8 py-6 text-[10px] font-black text-muted">Check-out</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-card-border/20">
-                            {attendanceData.length === 0 ? (
-                                <tr><td colSpan="6" className="px-8 py-20 text-center text-[10px] font-black text-muted">No attendance data found for this date.</td></tr>
-                            ) : attendanceData.map((log, idx) => (
-                                <tr key={log.id} className="hover:bg-white/5 transition-colors group">
-                                    <td className="px-8 py-6 text-sm font-black text-muted/50 font-mono tracking-tighter">{(idx + 1).toString().padStart(2, '0')}</td>
-                                    <td className="px-8 py-6 text-sm">
-                                        <div className="flex items-center gap-4">
-                                            <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center font-black group-hover:scale-110 transition-transform shadow-inner">
-                                                {(log.full_name || log.employee_name || log.username || '?').charAt(0)}
-                                            </div>
-                                            <span className="font-black text-main italic group-hover:text-primary transition-colors">{log.full_name || log.employee_name || log.username || 'Unknown'}</span>
-                                        </div>
-                                    </td>
-                                    <td className="px-8 py-6 text-[10px] font-bold text-muted">{log.dept || log.department || 'N/A'}</td>
-                                    <td className="px-8 py-6">
-                                        <span className={`px-4 py-1 rounded-full text-[10px] font-black border ${log.status === 'Present' ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-500' :
-                                            log.status === 'Late' ? 'bg-amber-500/10 border-amber-500/30 text-amber-500' :
-                                                'bg-rose-500/10 border-rose-500/30 text-rose-500'
-                                            }`}>{log.status}</span>
-                                    </td>
-                                    <td className="px-8 py-6 font-mono text-sm text-main">{log.check_in ? new Date(log.check_in).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true }) : '--:--'}</td>
-                                    <td className="px-8 py-6 font-mono text-sm text-main">{log.check_out ? new Date(log.check_out).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true }) : '--:--'}</td>
+
+                {/* Attendance List Table */}
+                <div className="bg-white rounded-[24px] shadow-sm border border-slate-100 overflow-hidden">
+                    {/* Table Header */}
+                    <div className="p-5 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
+                            <FiUsers className="text-slate-400" /> Attendance List
+                        </h3>
+                        <div className="flex flex-wrap items-center gap-3">
+                            <div className="hidden md:flex bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-xs font-bold text-slate-600 cursor-pointer hover:bg-slate-100 transition-colors items-center gap-2">
+                                <span>Last 7 Days</span> <FiChevronRight className="rotate-90" />
+                            </div>
+                            <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2">
+                                <FiSearch className="text-slate-400" />
+                                <input type="text" placeholder="Search employee..." className="bg-transparent border-none outline-none text-xs font-semibold text-slate-700 w-32 md:w-48 placeholder:text-slate-400" />
+                            </div>
+                            <button className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-50 hover:text-slate-900 shadow-sm transition-all"><FiFilter /> Filter</button>
+                        </div>
+                    </div>
+
+                    <div className="overflow-x-auto">
+                        <table className="w-full">
+                            <thead>
+                                <tr className="bg-slate-50/50 border-b border-slate-100 text-left">
+                                    <th className="px-6 py-4 w-12"><input type="checkbox" className="rounded border-slate-300 text-slate-900 focus:ring-0" /></th>
+                                    <th className="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Employee</th>
+                                    <th className="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Department</th>
+                                    <th className="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Check-In</th>
+                                    <th className="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Check-Out</th>
+                                    <th className="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Log Hours</th>
+                                    <th className="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-right">Status</th>
+                                    <th className="px-6 py-4 w-12"></th>
                                 </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-50">
+                                {currentData.length === 0 ? (
+                                    <tr><td colSpan="8" className="px-6 py-12 text-center text-xs font-medium text-slate-400">No attendance data found for this date.</td></tr>
+                                ) : currentData.map((log, idx) => {
+                                    const displayName = log.full_name?.trim() ? log.full_name : (log.username?.trim() ? log.username : 'Unknown Staff');
+                                    const displayDept = log.dept?.trim() ? log.dept : (log.department?.trim() ? log.department : 'General');
+                                    const hours = log.check_in && log.check_out ? (new Date(log.check_out) - new Date(log.check_in)) / 36e5 : 0;
+
+                                    return (
+                                        <tr key={log.id} className="hover:bg-slate-50/50 transition-colors group">
+                                            <td className="px-6 py-4"><input type="checkbox" className="rounded border-slate-300 text-slate-900 focus:ring-0" /></td>
+                                            <td className="px-6 py-4">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-slate-100 to-slate-200 text-slate-600 flex items-center justify-center font-bold text-xs ring-2 ring-white shadow-sm uppercase">
+                                                        {displayName.charAt(0)}
+                                                    </div>
+                                                    <div>
+                                                        <span className="block text-sm font-bold text-slate-800 group-hover:text-blue-600 transition-colors">{displayName}</span>
+                                                        <span className="block text-[10px] font-semibold text-slate-400 lg:hidden">{displayDept}</span>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4 text-xs font-bold text-slate-500">
+                                                <span className="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-600 border border-slate-200">{displayDept}</span>
+                                            </td>
+                                            <td className="px-6 py-4 text-xs font-bold text-slate-600">{log.check_in ? new Date(log.check_in).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true }) : '--:--'}</td>
+                                            <td className="px-6 py-4 text-xs font-bold text-slate-600">{log.check_out ? new Date(log.check_out).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true }) : '--:--'}</td>
+                                            <td className="px-6 py-4 text-xs font-bold font-mono text-slate-700">{hours > 0 ? `${Math.floor(hours)}h ${Math.round((hours % 1) * 60)}m` : '--'}</td>
+                                            <td className="px-6 py-4 text-right">
+                                                <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-bold border ${log.status === 'Present' ? 'bg-emerald-50 border-emerald-100 text-emerald-600' :
+                                                    log.status === 'Late' ? 'bg-amber-50 border-amber-100 text-amber-600' :
+                                                        'bg-rose-50 border-rose-100 text-rose-600'
+                                                    }`}>
+                                                    <div className={`w-1.5 h-1.5 rounded-full ${log.status === 'Present' ? 'bg-emerald-500' : log.status === 'Late' ? 'bg-amber-500' : 'bg-rose-500'}`}></div>
+                                                    {log.status}
+                                                </span>
+                                            </td>
+                                            <td className="px-6 py-4 text-right text-slate-400 group-hover:text-slate-600 cursor-pointer"><FiMoreHorizontal /></td>
+                                        </tr>
+                                    )
+                                })}
+                            </tbody>
+                        </table>
+                    </div>
+                    {/* Footer Pagination */}
+                    <div className="p-4 border-t border-slate-100 flex items-center justify-between">
+                        <span className="text-xs font-bold text-slate-400">Total Attendance : {attendanceData.length}</span>
+                        <div className="flex items-center gap-2">
+                            <button disabled={currentPage === 1} onClick={() => setCurrentPage(c => Math.max(1, c - 1))} className="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-50 disabled:opacity-50 transition-all"><FiChevronLeft /></button>
+                            {Array.from({ length: Math.min(3, totalPages) }, (_, i) => (
+                                <button key={i} onClick={() => setCurrentPage(i + 1)} className={`w-8 h-8 flex items-center justify-center rounded-lg text-xs font-bold transition-all ${currentPage === i + 1 ? 'bg-slate-900 text-white shadow-md' : 'border border-slate-200 text-slate-600 hover:bg-slate-50'}`}>{i + 1}</button>
                             ))}
-                        </tbody>
-                    </table>
+                            {totalPages > 3 && <span className="text-slate-400 text-xs">...</span>}
+                            <button disabled={currentPage === totalPages} onClick={() => setCurrentPage(c => Math.min(totalPages, c + 1))} className="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-50 disabled:opacity-50 transition-all"><FiChevronRight /></button>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
-    );
+        );
+    };
 
     return (
-        <div className="p-8 max-w-[1700px] mx-auto space-y-8" >
+        <div className="p-6 max-w-7xl mx-auto space-y-8 bg-slate-50/50 min-h-screen font-sans">
             <LeaveRequestModal isOpen={isLeaveModalOpen} onClose={() => setIsLeaveModalOpen(false)} onSubmitted={fetchMyLeaves} />
             <RegularizationModal isOpen={isRegModalOpen} onClose={() => setIsRegModalOpen(false)} onSubmitted={fetchMyHistory} />
             <LeaveActionModal isOpen={leaveActionModal.isOpen} leaveId={leaveActionModal.leaveId} actionType={leaveActionModal.type} onClose={() => setLeaveActionModal({ isOpen: false })} onSubmitted={fetchAllLeaves} />
             <AdminEditLeaveModal isOpen={editLeaveModal.isOpen} leave={editLeaveModal.leave} onClose={() => setEditLeaveModal({ isOpen: false })} onSubmitted={fetchAllLeaves} />
+            <HolidayConfigModal isOpen={isHolidayModalOpen} onClose={() => setIsHolidayModalOpen(false)} />
 
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 mb-4">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                 <div>
-                    <h2 className="text-4xl font-black text-main tracking-tighter italic">Attendance <span className="text-primary font-black">matrix</span></h2>
-                    <p className="text-[10px] font-bold text-muted mt-1">Real-time attendance & tracking</p>
+                    <h2 className="text-2xl font-bold text-slate-900 tracking-tight">Attendance & Leave</h2>
+                    <p className="text-xs font-medium text-slate-500 mt-1">Manage team presence and time-off requests</p>
                 </div>
-                <div className="flex bg-white/5 p-1.5 rounded-[2rem] border border-card-border/30 shadow-xl backdrop-blur-md">
-                    {/* Show different tabs based on role */}
-                    {userRole !== 'admin' ? (
+                <div className="flex bg-white p-1 rounded-xl shadow-sm border border-slate-200">
+                    {userRole !== 'admin' && (
                         <>
-                            <button onClick={() => setActiveTab('my_dashboard')} className={`px-8 py-3.5 rounded-[1.5rem] text-[10px] font-bold transition-all flex items-center gap-2 ${activeTab === 'my_dashboard' ? 'bg-primary text-white shadow-xl shadow-primary/20 scale-105 z-10' : 'text-muted hover:text-main hover:bg-white/5'}`}><FiActivity /> Dashboard</button>
-                            <button onClick={() => setActiveTab('leaves')} className={`px-8 py-3.5 rounded-[1.5rem] text-[10px] font-bold transition-all flex items-center gap-2 ${activeTab === 'leaves' ? 'bg-primary text-white shadow-xl shadow-primary/20 scale-105 z-10' : 'text-muted hover:text-main hover:bg-white/5'}`}><FiCalendar /> Leave history</button>
+                            <button onClick={() => setActiveTab('my_dashboard')} className={`px-6 py-2.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-2 ${activeTab === 'my_dashboard' ? 'bg-slate-900 text-white shadow-md' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'}`}>Dashboard</button>
+                            <button onClick={() => setActiveTab('leaves')} className={`px-6 py-2.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-2 ${activeTab === 'leaves' ? 'bg-slate-900 text-white shadow-md' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'}`}>History</button>
                         </>
-                    ) : null}
+                    )}
                     {(userRole === 'admin' || userRole === 'manager') && (
                         <>
-                            <button onClick={() => setActiveTab('list')} className={`px-8 py-3.5 rounded-[1.5rem] text-[10px] font-bold transition-all flex items-center gap-2 ${activeTab === 'list' ? 'bg-primary text-white shadow-xl shadow-primary/20 scale-105 z-10' : 'text-muted hover:text-main hover:bg-white/5'}`}><FiUsers /> Staff list</button>
-                            <button onClick={() => setActiveTab('report')} className={`px-8 py-3.5 rounded-[1.5rem] text-[10px] font-bold transition-all flex items-center gap-2 ${activeTab === 'report' ? 'bg-primary text-white shadow-xl shadow-primary/20 scale-105 z-10' : 'text-muted hover:text-main hover:bg-white/5'}`}><FiFileText /> Reports</button>
-                            <button onClick={() => setActiveTab('manage_leaves')} className={`px-8 py-3.5 rounded-[1.5rem] text-[10px] font-bold transition-all flex items-center gap-2 ${activeTab === 'manage_leaves' ? 'bg-emerald-600 text-white shadow-xl shadow-emerald-500/20 scale-105 z-10' : 'text-muted hover:text-emerald-500 hover:bg-emerald-500/5'}`}><FiShield /> Leave requests</button>
-                            <button onClick={() => setIsHolidayModalOpen(true)} className="px-8 py-3.5 rounded-[1.5rem] text-[10px] font-bold transition-all flex items-center gap-2 text-muted hover:text-rose-500 hover:bg-rose-500/5"><FiCalendar /> Holidays</button>
+                            <button onClick={() => setActiveTab('list')} className={`px-5 py-2.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-2 ${activeTab === 'list' ? 'bg-slate-900 text-white shadow-md' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'}`}>Staff List</button>
+                            <button onClick={() => setActiveTab('report')} className={`px-5 py-2.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-2 ${activeTab === 'report' ? 'bg-slate-900 text-white shadow-md' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'}`}>Reports</button>
+                            <button onClick={() => setActiveTab('manage_leaves')} className={`px-5 py-2.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-2 ${activeTab === 'manage_leaves' ? 'bg-slate-900 text-white shadow-md' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'}`}>Requests</button>
+                            <button onClick={() => setIsHolidayModalOpen(true)} className="px-5 py-2.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-2 text-slate-500 hover:text-rose-600 hover:bg-rose-50">Holidays</button>
                         </>
                     )}
                 </div>
             </div>
-
-            <HolidayConfigModal isOpen={isHolidayModalOpen} onClose={() => setIsHolidayModalOpen(false)} />
 
             <div className="transition-all duration-300">
                 {activeTab === 'my_dashboard' && <MyAttendanceDashboard />}
                 {activeTab === 'list' && <AdminListView />}
 
                 {activeTab === 'manage_leaves' && (
-                    <div className="glass-card border-none bg-white/5 rounded-[2.5rem] shadow-2xl overflow-hidden relative">
-                        <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-emerald-500/50 via-emerald-500 to-emerald-500/50"></div>
-                        <div className="p-8 border-b border-card-border/30 flex flex-col md:flex-row md:items-center justify-between gap-6 bg-emerald-500/5">
-                            <div className="flex items-center gap-4">
-                                <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-emerald-500 shadow-inner">
-                                    <FiShield size={24} />
+                    <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
+                        <div className="p-6 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-6">
+                            <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center text-orange-600">
+                                    <FiShield size={20} />
                                 </div>
                                 <div>
-                                    <h3 className="text-xl font-black text-main tracking-tighter italic">Leave request list</h3>
-                                    <p className="text-[10px] font-bold text-muted">Leave authorization portal</p>
+                                    <h3 className="text-lg font-bold text-slate-800">Leave Requests</h3>
+                                    <p className="text-xs font-medium text-slate-500">Review pending applications</p>
                                 </div>
                             </div>
-                            <div className="flex items-center gap-4">
-                                <select className="bg-white/5 border border-card-border/50 rounded-xl text-[10px] font-black text-main px-4 py-2.5 focus:ring-2 focus:ring-emerald-500/20 transition-all outline-none hover:border-emerald-500/50" value={reviewStatusFilter} onChange={(e) => setReviewStatusFilter(e.target.value)}>
-                                    <option className="bg-slate-900" value="All">All statuses</option>
-                                    <option className="bg-slate-900" value="Pending">Pending approval</option>
-                                    <option className="bg-slate-900" value="Approved">Approved</option>
-                                    <option className="bg-slate-900" value="Rejected">Rejected</option>
+                            <div className="flex items-center gap-3">
+                                <select className="bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold text-slate-700 px-4 py-2 focus:ring-2 focus:ring-slate-100 outline-none cursor-pointer" value={reviewStatusFilter} onChange={(e) => setReviewStatusFilter(e.target.value)}>
+                                    <option value="All">All Statuses</option>
+                                    <option value="Pending">Pending</option>
+                                    <option value="Approved">Approved</option>
+                                    <option value="Rejected">Rejected</option>
                                 </select>
                             </div>
                         </div>
                         <div className="overflow-x-auto">
-                            <table className="w-full border-collapse">
+                            <table className="w-full">
                                 <thead>
-                                    <tr className="bg-white/5 border-b border-card-border/30 text-left">
-                                        <th className="px-8 py-6 text-[10px] font-black text-muted">Request ID</th>
-                                        <th className="px-8 py-6 text-[10px] font-black text-muted">Name</th>
-                                        <th className="px-8 py-6 text-[10px] font-black text-muted">Duration</th>
-                                        <th className="px-8 py-6 text-[10px] font-black text-muted">Reason</th>
-                                        <th className="px-8 py-6 text-[10px] font-black text-muted">Status</th>
-                                        <th className="px-8 py-6 text-[10px] font-black text-muted">Actions</th>
+                                    <tr className="bg-slate-50/50 border-b border-slate-100 text-left">
+                                        <th className="px-6 py-4 text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Request ID</th>
+                                        <th className="px-6 py-4 text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Employee</th>
+                                        <th className="px-6 py-4 text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Duration</th>
+                                        <th className="px-6 py-4 text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Reason</th>
+                                        <th className="px-6 py-4 text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Status</th>
+                                        <th className="px-6 py-4 text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Actions</th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-card-border/20">
+                                <tbody className="divide-y divide-slate-50">
                                     {allLeaves.length === 0 ? (
-                                        <tr><td colSpan="6" className="px-8 py-20 text-center text-[10px] font-black text-muted">No pending leave requests found.</td></tr>
-                                    ) : allLeaves.map((leave, idx) => (
-                                        <tr key={leave.id} className="hover:bg-white/5 transition-all group">
-                                            <td className="px-8 py-6 font-mono text-sm text-muted/50 tracking-tighter">REQ-{(idx + 1).toString().padStart(3, '0')}</td>
-                                            <td className="px-8 py-6 text-sm">
-                                                <div className="flex items-center gap-4">
-                                                    <div className="w-10 h-10 rounded-xl bg-white/5 border border-card-border/30 flex items-center justify-center text-muted group-hover:bg-emerald-500/10 group-hover:text-emerald-500 transition-all shadow-inner font-black">
+                                        <tr><td colSpan="6" className="px-6 py-12 text-center text-xs font-medium text-slate-400">No requests matching filter.</td></tr>
+                                    ) : allLeaves.map(leave => (
+                                        <tr key={leave.id} className="hover:bg-slate-50/50 transition-colors">
+                                            <td className="px-6 py-4 text-xs font-medium text-slate-400 font-mono">#{leave.id}</td>
+                                            <td className="px-6 py-4">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center text-xs font-bold">
                                                         {leave.full_name?.charAt(0)}
                                                     </div>
                                                     <div>
-                                                        <p className="font-black text-main italic group-hover:text-emerald-500 transition-colors">{leave.full_name}</p>
-                                                        <p className="text-[10px] font-bold text-muted">{leave.department}</p>
+                                                        <p className="text-sm font-semibold text-slate-700">{leave.full_name}</p>
+                                                        <p className="text-[10px] font-medium text-slate-400">{leave.department}</p>
                                                     </div>
                                                 </div>
                                             </td>
-                                            <td className="px-8 py-6">
-                                                <p className="text-emerald-500 text-sm font-black italic">{new Date(leave.start_date).toLocaleDateString()} - {new Date(leave.end_date).toLocaleDateString()}</p>
-                                                <p className="text-[10px] font-bold text-muted mt-1">{leave.leave_type}</p>
+                                            <td className="px-6 py-4">
+                                                <div className="text-xs font-semibold text-slate-700">{new Date(leave.start_date).toLocaleDateString()} - {new Date(leave.end_date).toLocaleDateString()}</div>
+                                                <div className="text-[10px] text-slate-500 mt-0.5">{leave.leave_type}</div>
                                             </td>
-                                            <td className="px-8 py-6">
-                                                <p className="text-muted text-xs font-bold italic line-clamp-1 max-w-[200px] group-hover:line-clamp-none transition-all">"{leave.reason}"</p>
+                                            <td className="px-6 py-4">
+                                                <p className="text-xs text-slate-600 max-w-[200px] truncate" title={leave.reason}>{leave.reason}</p>
                                             </td>
-                                            <td className="px-8 py-6">
-                                                <span className={`px-4 py-1 rounded-full text-[10px] font-black border shadow-inner ${leave.status === 'Approved' ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-500' : leave.status === 'Rejected' ? 'bg-rose-500/10 border-rose-500/30 text-rose-500' : 'bg-primary/10 border-primary/30 text-primary'}`}>{leave.status}</span>
+                                            <td className="px-6 py-4">
+                                                <span className={`px-2.5 py-1 rounded-md text-[10px] font-bold border ${leave.status === 'Approved' ? 'bg-emerald-50 border-emerald-100 text-emerald-600' : leave.status === 'Rejected' ? 'bg-rose-50 border-rose-100 text-rose-600' : 'bg-amber-50 border-amber-100 text-amber-600'}`}>{leave.status}</span>
                                             </td>
-                                            <td className="px-8 py-6">
-                                                <div className="flex gap-3">
+                                            <td className="px-6 py-4">
+                                                <div className="flex gap-2">
                                                     {leave.status === 'Pending' && (
                                                         <>
-                                                            <button onClick={() => setLeaveActionModal({ isOpen: true, leaveId: leave.id, type: 'Approved' })} className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500 hover:text-white transition-all flex items-center justify-center shadow-lg active:scale-90"><FiCheck size={18} /></button>
-                                                            <button onClick={() => setLeaveActionModal({ isOpen: true, leaveId: leave.id, type: 'Rejected' })} className="w-10 h-10 rounded-xl bg-rose-500/10 text-rose-500 hover:bg-rose-500 hover:text-white transition-all flex items-center justify-center shadow-lg active:scale-90"><FiX size={18} /></button>
+                                                            <button onClick={() => setLeaveActionModal({ isOpen: true, leaveId: leave.id, type: 'Approved' })} className="p-2 rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition-colors"><FiCheck size={14} /></button>
+                                                            <button onClick={() => setLeaveActionModal({ isOpen: true, leaveId: leave.id, type: 'Rejected' })} className="p-2 rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 transition-colors"><FiX size={14} /></button>
                                                         </>
                                                     )}
-                                                    <button onClick={() => setEditLeaveModal({ isOpen: true, leave })} className="w-10 h-10 rounded-xl bg-primary/10 text-primary hover:bg-primary hover:text-white transition-all flex items-center justify-center shadow-lg active:scale-90"><FiEdit size={16} /></button>
+                                                    <button onClick={() => setEditLeaveModal({ isOpen: true, leave })} className="p-2 rounded-lg bg-slate-50 text-slate-600 hover:bg-slate-100 transition-colors"><FiEdit size={14} /></button>
                                                 </div>
                                             </td>
                                         </tr>
@@ -1012,93 +1127,98 @@ const AttendanceView = () => {
                 )}
 
                 {activeTab === 'report' && (
-                    <div className="glass-card border-none bg-white/5 rounded-[2.5rem] shadow-2xl overflow-hidden relative">
-                        <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary/50 via-primary to-primary/50"></div>
-                        <div className="p-8 border-b border-card-border/30 flex flex-col lg:flex-row lg:items-center justify-between gap-6 bg-white/5">
-                            <div className="flex items-center gap-4">
-                                <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary shadow-inner">
-                                    <FiFileText size={24} />
+                    <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                        <div className="p-4 border-b border-slate-200 flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-slate-50/50">
+                            <div className="flex items-center gap-3">
+                                <div className="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-600 border border-indigo-100">
+                                    <FiFileText size={16} />
                                 </div>
                                 <div>
-                                    <h3 className="text-xl font-black text-main tracking-tighter italic">Attendance reports</h3>
-                                    <p className="text-[10px] font-bold text-muted">Comprehensive attendance data reports</p>
+                                    <h3 className="text-sm font-bold text-slate-800">Attendance Matrix</h3>
+                                    <p className="text-[10px] font-medium text-slate-500">Monthly overview</p>
                                 </div>
                             </div>
-                            <div className="flex flex-wrap items-center gap-4">
-                                <div className="flex items-center gap-3">
-                                    <label className="text-[10px] font-bold text-muted">Date filter</label>
-                                    <select className="bg-white/5 border border-card-border/50 rounded-xl text-[10px] font-black text-main px-4 py-2.5 outline-none focus:ring-2 focus-ring-primary/20 hover:border-primary/50" value={selectedMonth} onChange={(e) => setSelectedMonth(Number(e.target.value))}>
-                                        {["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"].map((m, i) => <option key={i + 1} className="bg-slate-900" value={i + 1}>{m}</option>)}
+                            <div className="flex flex-wrap items-center gap-2">
+                                <div className="flex items-center gap-1 bg-white p-0.5 rounded-md border border-slate-200 shadow-sm">
+                                    <select className="bg-transparent text-[10px] font-bold text-slate-700 px-2 py-1.5 focus:outline-none cursor-pointer hover:bg-slate-50 rounded" value={selectedMonth} onChange={(e) => setSelectedMonth(Number(e.target.value))}>
+                                        {["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"].map((m, i) => <option key={i + 1} value={i + 1}>{m}</option>)}
                                     </select>
-                                    <select className="bg-white/5 border border-card-border/50 rounded-xl text-[10px] font-black text-main px-4 py-2.5 outline-none focus:ring-2 focus-ring-primary/20 hover:border-primary/50" value={selectedYear} onChange={(e) => setSelectedYear(Number(e.target.value))}>
-                                        {[2024, 2025, 2026].map(y => <option key={y} className="bg-slate-900" value={y}>{y}</option>)}
+                                    <div className="w-px h-3 bg-slate-200"></div>
+                                    <select className="bg-transparent text-[10px] font-bold text-slate-700 px-2 py-1.5 focus:outline-none cursor-pointer hover:bg-slate-50 rounded" value={selectedYear} onChange={(e) => setSelectedYear(Number(e.target.value))}>
+                                        {[2024, 2025, 2026].map(y => <option key={y} value={y}>{y}</option>)}
                                     </select>
                                 </div>
-                                <div className="flex gap-3">
-                                    <button onClick={exportToCSV} className="flex items-center gap-2 px-5 py-2.5 bg-emerald-500/10 text-emerald-500 border border-emerald-500/30 rounded-xl text-[10px] font-black hover:bg-emerald-500 hover:text-white transition-all shadow-lg active:scale-95"><FiDownload /> Export CSV</button>
-                                    <button onClick={exportToPDF} className="flex items-center gap-2 px-5 py-2.5 bg-rose-500/10 text-rose-500 border border-rose-500/30 rounded-xl text-[10px] font-black hover:bg-rose-500 hover:text-white transition-all shadow-lg active:scale-95"><FiFileText /> Export PDF</button>
+                                <div className="flex bg-white rounded-md border border-slate-200 shadow-sm p-0.5">
+                                    <button onClick={exportToCSV} className="px-3 py-1.5 hover:bg-slate-50 text-slate-600 rounded text-[10px] font-bold flex items-center gap-1 transition-all" title="Export CSV"><FiDownload size={14} /> CSV</button>
+                                    <div className="w-px h-full bg-slate-200 mx-0.5"></div>
+                                    <button onClick={exportToPDF} className="px-3 py-1.5 hover:bg-slate-50 text-slate-600 rounded text-[10px] font-bold flex items-center gap-1 transition-all" title="Export PDF"><FiFileText size={14} /> PDF</button>
                                 </div>
                             </div>
                         </div>
-                        <div className="overflow-x-auto">
+                        <div className="overflow-x-auto custom-scrollbar">
                             <table className="w-full border-collapse">
-                                <thead className="bg-white/5 border-b border-card-border/30 text-[10px] font-black text-muted sticky top-0 z-10">
+                                <thead>
                                     <tr>
-                                        <th className="px-3 py-3 text-left sticky left-0 bg-white/5 border-r border-card-border/30 z-30 min-w-[50px]">S.No</th>
-                                        <th className="px-4 py-3 text-left sticky left-[50px] bg-white/5 border-r border-card-border/30 z-20 min-w-[200px]">Employee</th>
+                                        <th className="px-3 py-2 text-left text-[10px] font-bold text-slate-500 uppercase tracking-wider sticky left-0 bg-slate-50 z-20 border-b border-r border-slate-200 w-[140px] shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)]">Attributes</th>
                                         {Array.from({ length: new Date(selectedYear, selectedMonth, 0).getDate() }, (_, i) => i + 1).map(day => {
-                                            const dayOfWeek = new Date(selectedYear, selectedMonth - 1, day).toLocaleString('default', { weekday: 'short' })[0];
+                                            const date = new Date(selectedYear, selectedMonth - 1, day);
+                                            const isWeekend = date.getDay() === 0 || date.getDay() === 6;
                                             return (
-                                                <th key={day} className="px-1 py-3 text-center min-w-[32px] border-r border-dashed border-card-border/10 leading-tight">
-                                                    <div>{day}</div>
-                                                    <div className="text-[7px] text-muted font-black mt-0.5">{dayOfWeek}</div>
+                                                <th key={day} className={`px-0.5 py-1 text-center min-w-[28px] border-b border-r border-slate-100 ${isWeekend ? 'bg-slate-50/50' : 'bg-white'}`}>
+                                                    <div className={`text-[10px] font-bold ${isWeekend ? 'text-rose-400' : 'text-slate-600'}`}>{day}</div>
+                                                    <div className="text-[8px] font-bold text-slate-300 uppercase tracking-tight">{date.toLocaleString('default', { weekday: 'narrow' })}</div>
                                                 </th>
                                             );
                                         })}
-                                        <th className="px-4 py-3 text-center min-w-[80px]">Summary</th>
+                                        <th className="px-2 py-2 text-center text-[10px] font-bold text-slate-500 uppercase tracking-wider border-b border-l border-slate-200 bg-slate-50">Stats</th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-card-border/20 text-xs">
+                                <tbody className="text-[10px]">
                                     {matrixData.map((row, index) => (
-                                        <tr key={row.user_id} className="hover:bg-white/5 transition-colors">
-                                            <td className="px-3 py-3 sticky left-0 bg-white/5 border-r border-card-border/30 z-10 text-muted/50 font-mono text-[10px]">
-                                                {(index + 1).toString().padStart(2, '0')}
-                                            </td>
-                                            <td className="px-4 py-3 sticky left-[50px] bg-white/5 border-r border-card-border/30 z-10">
-                                                <div>
-                                                    <div className="font-bold text-main capitalize truncate">{row.full_name}</div>
-                                                    <div className="text-[9px] font-bold text-muted truncate">{row.department}</div>
+                                        <tr key={row.user_id} className="hover:bg-slate-50/30 transition-colors group">
+                                            <td className="px-3 py-1.5 sticky left-0 bg-white z-10 border-r border-b border-slate-100 group-hover:bg-slate-50 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)]">
+                                                <div className="flex items-center gap-2">
+                                                    <div className="w-5 h-5 rounded bg-slate-100 text-[9px] font-bold text-slate-600 flex items-center justify-center uppercase">
+                                                        {row.full_name?.charAt(0)}
+                                                    </div>
+                                                    <div className="min-w-0">
+                                                        <div className="font-bold text-slate-700 truncate max-w-[100px] leading-tight" title={row.full_name}>{row.full_name}</div>
+                                                        <div className="text-[9px] text-slate-400 truncate max-w-[100px] leading-tight">{row.department}</div>
+                                                    </div>
                                                 </div>
                                             </td>
                                             {Array.from({ length: new Date(selectedYear, selectedMonth, 0).getDate() }, (_, i) => {
                                                 const dayStatus = row.daily_status.find(s => s.day === i + 1)?.status || 'Absent';
-                                                let cellClass = "bg-rose-500/10 text-rose-500 font-bold";
-                                                let cellText = "A";
+                                                let cellContent = <div className="w-1.5 h-1.5 rounded-full bg-slate-100 mx-auto" title="No Data/Absent"></div>;
 
-                                                if (dayStatus === 'Present') { cellClass = "bg-emerald-500/10 text-emerald-500 font-bold"; cellText = "P"; }
-                                                else if (dayStatus === 'Late') { cellClass = "bg-amber-500/10 text-amber-500 font-bold"; cellText = "L"; }
-                                                else if (dayStatus === 'Leave' || dayStatus === 'On Leave') { cellClass = "bg-indigo-500/10 text-indigo-500 font-bold"; cellText = "OL"; }
-                                                else if (dayStatus === 'Holiday') { cellClass = "bg-pink-500/10 text-pink-500 font-black"; cellText = "H"; }
-                                                else if (dayStatus === 'Weekend') { cellClass = "bg-white/5 text-muted/50"; cellText = "W"; }
+                                                if (dayStatus === 'Present') cellContent = <div className="w-5 h-5 mx-auto rounded flex items-center justify-center bg-emerald-50 text-emerald-600 font-bold text-[9px]" title="Present">P</div>;
+                                                else if (dayStatus === 'Late') cellContent = <div className="w-5 h-5 mx-auto rounded flex items-center justify-center bg-amber-50 text-amber-600 font-bold text-[9px]" title="Late">L</div>;
+                                                else if (dayStatus === 'Leave' || dayStatus === 'On Leave') cellContent = <div className="w-5 h-5 mx-auto rounded flex items-center justify-center bg-indigo-50 text-indigo-500 font-bold text-[9px]" title="Leave">OL</div>;
+                                                else if (dayStatus === 'Holiday') cellContent = <div className="w-5 h-5 mx-auto rounded flex items-center justify-center bg-slate-50 text-slate-400 font-bold text-[9px]" title="Holiday">H</div>;
+                                                else if (dayStatus === 'Weekend') cellContent = <div className="text-[10px] text-slate-200 font-light select-none">·</div>;
+                                                else if (dayStatus === 'Absent') cellContent = <div className="w-1.5 h-1.5 rounded-full bg-rose-200 mx-auto" title="Absent"></div>;
 
                                                 return (
-                                                    <td key={i} className="p-1 text-center border-r border-dashed border-card-border/10">
-                                                        <div className={`w-6 h-6 mx-auto rounded-md flex items-center justify-center text-[10px] ${cellClass}`}>
-                                                            {cellText}
-                                                        </div>
+                                                    <td key={i} className={`p-0 text-center border-r border-b border-slate-50 ${dayStatus === 'Weekend' ? 'bg-slate-50/30' : ''}`}>
+                                                        {cellContent}
                                                     </td>
                                                 );
                                             })}
-                                            <td className="px-4 py-3 text-center">
-                                                <div className="flex items-center justify-center gap-1 text-[10px]">
-                                                    <span className="text-emerald-500 font-bold">{row.daily_status.filter(s => s.status === 'Present').length}P</span>
-                                                    <span className="text-muted/50">/</span>
-                                                    <span className="text-rose-500 font-bold">{row.daily_status.filter(s => s.status === 'Absent').length}A</span>
+                                            <td className="px-2 py-1.5 text-center border-b border-l border-slate-100 bg-slate-50/30">
+                                                <div className="flex items-center justify-center gap-1.5">
+                                                    <div className="flex flex-col items-center">
+                                                        <span className="text-[9px] font-bold text-emerald-600 leading-none">{row.daily_status.filter(s => s.status === 'Present').length}</span>
+                                                        <span className="text-[7px] font-medium text-slate-400 leading-none mt-0.5">P</span>
+                                                    </div>
+                                                    <div className="w-px h-3 bg-slate-200"></div>
+                                                    <div className="flex flex-col items-center">
+                                                        <span className="text-[9px] font-bold text-rose-500 leading-none">{row.daily_status.filter(s => s.status === 'Absent').length}</span>
+                                                        <span className="text-[7px] font-medium text-slate-400 leading-none mt-0.5">A</span>
+                                                    </div>
                                                 </div>
                                             </td>
                                         </tr>
                                     ))}
-                                    {matrixData.length === 0 && (<tr><td colSpan={new Date(selectedYear, selectedMonth, 0).getDate() + 2} className="px-8 py-12 text-center text-muted font-bold italic">No attendance records found for this period.</td></tr>)}
                                 </tbody>
                             </table>
                         </div>
@@ -1107,43 +1227,41 @@ const AttendanceView = () => {
 
                 {activeTab === 'leaves' && (
                     <div className="space-y-6">
-                        {/* Hide Apply for Leave button for admin */}
                         {userRole !== 'admin' && (
-                            <div className="glass-card border-none bg-white/5 rounded-[2.5rem] p-12 text-center shadow-sm relative overflow-hidden group">
-                                <div className="absolute top-0 right-0 p-8 opacity-5 text-primary pointer-events-none group-hover:scale-110 transition-transform">
+                            <div className="bg-white rounded-3xl p-8 text-center shadow-sm border border-slate-100 relative overflow-hidden group">
+                                <div className="absolute top-0 right-0 p-8 opacity-5 text-indigo-600 pointer-events-none group-hover:scale-110 transition-transform">
                                     <FiFileText size={120} />
                                 </div>
-                                <h4 className="text-xl font-black text-main mb-2 italic tracking-tighter">Apply for leave</h4>
-                                <p className="text-muted font-bold max-w-sm mx-auto text-[10px] opacity-60">Track your time off and submit new requests easily.</p>
-                                <button onClick={() => setIsLeaveModalOpen(true)} className="mt-8 bg-primary text-white px-10 py-4 rounded-2xl font-black text-[10px] shadow-[0_15px_30px_-10px_rgba(var(--primary-rgb),0.5)] hover:bg-primary-hover transition-all group flex items-center gap-3 mx-auto active:scale-95">Apply for leave <FiArrowRight className="group-hover:translate-x-1 transition-transform" /></button>
+                                <h4 className="text-lg font-bold text-slate-800 mb-2">Request Time Off</h4>
+                                <p className="text-xs font-medium text-slate-500 max-w-sm mx-auto">Submit leave requests and track your approval status.</p>
+                                <button onClick={() => setIsLeaveModalOpen(true)} className="mt-6 bg-slate-900 text-white px-8 py-3 rounded-xl font-bold text-xs hover:bg-slate-800 transition-all shadow-lg shadow-slate-200">New Request</button>
                             </div>
                         )}
-                        <div className="glass-card border-none bg-white/5 rounded-[2.5rem] shadow-2xl overflow-hidden relative">
-                            <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary/50 via-primary to-primary/50"></div>
-                            <div className="p-8 border-b border-card-border/30 flex items-center justify-between bg-white/5">
-                                <h3 className="text-xl font-black text-main tracking-tighter italic flex items-center gap-3"><FiCalendar className="text-primary" /> My leave history</h3>
+                        <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
+                            <div className="p-6 border-b border-slate-100 flex items-center justify-between">
+                                <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2"><FiClock className="text-slate-400" /> Leave History</h3>
                             </div>
                             <div className="overflow-x-auto">
-                                <table className="w-full border-collapse">
+                                <table className="w-full">
                                     <thead>
-                                        <tr className="bg-white/5 border-b border-card-border/30 text-left">
-                                            <th className="px-8 py-6 text-[10px] font-black text-muted">Leave type</th>
-                                            <th className="px-8 py-6 text-[10px] font-black text-muted">Duration</th>
-                                            <th className="px-8 py-6 text-[10px] font-black text-muted">Reason</th>
-                                            <th className="px-8 py-6 text-[10px] font-black text-muted">Admin notes</th>
-                                            <th className="px-8 py-6 text-right text-[10px] font-black text-muted">Status</th>
+                                        <tr className="bg-slate-50/50 border-b border-slate-100 text-left">
+                                            <th className="px-6 py-4 text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Type</th>
+                                            <th className="px-6 py-4 text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Duration</th>
+                                            <th className="px-6 py-4 text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Reason</th>
+                                            <th className="px-6 py-4 text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Note</th>
+                                            <th className="px-6 py-4 text-right text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Status</th>
                                         </tr>
                                     </thead>
-                                    <tbody className="divide-y divide-card-border/20">
+                                    <tbody className="divide-y divide-slate-50">
                                         {leavesData.length === 0 ? (
-                                            <tr><td colSpan="5" className="px-8 py-20 text-center text-[10px] font-black text-muted">No leave records found.</td></tr>
+                                            <tr><td colSpan="5" className="px-6 py-12 text-center text-xs font-medium text-slate-400">No leave records found.</td></tr>
                                         ) : leavesData.map(leave => (
-                                            <tr key={leave.id} className="hover:bg-white/5 transition-colors group">
-                                                <td className="px-8 py-6"><span className="text-sm font-black text-primary italic group-hover:text-primary-hover transition-colors">{leave.leave_type}</span></td>
-                                                <td className="px-8 py-6"><span className="text-xs font-bold text-main">{new Date(leave.start_date).toLocaleDateString()} - {new Date(leave.end_date).toLocaleDateString()}</span></td>
-                                                <td className="px-8 py-6 max-w-xs"><p className="text-xs text-muted font-bold italic line-clamp-2">"{leave.reason}"</p></td>
-                                                <td className="px-8 py-6 max-w-xs"><p className="text-xs text-emerald-500 font-black italic">{leave.admin_notes || '--'}</p></td>
-                                                <td className="px-8 py-6 text-right"><span className={`px-4 py-1 rounded-full text-[10px] font-black border shadow-inner ${leave.status === 'Approved' ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-500' : leave.status === 'Rejected' ? 'bg-rose-500/10 border-rose-500/30 text-rose-500' : 'bg-primary/10 border-primary/30 text-primary'}`}>{leave.status}</span></td>
+                                            <tr key={leave.id} className="hover:bg-slate-50/50 transition-colors">
+                                                <td className="px-6 py-4 text-xs font-bold text-slate-700">{leave.leave_type}</td>
+                                                <td className="px-6 py-4 text-xs font-medium text-slate-600">{new Date(leave.start_date).toLocaleDateString()} - {new Date(leave.end_date).toLocaleDateString()}</td>
+                                                <td className="px-6 py-4 text-xs font-medium text-slate-500 truncate max-w-[200px]" title={leave.reason}>{leave.reason}</td>
+                                                <td className="px-6 py-4 text-xs font-medium text-emerald-600 truncate max-w-[150px]">{leave.admin_notes || '-'}</td>
+                                                <td className="px-6 py-4 text-right"><span className={`px-2.5 py-1 rounded-md text-[10px] font-bold border ${leave.status === 'Approved' ? 'bg-emerald-50 border-emerald-100 text-emerald-600' : leave.status === 'Rejected' ? 'bg-rose-50 border-rose-100 text-rose-600' : 'bg-slate-100 border-slate-200 text-slate-600'}`}>{leave.status}</span></td>
                                             </tr>
                                         ))}
                                     </tbody>
@@ -1153,8 +1271,9 @@ const AttendanceView = () => {
                     </div>
                 )}
             </div>
-        </div >
+        </div>
     );
 };
 
 export default AttendanceView;
+
