@@ -1,14 +1,16 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { FiShield, FiArrowLeft, FiCheck } from 'react-icons/fi';
+import { FiShield, FiArrowLeft, FiCheck, FiCopy } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
 import { QRCodeSVG } from 'qrcode.react';
 import api from '../api/axios';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 
 const Setup2FA = () => {
     const navigate = useNavigate();
     const { user } = useAuth();
+    const { showToast } = useToast();
     const [loading, setLoading] = useState(false);
     const [setupData, setSetupData] = useState(null);
     const [code, setCode] = useState('');
@@ -42,6 +44,7 @@ const Setup2FA = () => {
         try {
             await api.post('/api/auth/2fa/confirm-authenticated', { code });
             setSuccess(true);
+            showToast('2FA setup successfully!', 'success');
             setTimeout(() => {
                 navigate('/profile');
             }, 2000);
@@ -50,6 +53,13 @@ const Setup2FA = () => {
             setCode('');
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleCopyKey = () => {
+        if (setupData?.secret) {
+            navigator.clipboard.writeText(setupData.secret);
+            showToast('Secret key copied to clipboard', 'success');
         }
     };
 
@@ -110,9 +120,19 @@ const Setup2FA = () => {
                             <QRCodeSVG value={setupData?.qr_code_url} size={200} level="H" />
                         </div>
 
-                        <div className="bg-indigo-50 p-4 rounded-xl mb-6">
-                            <p className="text-xs font-bold text-indigo-600 uppercase tracking-wider mb-2">Manual Entry Key</p>
-                            <code className="text-sm font-mono text-gray-800 break-all block">{setupData?.secret}</code>
+                        <div className="bg-indigo-50 p-4 rounded-xl mb-6 relative group">
+                            <div className="flex items-center justify-between mb-2">
+                                <p className="text-xs font-bold text-indigo-600 uppercase tracking-wider">Manual Entry Key</p>
+                                <button
+                                    onClick={handleCopyKey}
+                                    className="text-xs font-bold text-indigo-500 hover:text-indigo-700 flex items-center gap-1 transition-colors"
+                                >
+                                    <FiCopy /> Copy
+                                </button>
+                            </div>
+                            <code className="text-sm font-mono text-gray-800 break-all block bg-white/50 p-2 rounded border border-indigo-100/50">
+                                {setupData?.secret}
+                            </code>
                         </div>
 
                         <form onSubmit={handleConfirm} className="space-y-4">
