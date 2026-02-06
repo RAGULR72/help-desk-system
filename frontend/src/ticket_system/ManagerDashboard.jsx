@@ -8,7 +8,7 @@ import UserProfileView from './components/UserProfileView';
 import { useAuth } from '../context/AuthContext';
 import AnalyticsDashboard from './components/AnalyticsDashboard';
 
-import LiveMapView from '../map_system/components/LiveMapView';
+
 import AssetManagement from '../asset_management/AssetManagement';
 import UserManagementView from './components/UserManagementView';
 import FeedbackOverview from './components/FeedbackOverview';
@@ -40,7 +40,7 @@ const ManagerDashboard = () => {
             {activeTab === 'attendance' && <AttendanceView />}
             {activeTab === 'sla' && <SLAMonitoring />}
             {activeTab === 'profile' && <UserProfileView />}
-            {activeTab === 'map' && <LiveMapView />}
+
             {activeTab === 'users' && <UserManagementView />}
             {activeTab === 'asset_management' && <AssetManagement />}
             {activeTab === 'feedback' && <FeedbackOverview />}

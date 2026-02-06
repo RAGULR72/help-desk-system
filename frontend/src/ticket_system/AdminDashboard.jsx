@@ -18,7 +18,7 @@ import CommandCenterView from './components/CommandCenterView';
 import PortalConfig from '../pages/Portal/PortalConfig';
 import AssetManagement from '../asset_management/AssetManagement';
 import AssetSettings from '../asset_management/AssetSettings';
-import LiveMapView from '../map_system/components/LiveMapView';
+
 
 
 import ExpenseDashboard from '../expense_system/ExpenseDashboard';
@@ -85,7 +85,7 @@ const AdminDashboard = () => {
             {activeTab === 'portal_config' && <PortalConfig />}
             {activeTab === 'asset_management' && <AssetManagement />}
             {activeTab === 'asset_settings' && <AssetSettings />}
-            {activeTab === 'map' && <LiveMapView />}
+
             {activeTab === 'command_center' && <CommandCenterView />}
             {activeTab === 'expenses' && <ExpenseDashboard />}
         </DashboardLayout >

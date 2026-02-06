@@ -13,7 +13,6 @@ import { useTranslation } from '../context/TranslationContext';
 
 import { useChat } from '../chat_system/ChatContext';
 import { IoChatbubbles, IoCard } from 'react-icons/io5';
-import LiveMapView from '../map_system/components/LiveMapView';
 import AssetManagement from '../asset_management/AssetManagement';
 import ExpenseDashboard from '../expense_system/ExpenseDashboard';
 
@@ -237,7 +236,7 @@ const TechnicianDashboard = () => {
 
             {activeTab === 'users' && <UserManagementView />}
             {activeTab === 'profile' && <UserProfileView />}
-            {activeTab === 'map' && <LiveMapView />}
+
             {activeTab === 'asset_management' && <AssetManagement />}
         </DashboardLayout>
     );

@@ -184,7 +184,7 @@ const DashboardLayout = ({ children, activeTab = 'tickets', userRole, onTabChang
         { id: 'portal_config', label: 'Portal Config', icon: <FiLayout />, color: 'text-indigo-600', badge: null, roles: ['admin'] },
         { id: 'asset_settings', label: 'Asset Settings', icon: <FiShield />, color: 'text-slate-600', badge: null, roles: ['admin'] },
         { id: 'command_center', label: 'AI Command Center', icon: <FiActivity />, color: 'text-indigo-400', badge: 'PRO', roles: ['admin'] },
-        { id: 'map', label: 'Live Map', icon: <FiGlobe />, color: 'text-emerald-500', badge: null, roles: ['admin', 'manager', 'technician'] },
+
     ].filter(item => {
         if (item.roles && !item.roles.includes(userRole)) return false;
         if (item.id === 'dashboard' || item.id === 'chats') return true;
