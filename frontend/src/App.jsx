@@ -61,114 +61,114 @@ const DashboardWrapper = ({ children, tab }) => {
   );
 };
 
-import { HelmetProvider } from 'react-helmet-async';
+
 
 function App() {
   return (
-    <HelmetProvider>
-      <ThemeProvider>
-        <AuthProvider>
-          <ToastProvider>
-            <TranslationProvider>
-              <ChatProvider>
-                <Router>
 
-                  <Routes>
-                    {/* Main Help Desk Route */}
-                    <Route path="/" element={<TicketPage />} />
-                    <Route path="/login" element={<LoginPage />} />
-                    <Route path="/qr-auth" element={<QRAuthPage />} />
-                    <Route path="/setup-2fa" element={<Setup2FA />} />
+    <ThemeProvider>
+      <AuthProvider>
+        <ToastProvider>
+          <TranslationProvider>
+            <ChatProvider>
+              <Router>
 
-                    <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
-                    <Route path="/activity" element={<ActivityPage />} />
-                    <Route path="/settings" element={<SettingsPage />} />
-                    <Route path="/admin/edit-user/:id" element={<ProtectedRoute allowedRoles={['admin', 'manager']}><EditUserPage /></ProtectedRoute>} />
-                    <Route path="/admin/user-profile/:id" element={<ProtectedRoute allowedRoles={['admin', 'manager']}><AdminUserViewPage /></ProtectedRoute>} />
-                    <Route path="/chats" element={<ProtectedRoute><ChatPage /></ProtectedRoute>} />
-                    <Route path="/expenses" element={
-                      <ProtectedRoute>
-                        <DashboardWrapper tab="expenses">
-                          <ExpenseDashboard />
-                        </DashboardWrapper>
-                      </ProtectedRoute>
-                    } />
-                    <Route path="/expenses/create" element={
-                      <ProtectedRoute>
-                        <ExpenseCreatePage />
-                      </ProtectedRoute>
-                    } />
-                    <Route path="/expenses/edit/:id" element={
-                      <ProtectedRoute>
-                        <ExpenseCreatePage />
-                      </ProtectedRoute>
-                    } />
+                <Routes>
+                  {/* Main Help Desk Route */}
+                  <Route path="/" element={<TicketPage />} />
+                  <Route path="/login" element={<LoginPage />} />
+                  <Route path="/qr-auth" element={<QRAuthPage />} />
+                  <Route path="/setup-2fa" element={<Setup2FA />} />
 
-
-                    {/* Dashboard Routes */}
-                    <Route path="/dashboard/user" element={
-                      <ProtectedRoute allowedRoles={['user', 'admin']}>
-                        <UserDashboard />
-                      </ProtectedRoute>
-                    } />
-                    <Route path="/dashboard/admin" element={
-                      <ProtectedRoute allowedRoles={['admin']}>
-                        <AdminDashboard />
-                      </ProtectedRoute>
-                    } />
-                    <Route path="/dashboard/manager" element={
-                      <ProtectedRoute allowedRoles={['manager', 'admin']}>
-                        <ManagerDashboard />
-                      </ProtectedRoute>
-                    } />
-                    <Route path="/dashboard/technician" element={
-                      <ProtectedRoute allowedRoles={['technician', 'admin']}>
-                        <TechnicianDashboard />
-                      </ProtectedRoute>
-                    } />
-
-                    <Route path="/dashboard/tickets/:id" element={
-                      <ProtectedRoute>
-                        <TicketDetailView />
-                      </ProtectedRoute>
-                    } />
-
-                    <Route path="/dashboard/sla-monitoring" element={
-                      <ProtectedRoute allowedRoles={['admin', 'manager', 'technician']}>
-                        <SLAMonitoring />
-                      </ProtectedRoute>
-                    } />
-
-                    <Route path="/dashboard/sla-configuration" element={
-                      <ProtectedRoute allowedRoles={['admin']}>
-                        <SLAConfiguration />
-                      </ProtectedRoute>
-                    } />
-
-                    <Route path="/dashboard/analytics" element={
-                      <ProtectedRoute allowedRoles={['admin', 'manager']}>
-                        <AnalyticsDashboard />
-                      </ProtectedRoute>
-                    } />
-
-                    <Route path="/dashboard/command-center" element={
-                      <ProtectedRoute allowedRoles={['admin']}>
-                        <CommandCenterView />
-                      </ProtectedRoute>
-                    } />
+                  <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+                  <Route path="/activity" element={<ActivityPage />} />
+                  <Route path="/settings" element={<SettingsPage />} />
+                  <Route path="/admin/edit-user/:id" element={<ProtectedRoute allowedRoles={['admin', 'manager']}><EditUserPage /></ProtectedRoute>} />
+                  <Route path="/admin/user-profile/:id" element={<ProtectedRoute allowedRoles={['admin', 'manager']}><AdminUserViewPage /></ProtectedRoute>} />
+                  <Route path="/chats" element={<ProtectedRoute><ChatPage /></ProtectedRoute>} />
+                  <Route path="/expenses" element={
+                    <ProtectedRoute>
+                      <DashboardWrapper tab="expenses">
+                        <ExpenseDashboard />
+                      </DashboardWrapper>
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/expenses/create" element={
+                    <ProtectedRoute>
+                      <ExpenseCreatePage />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/expenses/edit/:id" element={
+                    <ProtectedRoute>
+                      <ExpenseCreatePage />
+                    </ProtectedRoute>
+                  } />
 
 
-                    {/* Catch-all Redirect */}
-                    <Route path="*" element={<Navigate to="/" replace />} />
-                  </Routes>
+                  {/* Dashboard Routes */}
+                  <Route path="/dashboard/user" element={
+                    <ProtectedRoute allowedRoles={['user', 'admin']}>
+                      <UserDashboard />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/dashboard/admin" element={
+                    <ProtectedRoute allowedRoles={['admin']}>
+                      <AdminDashboard />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/dashboard/manager" element={
+                    <ProtectedRoute allowedRoles={['manager', 'admin']}>
+                      <ManagerDashboard />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/dashboard/technician" element={
+                    <ProtectedRoute allowedRoles={['technician', 'admin']}>
+                      <TechnicianDashboard />
+                    </ProtectedRoute>
+                  } />
 
-                </Router>
-              </ChatProvider>
-            </TranslationProvider>
-          </ToastProvider>
-        </AuthProvider >
-      </ThemeProvider>
-    </HelmetProvider>
+                  <Route path="/dashboard/tickets/:id" element={
+                    <ProtectedRoute>
+                      <TicketDetailView />
+                    </ProtectedRoute>
+                  } />
+
+                  <Route path="/dashboard/sla-monitoring" element={
+                    <ProtectedRoute allowedRoles={['admin', 'manager', 'technician']}>
+                      <SLAMonitoring />
+                    </ProtectedRoute>
+                  } />
+
+                  <Route path="/dashboard/sla-configuration" element={
+                    <ProtectedRoute allowedRoles={['admin']}>
+                      <SLAConfiguration />
+                    </ProtectedRoute>
+                  } />
+
+                  <Route path="/dashboard/analytics" element={
+                    <ProtectedRoute allowedRoles={['admin', 'manager']}>
+                      <AnalyticsDashboard />
+                    </ProtectedRoute>
+                  } />
+
+                  <Route path="/dashboard/command-center" element={
+                    <ProtectedRoute allowedRoles={['admin']}>
+                      <CommandCenterView />
+                    </ProtectedRoute>
+                  } />
+
+
+                  {/* Catch-all Redirect */}
+                  <Route path="*" element={<Navigate to="/" replace />} />
+                </Routes>
+
+              </Router>
+            </ChatProvider>
+          </TranslationProvider>
+        </ToastProvider>
+      </AuthProvider >
+    </ThemeProvider>
+
   );
 }
 

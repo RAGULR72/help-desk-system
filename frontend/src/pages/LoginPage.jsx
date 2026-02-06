@@ -5,7 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { useTranslation } from '../context/TranslationContext';
 import { useNavigate, Link } from 'react-router-dom';
 import api from '../api/axios';
-import SEO from '../components/SEO/SEO';
+
 import { QRCodeSVG } from 'qrcode.react';
 
 
@@ -444,11 +444,7 @@ const LoginPage = () => {
 
     return (
         <div className="min-h-screen w-full flex overflow-hidden bg-white">
-            <SEO
-                title="Login"
-                description="Secure login for Proserve Help Desk. Access your dashboard to manage support tickets, SLAs, and technical requests."
-                url="/login"
-            />
+
             {/* Visual Side - Clean & Professional */}
             <div className="hidden lg:flex lg:w-1/2 relative flex-col justify-center p-16 overflow-hidden bg-slate-50 border-r border-gray-100">
                 <div className="absolute inset-0 z-0 opacity-40">
