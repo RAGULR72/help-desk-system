@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import {
     FiArrowLeft, FiClock, FiUser, FiAlertCircle,
     FiPaperclip, FiDownload, FiMessageSquare, FiSend,
-    FiRotateCcw, FiFlag, FiPlusCircle, FiRefreshCw, FiEdit, FiCheckCircle, FiX, FiChevronDown, FiTool, FiStar, FiCheck, FiHeart, FiLock, FiZap, FiAlertTriangle, FiInfo, FiCpu, FiList
+    FiRotateCcw, FiFlag, FiPlusCircle, FiRefreshCw, FiEdit, FiCheckCircle, FiX, FiChevronDown, FiTool, FiStar, FiCheck, FiHeart, FiLock, FiZap, FiAlertTriangle, FiInfo, FiCpu, FiList, FiEye
 } from 'react-icons/fi';
 import CreateTicketModal from './CreateTicketModal';
 import { RepairWorkflow, RepairInitiationModal } from './RepairWorkflow';
@@ -1664,6 +1664,31 @@ const TicketDetailView = () => {
                                         const fileUrl = cleanFile.startsWith('http')
                                             ? cleanFile
                                             : `${api.defaults.baseURL}${cleanFile.startsWith('/') ? '' : '/'}${cleanFile}`;
+
+                                        const isImage = cleanFile.match(/\.(jpg|jpeg|png|gif|webp)$/i);
+
+                                        if (isImage) {
+                                            return (
+                                                <div
+                                                    key={i}
+                                                    onClick={() => window.open(fileUrl, '_blank')}
+                                                    className="group relative rounded-2xl overflow-hidden border border-gray-100 dark:border-slate-800 cursor-pointer shadow-sm hover:shadow-md transition-all"
+                                                >
+                                                    <div className="aspect-video w-full bg-gray-100 dark:bg-slate-800 relative">
+                                                        <img src={fileUrl} alt="attachment" className="w-full h-full object-cover" />
+                                                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center">
+                                                            <div className="px-4 py-2 bg-white/20 backdrop-blur-md rounded-xl text-white opacity-0 group-hover:opacity-100 transition-all transform translate-y-2 group-hover:translate-y-0 flex items-center gap-2 font-bold text-xs">
+                                                                <FiEye /> Preview Image
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div className="p-3 bg-white dark:bg-slate-900 flex justify-between items-center">
+                                                        <span className="text-xs font-bold text-gray-700 dark:text-gray-300 truncate max-w-[80%]">{cleanFile.split('/').pop()}</span>
+                                                        <FiDownload className="text-gray-400 group-hover:text-indigo-600 transition-colors" />
+                                                    </div>
+                                                </div>
+                                            );
+                                        }
 
                                         return (
                                             <div
