@@ -1452,6 +1452,8 @@ def verify_2fa(req: root_schemas.Verify2FARequest, request: Request, response: R
             raise HTTPException(status_code=400, detail="Invalid verification code")
     except auth.JWTError:
         raise HTTPException(status_code=401, detail="Token expired or invalid (check system time)")
+    except HTTPException:
+        raise
     except Exception as e:
         # Catch all other errors and output them
         import traceback
@@ -1507,6 +1509,9 @@ def verify_email_otp(req: root_schemas.Verify2FARequest, request: Request, respo
             
         if user.email_otp != req.code:
             raise HTTPException(status_code=400, detail="Invalid verification code")
+            
+        # Check session limit
+        check_session_limit(user, db)
             
         # Success: Clear OTP
         user.email_otp = None
