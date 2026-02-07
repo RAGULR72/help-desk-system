@@ -1049,9 +1049,16 @@ const AttendanceView = () => {
                             <select
                                 value={dateFilter}
                                 onChange={(e) => {
-                                    setDateFilter(e.target.value);
-                                    if (e.target.value === 'today') {
-                                        setSelectedDateFilter(new Date().toISOString().split('T')[0]);
+                                    const value = e.target.value;
+                                    setDateFilter(value);
+
+                                    const today = new Date();
+                                    if (value === 'today') {
+                                        setSelectedDateFilter(today.toISOString().split('T')[0]);
+                                    } else if (value === 'yesterday') {
+                                        const yesterday = new Date(today);
+                                        yesterday.setDate(yesterday.getDate() - 1);
+                                        setSelectedDateFilter(yesterday.toISOString().split('T')[0]);
                                     }
                                 }}
                                 className="text-xs font-medium text-slate-600 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 cursor-pointer hover:bg-slate-100"
