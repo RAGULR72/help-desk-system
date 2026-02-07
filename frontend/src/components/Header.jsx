@@ -135,12 +135,15 @@ const Header = () => {
                                                     src={user.avatar_url.startsWith('http') ? user.avatar_url : `${baseURL}${user.avatar_url.startsWith('/') ? '' : '/'}${user.avatar_url}`}
                                                     alt={user.username}
                                                     className="w-9 h-9 rounded-full object-cover border-2 border-primary"
+                                                    onError={(e) => {
+                                                        e.target.style.display = 'none';
+                                                        e.target.nextSibling.style.display = 'flex';
+                                                    }}
                                                 />
-                                            ) : (
-                                                <div className="w-9 h-9 bg-primary rounded-full flex items-center justify-center border-2 border-white/20 shadow-lg">
-                                                    <span className="text-white font-black text-sm">{(user.full_name || user.username).charAt(0).toUpperCase()}</span>
-                                                </div>
-                                            )}
+                                            ) : null}
+                                            <div className={`w-9 h-9 bg-primary rounded-full items-center justify-center border-2 border-white/20 shadow-lg ${user.avatar_url ? 'hidden' : 'flex'}`}>
+                                                <span className="text-white font-black text-sm">{(user.full_name || user.username).charAt(0).toUpperCase()}</span>
+                                            </div>
                                             <FiChevronDown size={14} className={`mr-1 text-main opacity-50 transition-transform ${profileDropdownOpen ? 'rotate-180' : ''}`} />
                                         </button>
 
