@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
     FiCheck, FiX, FiFilter, FiDownload, FiUpload,
     FiFileText, FiCalendar, FiClock, FiMapPin,
@@ -605,9 +606,10 @@ const AttendanceView = () => {
 
     // Handle opening employee detail view
     const handleViewEmployee = (employee) => {
-        setViewEmployeeModal({ isOpen: true, employee });
         if (employee.user_id) {
-            fetchEmployeeHistory(employee.user_id);
+            navigate(`/attendance/employee/${employee.user_id}`);
+        } else {
+            console.error("No user ID found for employee", employee);
         }
     };
 

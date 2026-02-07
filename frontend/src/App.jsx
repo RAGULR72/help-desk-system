@@ -30,6 +30,7 @@ import AnalyticsDashboard from './ticket_system/components/AnalyticsDashboard';
 import CommandCenterView from './ticket_system/components/CommandCenterView';
 import EditUserPage from './pages/EditUserPage';
 import AdminUserViewPage from './pages/AdminUserViewPage';
+import EmployeeDetailPage from './attendance_system/EmployeeDetailPage';
 
 import './index.css';
 
@@ -154,6 +155,12 @@ function App() {
                   <Route path="/dashboard/command-center" element={
                     <ProtectedRoute allowedRoles={['admin']}>
                       <CommandCenterView />
+                    </ProtectedRoute>
+                  } />
+
+                  <Route path="/attendance/employee/:id" element={
+                    <ProtectedRoute allowedRoles={['admin', 'manager']}>
+                      <EmployeeDetailPage />
                     </ProtectedRoute>
                   } />
 
