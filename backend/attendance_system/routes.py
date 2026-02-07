@@ -579,3 +579,40 @@ def get_all_no_punch_out_records(
     
     return result
 
+
+# Get attendance history for a specific user (admin/manager only)
+@router.get("/user/{user_id}/history")
+async def get_user_attendance_history(
+    user_id: int,
+    db: Session = Depends(get_db),
+    current_user: root_models.User = Depends(get_current_user)
+):
+    """Get full attendance history for a specific user"""
+    # Check authorization - admin/manager only
+    if current_user.role not in ['admin', 'manager']:
+        raise HTTPException(status_code=403, detail="Not authorized")
+    
+    # Get user info
+    target_user = db.query(root_models.User).filter(root_models.User.id == user_id).first()
+    if not target_user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # Get all attendance records for this user, sorted by date descending
+    records = db.query(attendance_models.Attendance).filter(
+        attendance_models.Attendance.user_id == user_id
+    ).order_by(attendance_models.Attendance.date.desc()).limit(100).all()
+    
+    result = []
+    for record in records:
+        result.append({
+            "id": record.id,
+            "user_id": record.user_id,
+            "date": record.date.isoformat() if record.date else None,
+            "check_in": record.check_in.isoformat() if record.check_in else None,
+            "check_out": record.check_out.isoformat() if record.check_out else None,
+            "status": record.status,
+            "work_location": record.work_location,
+            "no_punch_out_reason": record.no_punch_out_reason if hasattr(record, 'no_punch_out_reason') else None
+        })
+    
+    return result

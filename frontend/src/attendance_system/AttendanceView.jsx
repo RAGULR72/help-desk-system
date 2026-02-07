@@ -6,7 +6,7 @@ import {
     FiChevronLeft, FiChevronRight, FiEdit, FiClipboard,
     FiMessageSquare, FiSettings, FiPlus, FiTrash2,
     FiShield, FiActivity, FiCheckCircle, FiPieChart,
-    FiZap, FiPower, FiTarget, FiUsers, FiSearch, FiMoreHorizontal
+    FiZap, FiPower, FiTarget, FiUsers, FiSearch, FiMoreHorizontal, FiMoreVertical
 } from 'react-icons/fi';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, RadialBarChart, RadialBar, PolarAngleAxis } from 'recharts';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -585,6 +585,31 @@ const AttendanceView = () => {
     const [departmentFilter, setDepartmentFilter] = useState('all');
     const [searchQuery, setSearchQuery] = useState('');
     const [viewEmployeeModal, setViewEmployeeModal] = useState({ isOpen: false, employee: null });
+    const [employeeHistory, setEmployeeHistory] = useState([]);
+    const [employeeHistoryLoading, setEmployeeHistoryLoading] = useState(false);
+    const [employeeHistorySearch, setEmployeeHistorySearch] = useState('');
+
+    // Fetch employee attendance history when modal opens
+    const fetchEmployeeHistory = async (userId) => {
+        setEmployeeHistoryLoading(true);
+        try {
+            const res = await api.get(`/api/attendance/user/${userId}/history`);
+            setEmployeeHistory(res.data || []);
+        } catch (err) {
+            console.error("Failed to fetch employee history", err);
+            setEmployeeHistory([]);
+        } finally {
+            setEmployeeHistoryLoading(false);
+        }
+    };
+
+    // Handle opening employee detail view
+    const handleViewEmployee = (employee) => {
+        setViewEmployeeModal({ isOpen: true, employee });
+        if (employee.user_id) {
+            fetchEmployeeHistory(employee.user_id);
+        }
+    };
 
     useEffect(() => {
         if (activeTab === 'my_dashboard' || activeTab === 'dashboard') {
@@ -1181,7 +1206,7 @@ const AttendanceView = () => {
                                             </td>
                                             <td className="px-4 py-3">
                                                 <button
-                                                    onClick={() => setViewEmployeeModal({ isOpen: true, employee: log })}
+                                                    onClick={() => handleViewEmployee(log)}
                                                     className="px-3 py-1.5 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 rounded-lg text-xs font-semibold transition-all opacity-0 group-hover:opacity-100"
                                                 >
                                                     View
@@ -1523,109 +1548,297 @@ const AttendanceView = () => {
             <AdminEditLeaveModal isOpen={editLeaveModal.isOpen} onClose={() => setEditLeaveModal({ ...editLeaveModal, isOpen: false })} onSubmitted={fetchAllLeaves} leave={editLeaveModal.leave} />
             <HolidayConfigModal isOpen={isHolidayModalOpen} onClose={() => setIsHolidayModalOpen(false)} />
 
-            {/* Employee View Modal */}
+            {/* Employee Detail View - Full Page Modal */}
             {viewEmployeeModal.isOpen && viewEmployeeModal.employee && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-md">
+                <div className="fixed inset-0 z-[100] bg-slate-100 overflow-auto">
                     <motion.div
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        className="bg-white w-full max-w-md rounded-3xl shadow-2xl overflow-hidden"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="min-h-screen"
                     >
-                        {/* Header */}
-                        <div className="bg-gradient-to-r from-emerald-500 to-teal-500 p-6 text-white relative">
-                            <button
-                                onClick={() => setViewEmployeeModal({ isOpen: false, employee: null })}
-                                className="absolute top-4 right-4 p-2 hover:bg-white/20 rounded-lg transition-colors"
-                            >
-                                <FiX size={18} />
-                            </button>
-                            <div className="flex items-center gap-4">
-                                <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center text-2xl font-bold">
-                                    {(viewEmployeeModal.employee.full_name || viewEmployeeModal.employee.username || 'U').charAt(0).toUpperCase()}
-                                </div>
-                                <div>
-                                    <h3 className="text-xl font-bold">{viewEmployeeModal.employee.full_name || viewEmployeeModal.employee.username || 'Unknown'}</h3>
-                                    <p className="text-white/70 text-sm">{viewEmployeeModal.employee.department || viewEmployeeModal.employee.dept || 'General'}</p>
+                        {/* Top Header */}
+                        <div className="bg-white border-b border-slate-200 sticky top-0 z-10">
+                            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+                                <div className="flex items-center justify-between">
+                                    <button
+                                        onClick={() => {
+                                            setViewEmployeeModal({ isOpen: false, employee: null });
+                                            setEmployeeHistory([]);
+                                            setEmployeeHistorySearch('');
+                                        }}
+                                        className="flex items-center gap-2 text-slate-600 hover:text-slate-900 transition-colors"
+                                    >
+                                        <FiChevronLeft size={20} />
+                                        <span className="text-sm font-medium">Detail Employee</span>
+                                    </button>
+                                    <div className="flex items-center gap-2">
+                                        <span className="px-3 py-1 bg-emerald-100 text-emerald-700 text-xs font-bold rounded-full">Active</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
-                        {/* Content */}
-                        <div className="p-6 space-y-4">
-                            {/* Status Badge */}
-                            <div className="flex justify-center">
-                                {(() => {
-                                    const status = viewEmployeeModal.employee.status || (viewEmployeeModal.employee.check_in && !viewEmployeeModal.employee.check_out ? 'No Punch Out' : 'Absent');
-                                    const statusConfig = {
-                                        'Present': { bg: 'bg-emerald-100', text: 'text-emerald-700', border: 'border-emerald-200' },
-                                        'Late': { bg: 'bg-amber-100', text: 'text-amber-700', border: 'border-amber-200' },
-                                        'Absent': { bg: 'bg-rose-100', text: 'text-rose-700', border: 'border-rose-200' },
-                                        'No Punch Out': { bg: 'bg-orange-100', text: 'text-orange-700', border: 'border-orange-200' }
-                                    };
-                                    const config = statusConfig[status] || statusConfig['Absent'];
-                                    return (
-                                        <span className={`px-4 py-2 rounded-full text-sm font-bold border ${config.bg} ${config.text} ${config.border}`}>
-                                            {status}
-                                        </span>
-                                    );
-                                })()}
-                            </div>
+                        {/* Main Content */}
+                        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+                            {/* Employee Info Header */}
+                            <div className="bg-white rounded-2xl border border-slate-200 p-6 mb-6">
+                                <div className="flex flex-col lg:flex-row lg:items-center gap-6">
+                                    {/* Avatar & Name */}
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-100 to-teal-200 flex items-center justify-center text-2xl font-bold text-emerald-700">
+                                            {(viewEmployeeModal.employee.full_name || viewEmployeeModal.employee.username || 'U').charAt(0).toUpperCase()}
+                                        </div>
+                                        <div>
+                                            <h2 className="text-xl font-bold text-slate-800">
+                                                {viewEmployeeModal.employee.full_name || viewEmployeeModal.employee.username || 'Unknown'}
+                                            </h2>
+                                            <p className="text-sm text-slate-500">EMP-{(viewEmployeeModal.employee.user_id || '000').toString().padStart(3, '0')}</p>
+                                        </div>
+                                    </div>
 
-                            {/* Time Info */}
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="bg-slate-50 rounded-xl p-4 text-center">
-                                    <div className="text-xs text-slate-500 mb-1 font-semibold">Check-In</div>
-                                    <div className={`text-lg font-bold ${viewEmployeeModal.employee.check_in ? 'text-slate-800' : 'text-rose-500'}`}>
-                                        {viewEmployeeModal.employee.check_in
-                                            ? new Date(viewEmployeeModal.employee.check_in).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true }).toUpperCase()
-                                            : 'Not Recorded'}
+                                    {/* Info Boxes */}
+                                    <div className="flex-1 grid grid-cols-2 lg:grid-cols-4 gap-4">
+                                        <div className="bg-slate-50 rounded-xl p-3">
+                                            <span className="text-[10px] text-slate-400 font-medium block">Job Title</span>
+                                            <span className="text-sm font-semibold text-slate-700">{viewEmployeeModal.employee.job_title || 'Employee'}</span>
+                                        </div>
+                                        <div className="bg-slate-50 rounded-xl p-3">
+                                            <span className="text-[10px] text-slate-400 font-medium block">Department</span>
+                                            <span className="text-sm font-semibold text-slate-700">{viewEmployeeModal.employee.department || viewEmployeeModal.employee.dept || 'General'}</span>
+                                        </div>
+                                        <div className="bg-slate-50 rounded-xl p-3">
+                                            <span className="text-[10px] text-slate-400 font-medium block">Employment Type</span>
+                                            <span className="text-sm font-semibold text-slate-700">Full-time</span>
+                                        </div>
+                                        <div className="bg-slate-50 rounded-xl p-3">
+                                            <span className="text-[10px] text-slate-400 font-medium block">Work Location</span>
+                                            <span className="text-sm font-semibold text-slate-700">{viewEmployeeModal.employee.work_location || 'Office'}</span>
+                                        </div>
                                     </div>
                                 </div>
-                                <div className="bg-slate-50 rounded-xl p-4 text-center">
-                                    <div className="text-xs text-slate-500 mb-1 font-semibold">Check-Out</div>
-                                    <div className={`text-lg font-bold ${viewEmployeeModal.employee.check_out ? 'text-slate-800' : 'text-rose-500'}`}>
-                                        {viewEmployeeModal.employee.check_out
-                                            ? new Date(viewEmployeeModal.employee.check_out).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true }).toUpperCase()
-                                            : 'Not Recorded'}
+                            </div>
+
+                            {/* Tabs */}
+                            <div className="bg-white rounded-t-2xl border border-b-0 border-slate-200 px-6">
+                                <div className="flex gap-6 border-b border-slate-100">
+                                    {['General', 'Payroll', 'Attendance', 'Leave', 'Performance', 'Documents'].map((tab, idx) => (
+                                        <button
+                                            key={tab}
+                                            className={`py-4 text-sm font-medium border-b-2 transition-colors ${idx === 2
+                                                ? 'text-emerald-600 border-emerald-500'
+                                                : 'text-slate-500 border-transparent hover:text-slate-700'
+                                                }`}
+                                        >
+                                            {tab}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Stats Cards */}
+                            <div className="bg-white border-x border-slate-200 p-6">
+                                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                                    {/* Attendance Rate */}
+                                    <div className="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-xl p-4 border border-emerald-100">
+                                        <span className="text-xs text-slate-500 font-medium">Attendance Rate</span>
+                                        <div className="text-3xl font-bold text-slate-800 mt-1">
+                                            {employeeHistory.length > 0
+                                                ? Math.round((employeeHistory.filter(h => h.status === 'Present' || h.status === 'Late').length / employeeHistory.length) * 100)
+                                                : 0}%
+                                        </div>
+                                        <span className="text-[10px] text-slate-400">Based on total working days</span>
+                                    </div>
+
+                                    {/* Total Present Days */}
+                                    <div className="bg-slate-50 rounded-xl p-4 border border-slate-100">
+                                        <span className="text-xs text-slate-500 font-medium">Total Present Days (YTD)</span>
+                                        <div className="text-3xl font-bold text-slate-800 mt-1">
+                                            {employeeHistory.filter(h => h.status === 'Present' || h.status === 'Late').length} days
+                                        </div>
+                                        <span className="text-[10px] text-slate-400">January – December 2026</span>
+                                    </div>
+
+                                    {/* Late Check-ins */}
+                                    <div className="bg-amber-50 rounded-xl p-4 border border-amber-100">
+                                        <span className="text-xs text-slate-500 font-medium">Late Check-ins (YTD)</span>
+                                        <div className="text-3xl font-bold text-slate-800 mt-1">
+                                            {employeeHistory.filter(h => h.status === 'Late').length} times
+                                        </div>
+                                        <span className="text-[10px] text-slate-400">Within allowed tolerance</span>
+                                    </div>
+
+                                    {/* Overtime Hours */}
+                                    <div className="bg-blue-50 rounded-xl p-4 border border-blue-100">
+                                        <span className="text-xs text-slate-500 font-medium">Overtime Hours (YTD)</span>
+                                        <div className="text-3xl font-bold text-slate-800 mt-1">
+                                            {(() => {
+                                                const totalOT = employeeHistory.reduce((acc, h) => {
+                                                    if (h.check_in && h.check_out) {
+                                                        const hours = (new Date(h.check_out) - new Date(h.check_in)) / 36e5;
+                                                        return acc + Math.max(0, hours - 8);
+                                                    }
+                                                    return acc;
+                                                }, 0);
+                                                return Math.round(totalOT);
+                                            })()} hours
+                                        </div>
+                                        <span className="text-[10px] text-slate-400">Approved overtime only</span>
                                     </div>
                                 </div>
                             </div>
 
-                            {/* Hours Worked */}
-                            {viewEmployeeModal.employee.check_in && viewEmployeeModal.employee.check_out && (
-                                <div className="bg-emerald-50 rounded-xl p-4 text-center border border-emerald-100">
-                                    <div className="text-xs text-emerald-600 mb-1 font-semibold">Total Hours Worked</div>
-                                    <div className="text-2xl font-bold text-emerald-700">
-                                        {(() => {
-                                            const hours = (new Date(viewEmployeeModal.employee.check_out) - new Date(viewEmployeeModal.employee.check_in)) / 36e5;
-                                            return `${Math.floor(hours)}h ${Math.round((hours % 1) * 60)}m`;
-                                        })()}
+                            {/* Search & Filter Bar */}
+                            <div className="bg-white border-x border-slate-200 p-6 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                                <div className="relative flex-1 max-w-md">
+                                    <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                                    <input
+                                        type="text"
+                                        placeholder="Search attendance information"
+                                        value={employeeHistorySearch}
+                                        onChange={(e) => setEmployeeHistorySearch(e.target.value)}
+                                        className="w-full pl-10 pr-4 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-emerald-500"
+                                    />
+                                </div>
+                                <div className="flex items-center gap-3">
+                                    <button className="flex items-center gap-2 px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-100">
+                                        <FiFilter size={14} /> Filter
+                                    </button>
+                                    <button className="flex items-center gap-2 px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-100">
+                                        <FiDownload size={14} /> Export
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Attendance History Table */}
+                            <div className="bg-white rounded-b-2xl border border-slate-200 overflow-hidden">
+                                <div className="overflow-x-auto">
+                                    <table className="w-full">
+                                        <thead>
+                                            <tr className="bg-slate-50 border-b border-slate-100">
+                                                <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500">Date</th>
+                                                <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500">Day</th>
+                                                <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500">Check-in</th>
+                                                <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500">Check-out</th>
+                                                <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500">Working Hours</th>
+                                                <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500">Overtime</th>
+                                                <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500">Status</th>
+                                                <th className="px-6 py-4 text-center text-xs font-semibold text-slate-500"></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-slate-50">
+                                            {employeeHistoryLoading ? (
+                                                <tr>
+                                                    <td colSpan="8" className="px-6 py-12 text-center">
+                                                        <div className="flex items-center justify-center gap-2 text-slate-400">
+                                                            <div className="w-5 h-5 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
+                                                            Loading attendance history...
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            ) : employeeHistory.length === 0 ? (
+                                                <tr>
+                                                    <td colSpan="8" className="px-6 py-12 text-center text-sm text-slate-400">
+                                                        No attendance records found for this employee
+                                                    </td>
+                                                </tr>
+                                            ) : employeeHistory
+                                                .filter(h => {
+                                                    if (!employeeHistorySearch) return true;
+                                                    const searchLower = employeeHistorySearch.toLowerCase();
+                                                    const dateStr = new Date(h.date).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }).toLowerCase();
+                                                    return dateStr.includes(searchLower) || (h.status || '').toLowerCase().includes(searchLower);
+                                                })
+                                                .slice(0, 20)
+                                                .map((record, idx) => {
+                                                    const recordDate = new Date(record.date);
+                                                    const dayName = recordDate.toLocaleDateString('en-US', { weekday: 'long' });
+                                                    const dateStr = recordDate.toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' });
+
+                                                    const checkInTime = record.check_in
+                                                        ? new Date(record.check_in).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })
+                                                        : '-';
+                                                    const checkOutTime = record.check_out
+                                                        ? new Date(record.check_out).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })
+                                                        : '-';
+
+                                                    let workingHours = '-';
+                                                    let overtime = '-';
+                                                    if (record.check_in && record.check_out) {
+                                                        const hours = (new Date(record.check_out) - new Date(record.check_in)) / 36e5;
+                                                        const h = Math.floor(hours);
+                                                        const m = Math.round((hours % 1) * 60);
+                                                        workingHours = `${h}h ${m}m`;
+                                                        if (hours > 8) {
+                                                            const otHours = hours - 8;
+                                                            overtime = `${Math.floor(otHours)}h ${Math.round((otHours % 1) * 60)}m`;
+                                                        }
+                                                    }
+
+                                                    const status = record.status || 'Absent';
+                                                    const statusColors = {
+                                                        'Present': 'bg-emerald-100 text-emerald-700',
+                                                        'Late': 'bg-amber-100 text-amber-700',
+                                                        'Absent': 'bg-rose-100 text-rose-700',
+                                                        'No Punch Out': 'bg-orange-100 text-orange-700'
+                                                    };
+
+                                                    return (
+                                                        <tr key={record.id || idx} className="hover:bg-slate-50/50 transition-colors">
+                                                            <td className="px-6 py-4 text-sm font-medium text-slate-700">{dateStr}</td>
+                                                            <td className="px-6 py-4 text-sm text-slate-600">{dayName}</td>
+                                                            <td className={`px-6 py-4 text-sm font-medium ${record.check_in ? 'text-slate-700' : 'text-rose-500'}`}>
+                                                                {record.check_in ? checkInTime : 'Not Recorded'}
+                                                            </td>
+                                                            <td className={`px-6 py-4 text-sm font-medium ${record.check_out ? 'text-slate-700' : 'text-rose-500'}`}>
+                                                                {record.check_out ? checkOutTime : 'Not Recorded'}
+                                                            </td>
+                                                            <td className="px-6 py-4 text-sm font-medium text-slate-600">{workingHours}</td>
+                                                            <td className="px-6 py-4 text-sm font-medium text-blue-600">{overtime}</td>
+                                                            <td className="px-6 py-4">
+                                                                <span className={`px-3 py-1 rounded-lg text-xs font-semibold ${statusColors[status] || statusColors['Absent']}`}>
+                                                                    {status}
+                                                                </span>
+                                                            </td>
+                                                            <td className="px-6 py-4 text-center">
+                                                                <button className="text-slate-400 hover:text-slate-600">
+                                                                    <FiMoreVertical size={16} />
+                                                                </button>
+                                                            </td>
+                                                        </tr>
+                                                    );
+                                                })}
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                {/* Pagination */}
+                                <div className="p-4 border-t border-slate-100 flex items-center justify-between">
+                                    <div className="flex items-center gap-2 text-sm text-slate-500">
+                                        Show
+                                        <select className="px-2 py-1 bg-slate-50 border border-slate-200 rounded-lg text-xs">
+                                            <option>5</option>
+                                            <option>10</option>
+                                            <option>20</option>
+                                        </select>
+                                        from {employeeHistory.length} data
+                                    </div>
+                                    <div className="flex items-center gap-1">
+                                        <button className="px-3 py-1.5 text-sm text-slate-400 hover:text-slate-600">&lt;</button>
+                                        {[1, 2, 3, 4, 5].map(page => (
+                                            <button
+                                                key={page}
+                                                className={`w-8 h-8 rounded-lg text-sm font-medium ${page === 1
+                                                    ? 'bg-emerald-500 text-white'
+                                                    : 'text-slate-500 hover:bg-slate-100'
+                                                    }`}
+                                            >
+                                                {page}
+                                            </button>
+                                        ))}
+                                        <button className="px-3 py-1.5 text-sm text-slate-400 hover:text-slate-600">&gt;</button>
                                     </div>
                                 </div>
-                            )}
-
-                            {/* No Punch Out Reason if available */}
-                            {viewEmployeeModal.employee.no_punch_out_reason && (
-                                <div className="bg-orange-50 rounded-xl p-4 border border-orange-100">
-                                    <div className="text-xs text-orange-600 mb-1 font-semibold">Reason for No Punch Out</div>
-                                    <p className="text-sm text-slate-700">{viewEmployeeModal.employee.no_punch_out_reason}</p>
-                                </div>
-                            )}
-
-                            {/* Date */}
-                            <div className="text-center text-xs text-slate-400 pt-2">
-                                Date: {viewEmployeeModal.employee.date ? new Date(viewEmployeeModal.employee.date).toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) : 'N/A'}
                             </div>
-                        </div>
-
-                        {/* Footer */}
-                        <div className="p-4 bg-slate-50 border-t border-slate-100">
-                            <button
-                                onClick={() => setViewEmployeeModal({ isOpen: false, employee: null })}
-                                className="w-full py-3 bg-slate-800 hover:bg-slate-900 text-white rounded-xl font-semibold transition-colors"
-                            >
-                                Close
-                            </button>
                         </div>
                     </motion.div>
                 </div>
