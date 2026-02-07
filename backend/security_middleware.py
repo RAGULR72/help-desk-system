@@ -41,6 +41,8 @@ class SecurityMiddleware(BaseHTTPMiddleware):
         super().__init__(app)
         # Store request counts per IP
         self.request_counts: Dict[str, List[datetime]] = defaultdict(list)
+        # Store login request counts per IP (separate from general requests)
+        self.login_requests: Dict[str, List[datetime]] = defaultdict(list)
         # Store failed login attempts per IP
         self.failed_attempts: Dict[str, List[datetime]] = defaultdict(list)
         # Blocked IPs with unblock time
@@ -79,6 +81,7 @@ class SecurityMiddleware(BaseHTTPMiddleware):
             else:
                 # Unblock expired
                 del self.blocked_ips[ip]
+                # Also clear failed attempts so they don't get immediately re-blocked
                 if ip in self.failed_attempts:
                     del self.failed_attempts[ip]
                 logger.info(f"IP {ip} automatically unblocked")
@@ -101,26 +104,43 @@ class SecurityMiddleware(BaseHTTPMiddleware):
         now = datetime.utcnow()
         
         # Determine limits based on endpoint
-        if "/api/auth/login" in endpoint or "/api/auth/2fa/verify" in endpoint:
+        is_login = "/api/auth/login" in endpoint or "/api/auth/2fa/verify" in endpoint
+        
+        if is_login:
             limit = LOGIN_RATE_LIMIT
             window = LOGIN_RATE_WINDOW
+            # Use login requests counter
+            requests_list = self.login_requests[ip]
         else:
             limit = RATE_LIMIT_REQUESTS
             window = RATE_LIMIT_WINDOW
+            # Use general requests counter
+            requests_list = self.request_counts[ip]
         
         # Clean old entries
         cutoff = now - timedelta(seconds=window)
-        self.request_counts[ip] = [
-            timestamp for timestamp in self.request_counts[ip]
-            if timestamp > cutoff
-        ]
+        # Filter in place or create new list
+        new_list = [timestamp for timestamp in requests_list if timestamp > cutoff]
         
         # Check if limit exceeded
-        if len(self.request_counts[ip]) >= limit:
+        if len(new_list) >= limit:
+            # Update list stored in map even if we return True (to keep clean)
+            if is_login:
+                self.login_requests[ip] = new_list
+            else:
+                self.request_counts[ip] = new_list
+                
             return True
         
         # Record this request
-        self.request_counts[ip].append(now)
+        new_list.append(now)
+        
+        # Save back to correct map
+        if is_login:
+            self.login_requests[ip] = new_list
+        else:
+            self.request_counts[ip] = new_list
+            
         return False
     
     def record_failed_login(self, ip: str):
