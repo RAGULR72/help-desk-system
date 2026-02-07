@@ -1167,8 +1167,8 @@ const AttendanceView = () => {
                                                 <span className="text-xs text-slate-600 bg-slate-100 px-2 py-1 rounded-md">{displayDept}</span>
                                             </td>
                                             <td className="px-4 py-3">
-                                                <span className="text-xs font-medium text-slate-700">
-                                                    {log.check_in ? new Date(log.check_in).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true }).toUpperCase() : '--:--'}
+                                                <span className={`text-xs font-medium ${log.check_in ? 'text-slate-700' : 'text-rose-500'}`}>
+                                                    {log.check_in ? new Date(log.check_in).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true }).toUpperCase() : 'Not Recorded'}
                                                 </span>
                                             </td>
                                             <td className="px-4 py-3">
@@ -1575,10 +1575,10 @@ const AttendanceView = () => {
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="bg-slate-50 rounded-xl p-4 text-center">
                                     <div className="text-xs text-slate-500 mb-1 font-semibold">Check-In</div>
-                                    <div className="text-lg font-bold text-slate-800">
+                                    <div className={`text-lg font-bold ${viewEmployeeModal.employee.check_in ? 'text-slate-800' : 'text-rose-500'}`}>
                                         {viewEmployeeModal.employee.check_in
                                             ? new Date(viewEmployeeModal.employee.check_in).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true }).toUpperCase()
-                                            : '--:--'}
+                                            : 'Not Recorded'}
                                     </div>
                                 </div>
                                 <div className="bg-slate-50 rounded-xl p-4 text-center">
