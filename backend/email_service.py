@@ -600,3 +600,88 @@ def send_2fa_otp_email(to_email: str, username: str, otp_code: str):
     except Exception as e:
         print(f"SMTP ERROR (2FA OTP): {str(e)}")
         return False
+
+def send_no_punch_out_email(to_email: str, employee_name: str, date: str, check_in_time: str):
+    """Send email notification for missing punch-out"""
+    try:
+        subject = f"⚠️ Missing Punch-Out Alert - {date}"
+        
+        html_content = f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <style>
+                body {{ font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f4f4f4; margin: 0; padding: 20px; }}
+                .container {{ max-width: 600px; margin: 0 auto; background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }}
+                .header {{ background: linear-gradient(135deg, #f59e0b, #d97706); padding: 30px; text-align: center; }}
+                .header h1 {{ color: white; margin: 0; font-size: 24px; }}
+                .content {{ padding: 30px; }}
+                .alert-box {{ background: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; margin: 20px 0; border-radius: 8px; }}
+                .info-row {{ display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #e5e7eb; }}
+                .label {{ color: #6b7280; font-weight: 500; }}
+                .value {{ color: #111827; font-weight: 600; }}
+                .action-btn {{ display: inline-block; background: #4f46e5; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; margin-top: 20px; }}
+                .footer {{ background: #f9fafb; padding: 20px; text-align: center; color: #6b7280; font-size: 12px; }}
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="header">
+                    <h1>⚠️ Missing Punch-Out</h1>
+                </div>
+                <div class="content">
+                    <p>Dear <strong>{employee_name}</strong>,</p>
+                    
+                    <div class="alert-box">
+                        <strong>You did not punch out on {date}</strong><br>
+                        Our records show that you checked in but forgot to check out.
+                    </div>
+                    
+                    <div class="info-row">
+                        <span class="label">Date</span>
+                        <span class="value">{date}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="label">Check-In Time</span>
+                        <span class="value">{check_in_time}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="label">Check-Out Time</span>
+                        <span class="value" style="color: #dc2626;">Not Recorded</span>
+                    </div>
+                    
+                    <p style="margin-top: 20px;">
+                        <strong>Action Required:</strong> Please log in to the system and provide a reason for the missing punch-out.
+                    </p>
+                    
+                    <center>
+                        <a href="https://www.proservehelpdesk.in/login" class="action-btn">Login to Submit Reason</a>
+                    </center>
+                </div>
+                <div class="footer">
+                    <p>This is an automated message from Proserve HR System</p>
+                    <p>© {datetime.now().year} Proserve. All rights reserved.</p>
+                </div>
+            </div>
+        </body>
+        </html>
+        """
+        
+        msg = MIMEMultipart("alternative")
+        msg["Subject"] = subject
+        msg["From"] = FROM_EMAIL
+        msg["To"] = to_email
+        
+        part = MIMEText(html_content, "html")
+        msg.attach(part)
+        
+        with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:
+            server.starttls()
+            server.login(SMTP_USERNAME, SMTP_PASSWORD)
+            server.sendmail(FROM_EMAIL, to_email, msg.as_string())
+            
+        return True
+    except Exception as e:
+        print(f"SMTP ERROR (No Punch Out): {str(e)}")
+        return False
+

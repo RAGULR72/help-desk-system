@@ -8,6 +8,7 @@ import api, { baseURL } from '../../api/axios';
 import { useChat } from '../../chat_system/ChatContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from '../../context/TranslationContext';
+import NoPunchOutModal from '../../attendance_system/NoPunchOutModal';
 
 
 const DashboardLayout = ({ children, activeTab = 'tickets', userRole, onTabChange, onAddUser }) => {
@@ -171,6 +172,9 @@ const DashboardLayout = ({ children, activeTab = 'tickets', userRole, onTabChang
 
     return (
         <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex font-sans transition-colors duration-300 relative overflow-hidden">
+            {/* No Punch Out Modal - Shows if user has pending no-punch-out records */}
+            <NoPunchOutModal />
+
             {/* Sidebar Overlay (Mobile Only) */}
             <AnimatePresence>
                 {isSidebarOpen && (

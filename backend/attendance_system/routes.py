@@ -499,3 +499,83 @@ def get_attendance_matrix(month: int, year: int, db: Session = Depends(get_db), 
         })
         
     return results
+
+# ============ No Punch Out Management ============
+
+class NoPunchOutReasonRequest(BaseModel):
+    attendance_id: int
+    reason: str
+
+@router.get("/no-punch-out/pending")
+def get_pending_no_punch_out(
+    db: Session = Depends(get_db),
+    current_user: root_models.User = Depends(get_current_user)
+):
+    """Get attendance records where user didn't punch out and hasn't provided a reason"""
+    pending = db.query(attendance_models.Attendance).filter(
+        attendance_models.Attendance.user_id == current_user.id,
+        attendance_models.Attendance.check_in != None,
+        attendance_models.Attendance.check_out == None,
+        attendance_models.Attendance.status == "No Punch Out",
+        attendance_models.Attendance.no_punch_out_reason == None
+    ).order_by(attendance_models.Attendance.date.desc()).all()
+    
+    return [{
+        "id": record.id,
+        "date": record.date.strftime("%Y-%m-%d") if record.date else None,
+        "check_in": record.check_in.strftime("%I:%M %p") if record.check_in else None,
+        "notified_at": record.no_punch_out_notified.isoformat() if record.no_punch_out_notified else None
+    } for record in pending]
+
+@router.post("/no-punch-out/submit-reason")
+def submit_no_punch_out_reason(
+    request: NoPunchOutReasonRequest,
+    db: Session = Depends(get_db),
+    current_user: root_models.User = Depends(get_current_user)
+):
+    """Submit reason for not punching out"""
+    attendance = db.query(attendance_models.Attendance).filter(
+        attendance_models.Attendance.id == request.attendance_id,
+        attendance_models.Attendance.user_id == current_user.id
+    ).first()
+    
+    if not attendance:
+        raise HTTPException(status_code=404, detail="Attendance record not found")
+    
+    if attendance.no_punch_out_reason:
+        raise HTTPException(status_code=400, detail="Reason already submitted")
+    
+    attendance.no_punch_out_reason = request.reason
+    db.commit()
+    
+    return {"message": "Reason submitted successfully"}
+
+@router.get("/no-punch-out/all")
+def get_all_no_punch_out_records(
+    db: Session = Depends(get_db),
+    current_user: root_models.User = Depends(get_current_user)
+):
+    """Admin endpoint to get all no punch out records"""
+    if current_user.role not in ['admin', 'manager']:
+        raise HTTPException(status_code=403, detail="Not authorized")
+    
+    records = db.query(attendance_models.Attendance).filter(
+        attendance_models.Attendance.status == "No Punch Out"
+    ).order_by(attendance_models.Attendance.date.desc()).limit(100).all()
+    
+    result = []
+    for record in records:
+        user = db.query(root_models.User).filter(root_models.User.id == record.user_id).first()
+        result.append({
+            "id": record.id,
+            "user_id": record.user_id,
+            "employee_name": user.full_name or user.username if user else "Unknown",
+            "department": user.department if user else None,
+            "date": record.date.strftime("%Y-%m-%d") if record.date else None,
+            "check_in": record.check_in.strftime("%I:%M %p") if record.check_in else None,
+            "reason": record.no_punch_out_reason,
+            "notified_at": record.no_punch_out_notified.isoformat() if record.no_punch_out_notified else None
+        })
+    
+    return result
+

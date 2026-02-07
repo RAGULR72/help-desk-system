@@ -14,8 +14,10 @@ class Attendance(Base):
     date = Column(DateTime, default=get_ist)
     check_in = Column(DateTime, nullable=True)
     check_out = Column(DateTime, nullable=True)
-    status = Column(String, default="Present") # Present, Late, Absent, WO, Half Day
+    status = Column(String, default="Present") # Present, Late, Absent, WO, Half Day, No Punch Out
     work_location = Column(String, default="Office")
+    no_punch_out_reason = Column(String, nullable=True)  # Reason provided by employee
+    no_punch_out_notified = Column(DateTime, nullable=True)  # When notification was sent
 
 class LeaveRequest(Base):
     __tablename__ = "leave_requests"

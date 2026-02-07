@@ -18,6 +18,7 @@ if parent_dir not in sys.path:
 
 from apscheduler.schedulers.background import BackgroundScheduler
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 from database import SessionLocal, engine
 from sla_system.sla_models import TicketSLATracking, SLARule, SLAEscalationRule, SLAEscalation, SLAPolicy
 from workflow_system.workflow_models import AutomationRule
@@ -29,6 +30,7 @@ from email_service import send_sla_breach_email
 import json
 from workflow_system import workflow_models as wm
 from sla_system import sla_service
+from attendance_system import models as attendance_models
 
 # Setup Logging
 logging.basicConfig(
@@ -293,6 +295,77 @@ def trigger_escalation_event(db: Session, tracking: TicketSLATracking, rule: SLA
     # This is where neenga n8n call panni WhatsApp/Email logic trigger pannalam
     # trigger_n8n_webhook(ticket, rule)
 
+def check_no_punch_out():
+    """
+    Runs at 3 AM IST daily to check for employees who checked in yesterday 
+    but didn't check out by 11:50 PM. Marks them as "No Punch Out" and sends email.
+    """
+    db = SessionLocal()
+    try:
+        logger.info("Starting No Punch Out check...")
+        
+        # Calculate yesterday's date in IST (UTC+5:30)
+        ist_offset = timedelta(hours=5, minutes=30)
+        now_ist = datetime.utcnow() + ist_offset
+        yesterday = (now_ist - timedelta(days=1)).date()
+        
+        # Find attendance records from yesterday with check_in but no check_out
+        # and not already marked as "No Punch Out"
+        records = db.query(attendance_models.Attendance).filter(
+            func.date(attendance_models.Attendance.date) == yesterday,
+            attendance_models.Attendance.check_in != None,
+            attendance_models.Attendance.check_out == None,
+            attendance_models.Attendance.status != "No Punch Out"
+        ).all()
+        
+        if not records:
+            logger.info("No missing punch-out records found for yesterday.")
+            return
+        
+        logger.info(f"Found {len(records)} employees without punch-out yesterday.")
+        
+        for record in records:
+            # Mark as "No Punch Out"
+            record.status = "No Punch Out"
+            record.no_punch_out_notified = datetime.utcnow()
+            
+            # Get user details for email
+            user = db.query(User).filter(User.id == record.user_id).first()
+            if user and user.email:
+                try:
+                    # Send email notification
+                    from email_service import send_no_punch_out_email
+                    send_no_punch_out_email(
+                        to_email=user.email,
+                        employee_name=user.full_name or user.username,
+                        date=yesterday.strftime("%d-%b-%Y"),
+                        check_in_time=record.check_in.strftime("%I:%M %p") if record.check_in else "N/A"
+                    )
+                    logger.info(f"Sent no punch-out notification to {user.email}")
+                except Exception as e:
+                    logger.error(f"Failed to send email to {user.email}: {e}")
+            
+            # Create in-app notification
+            if user:
+                create_notification(
+                    db,
+                    user.id,
+                    "Missing Punch-Out",
+                    f"You didn't punch out on {yesterday.strftime('%d-%b-%Y')}. Please provide a reason.",
+                    "attendance",
+                    "/dashboard/attendance"
+                )
+        
+        db.commit()
+        logger.info(f"Successfully processed {len(records)} no punch-out records.")
+        
+    except Exception as e:
+        logger.error(f"Error in no punch-out check: {str(e)}")
+        db.rollback()
+    finally:
+        db.close()
+
+
 def start_worker():
     """Starts the background scheduler"""
     scheduler = BackgroundScheduler()
@@ -301,6 +374,9 @@ def start_worker():
     
     # Runs every 1 hour for general automation (like auto-close)
     scheduler.add_job(run_automation_rules, 'interval', hours=1)
+    
+    # Runs at 3 AM IST (21:30 UTC previous day) to check for missing punch-outs
+    scheduler.add_job(check_no_punch_out, 'cron', hour=21, minute=30)  # 3 AM IST = 21:30 UTC
     
     logger.info("SLA & Automation Worker process started. Initializing scheduler...")
     scheduler.start()
