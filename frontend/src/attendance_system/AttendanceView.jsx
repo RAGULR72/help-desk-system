@@ -553,6 +553,7 @@ const AttendanceCalendarComp = ({ month, year, calendarData, onPrev, onNext }) =
 const AttendanceView = () => {
     const { t } = useTranslation();
     const { user } = useAuth();
+    const navigate = useNavigate();
     const userRole = user?.role || 'user';
     const [activeTab, setActiveTab] = useState('my_dashboard');
 
