@@ -579,6 +579,13 @@ const AttendanceView = () => {
     const [isHolidayModalOpen, setIsHolidayModalOpen] = useState(false);
     const [reviewStatusFilter, setReviewStatusFilter] = useState('Pending');
 
+    // Attendance List filters
+    const [dateFilter, setDateFilter] = useState('today');
+    const [statusFilter, setStatusFilter] = useState('all');
+    const [departmentFilter, setDepartmentFilter] = useState('all');
+    const [searchQuery, setSearchQuery] = useState('');
+    const [viewEmployeeModal, setViewEmployeeModal] = useState({ isOpen: false, employee: null });
+
     useEffect(() => {
         if (activeTab === 'my_dashboard' || activeTab === 'dashboard') {
             fetchMyStatus(); fetchMyHistory(); fetchCalendarData(); fetchSummary();
@@ -837,17 +844,28 @@ const AttendanceView = () => {
             value: data.total > 0 ? Math.round((data.present / data.total) * 100) : 0
         }));
 
-        // Search and Filter states
-        const [searchQuery, setSearchQuery] = useState('');
-        const [dateFilter, setDateFilter] = useState('last7');
+        // Use parent-level states - removed local declarations that conflict
         const [currentPage, setCurrentPage] = useState(1);
         const [rowsPerPage, setRowsPerPage] = useState(10);
 
-        // Filtered data
+        // Filtered data with all filters (search, status, department)
         const filteredData = attendanceData.filter(log => {
             const name = (log.full_name || log.username || '').toLowerCase();
-            const dept = (log.department || log.dept || '').toLowerCase();
-            return name.includes(searchQuery.toLowerCase()) || dept.includes(searchQuery.toLowerCase());
+            const dept = (log.department || log.dept || 'General');
+            const status = log.status || (log.check_in && !log.check_out ? 'No Punch Out' : 'Absent');
+
+            // Search filter
+            const matchesSearch = searchQuery === '' ||
+                name.includes(searchQuery.toLowerCase()) ||
+                dept.toLowerCase().includes(searchQuery.toLowerCase());
+
+            // Status filter
+            const matchesStatus = statusFilter === 'all' || status === statusFilter;
+
+            // Department filter
+            const matchesDept = departmentFilter === 'all' || dept === departmentFilter;
+
+            return matchesSearch && matchesStatus && matchesDept;
         });
 
         const totalPages = Math.ceil(filteredData.length / rowsPerPage);
@@ -1003,20 +1021,44 @@ const AttendanceView = () => {
 
                 {/* Attendance List Table */}
                 <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-                    {/* Table Header */}
-                    <div className="p-4 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                        <div className="flex items-center gap-2">
-                            <div className="w-2 h-2 rounded-full bg-slate-800"></div>
-                            <h3 className="text-sm font-bold text-slate-800">Attendance List</h3>
+                    {/* Table Header with Filters */}
+                    <div className="p-4 border-b border-slate-100">
+                        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                            <div className="flex items-center gap-3">
+                                <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
+                                <h3 className="text-sm font-bold text-slate-800">Attendance List</h3>
+                                <span className="text-xs text-slate-400">({filteredData.length} records)</span>
+                            </div>
+
+                            {/* Search Bar */}
+                            <div className="relative flex-1 max-w-xs">
+                                <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={14} />
+                                <input
+                                    type="text"
+                                    placeholder="Search employee..."
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    className="w-full pl-9 pr-4 py-2 text-xs bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/20"
+                                />
+                            </div>
                         </div>
-                        <div className="flex flex-wrap items-center gap-2">
+
+                        {/* Filter Row */}
+                        <div className="flex flex-wrap items-center gap-2 mt-4">
+                            {/* Date Filter - Default Today */}
                             <select
                                 value={dateFilter}
-                                onChange={(e) => setDateFilter(e.target.value)}
+                                onChange={(e) => {
+                                    setDateFilter(e.target.value);
+                                    if (e.target.value === 'today') {
+                                        setSelectedDateFilter(new Date().toISOString().split('T')[0]);
+                                    }
+                                }}
                                 className="text-xs font-medium text-slate-600 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 cursor-pointer hover:bg-slate-100"
                             >
-                                <option value="last7">Last 7 Days</option>
                                 <option value="today">Today</option>
+                                <option value="yesterday">Yesterday</option>
+                                <option value="last7">Last 7 Days</option>
                                 <option value="month">This Month</option>
                             </select>
 
@@ -1025,18 +1067,38 @@ const AttendanceView = () => {
                                 <input
                                     type="date"
                                     value={selectedDateFilter}
-                                    onChange={(e) => setSelectedDateFilter(e.target.value)}
+                                    onChange={(e) => {
+                                        setSelectedDateFilter(e.target.value);
+                                        setDateFilter('custom');
+                                    }}
                                     className="text-xs text-slate-600 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2"
                                 />
                             </div>
 
-                            <button className="flex items-center gap-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-100">
-                                <FiFilter size={12} /> Filter
-                            </button>
+                            {/* Status Filter */}
+                            <select
+                                value={statusFilter}
+                                onChange={(e) => setStatusFilter(e.target.value)}
+                                className="text-xs font-medium text-slate-600 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 cursor-pointer hover:bg-slate-100"
+                            >
+                                <option value="all">All Status</option>
+                                <option value="Present">✓ Present</option>
+                                <option value="Late">⏰ Late</option>
+                                <option value="Absent">✗ Absent</option>
+                                <option value="No Punch Out">⚠ No Punch Out</option>
+                            </select>
 
-                            <button className="flex items-center gap-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-100">
-                                Sort By <FiChevronRight className="rotate-90" size={12} />
-                            </button>
+                            {/* Department Sort */}
+                            <select
+                                value={departmentFilter}
+                                onChange={(e) => setDepartmentFilter(e.target.value)}
+                                className="text-xs font-medium text-slate-600 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 cursor-pointer hover:bg-slate-100"
+                            >
+                                <option value="all">All Departments</option>
+                                {[...new Set(attendanceData.map(d => d.department || d.dept || 'General'))].filter(Boolean).map(dept => (
+                                    <option key={dept} value={dept}>{dept}</option>
+                                ))}
+                            </select>
                         </div>
                     </div>
 
@@ -1045,22 +1107,19 @@ const AttendanceView = () => {
                         <table className="w-full">
                             <thead>
                                 <tr className="bg-slate-50/80 border-b border-slate-100">
-                                    <th className="px-4 py-3 w-10">
-                                        <input type="checkbox" className="rounded border-slate-300 text-emerald-600" />
-                                    </th>
-                                    <th className="px-4 py-3 text-[11px] font-semibold text-slate-500 text-left">ID Employee</th>
-                                    <th className="px-4 py-3 text-[11px] font-semibold text-slate-500 text-left">Name</th>
+                                    <th className="px-4 py-3 text-[11px] font-semibold text-slate-500 text-left">ID</th>
+                                    <th className="px-4 py-3 text-[11px] font-semibold text-slate-500 text-left">Employee</th>
                                     <th className="px-4 py-3 text-[11px] font-semibold text-slate-500 text-left">Department</th>
-                                    <th className="px-4 py-3 text-[11px] font-semibold text-slate-500 text-left">Check-In Time</th>
-                                    <th className="px-4 py-3 text-[11px] font-semibold text-slate-500 text-left">Check-Out Time</th>
-                                    <th className="px-4 py-3 text-[11px] font-semibold text-slate-500 text-left">Log Hours</th>
-                                    <th className="px-4 py-3 text-[11px] font-semibold text-slate-500 text-left">Status</th>
+                                    <th className="px-4 py-3 text-[11px] font-semibold text-slate-500 text-left">Check-In</th>
+                                    <th className="px-4 py-3 text-[11px] font-semibold text-slate-500 text-left">Check-Out</th>
+                                    <th className="px-4 py-3 text-[11px] font-semibold text-slate-500 text-left">Hours</th>
+                                    <th className="px-4 py-3 text-[11px] font-semibold text-slate-500 text-left">Action</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-50">
                                 {currentData.length === 0 ? (
                                     <tr>
-                                        <td colSpan="8" className="px-4 py-12 text-center text-sm text-slate-400">
+                                        <td colSpan="7" className="px-4 py-12 text-center text-sm text-slate-400">
                                             No attendance records found
                                         </td>
                                     </tr>
@@ -1068,48 +1127,58 @@ const AttendanceView = () => {
                                     const displayName = log.full_name?.trim() || log.username?.trim() || 'Unknown';
                                     const displayDept = log.department?.trim() || log.dept?.trim() || 'General';
                                     const hours = log.check_in && log.check_out ? (new Date(log.check_out) - new Date(log.check_in)) / 36e5 : 0;
-                                    const hoursStr = hours > 0 ? `${Math.floor(hours)}:${Math.round((hours % 1) * 60).toString().padStart(2, '0')}:00` : '--:--:--';
+                                    const hoursStr = hours > 0 ? `${Math.floor(hours)}:${Math.round((hours % 1) * 60).toString().padStart(2, '0')}` : '--:--';
                                     const empId = `#${(log.user_id || log.id || 100000 + idx).toString().padStart(6, '0')}`;
+                                    const status = log.status || (log.check_in && !log.check_out ? 'No Punch Out' : 'Absent');
+
+                                    const statusColors = {
+                                        'Present': 'bg-emerald-50 text-emerald-600 border-emerald-100',
+                                        'Late': 'bg-amber-50 text-amber-600 border-amber-100',
+                                        'Absent': 'bg-rose-50 text-rose-600 border-rose-100',
+                                        'No Punch Out': 'bg-orange-50 text-orange-600 border-orange-100'
+                                    };
 
                                     return (
-                                        <tr key={log.id || idx} className="hover:bg-slate-50/50 transition-colors">
-                                            <td className="px-4 py-3">
-                                                <input type="checkbox" className="rounded border-slate-300 text-emerald-600" />
-                                            </td>
+                                        <tr key={log.id || idx} className="hover:bg-slate-50/50 transition-colors group">
                                             <td className="px-4 py-3">
                                                 <span className="text-xs font-medium text-emerald-600">{empId}</span>
                                             </td>
                                             <td className="px-4 py-3">
-                                                <div className="flex items-center gap-2">
-                                                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-amber-100 to-orange-200 flex items-center justify-center text-xs font-bold text-amber-700">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-9 h-9 rounded-full bg-gradient-to-br from-emerald-100 to-teal-200 flex items-center justify-center text-xs font-bold text-emerald-700">
                                                         {displayName.charAt(0).toUpperCase()}
                                                     </div>
-                                                    <span className="text-xs font-semibold text-slate-700">{displayName}</span>
+                                                    <div>
+                                                        <p className="text-xs font-semibold text-slate-800">{displayName}</p>
+                                                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-bold border ${statusColors[status] || statusColors['Absent']}`}>
+                                                            {status}
+                                                        </span>
+                                                    </div>
                                                 </div>
                                             </td>
                                             <td className="px-4 py-3">
-                                                <span className="text-xs text-slate-600">{displayDept}</span>
+                                                <span className="text-xs text-slate-600 bg-slate-100 px-2 py-1 rounded-md">{displayDept}</span>
                                             </td>
                                             <td className="px-4 py-3">
                                                 <span className="text-xs font-medium text-slate-700">
-                                                    {log.check_in ? new Date(log.check_in).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true }).toUpperCase() : '--:-- --'}
+                                                    {log.check_in ? new Date(log.check_in).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true }).toUpperCase() : '--:--'}
                                                 </span>
                                             </td>
                                             <td className="px-4 py-3">
-                                                <span className="text-xs font-medium text-slate-700">
-                                                    {log.check_out ? new Date(log.check_out).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true }).toUpperCase() : '--:-- --'}
+                                                <span className={`text-xs font-medium ${log.check_out ? 'text-slate-700' : 'text-rose-500'}`}>
+                                                    {log.check_out ? new Date(log.check_out).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true }).toUpperCase() : 'Not Recorded'}
                                                 </span>
                                             </td>
                                             <td className="px-4 py-3">
                                                 <span className="text-xs font-mono font-medium text-slate-600">{hoursStr}</span>
                                             </td>
                                             <td className="px-4 py-3">
-                                                <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-semibold ${log.status === 'Present' ? 'bg-emerald-50 text-emerald-600' :
-                                                    log.status === 'Late' ? 'bg-amber-50 text-amber-600' :
-                                                        'bg-rose-50 text-rose-600'
-                                                    }`}>
-                                                    {log.status || 'Absent'}
-                                                </span>
+                                                <button
+                                                    onClick={() => setViewEmployeeModal({ isOpen: true, employee: log })}
+                                                    className="px-3 py-1.5 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 rounded-lg text-xs font-semibold transition-all opacity-0 group-hover:opacity-100"
+                                                >
+                                                    View
+                                                </button>
                                             </td>
                                         </tr>
                                     );
@@ -1446,6 +1515,114 @@ const AttendanceView = () => {
             <LeaveActionModal isOpen={leaveActionModal.isOpen} onClose={() => setLeaveActionModal({ ...leaveActionModal, isOpen: false })} onSubmitted={fetchAllLeaves} leaveId={leaveActionModal.leaveId} actionType={leaveActionModal.type} />
             <AdminEditLeaveModal isOpen={editLeaveModal.isOpen} onClose={() => setEditLeaveModal({ ...editLeaveModal, isOpen: false })} onSubmitted={fetchAllLeaves} leave={editLeaveModal.leave} />
             <HolidayConfigModal isOpen={isHolidayModalOpen} onClose={() => setIsHolidayModalOpen(false)} />
+
+            {/* Employee View Modal */}
+            {viewEmployeeModal.isOpen && viewEmployeeModal.employee && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-md">
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="bg-white w-full max-w-md rounded-3xl shadow-2xl overflow-hidden"
+                    >
+                        {/* Header */}
+                        <div className="bg-gradient-to-r from-emerald-500 to-teal-500 p-6 text-white relative">
+                            <button
+                                onClick={() => setViewEmployeeModal({ isOpen: false, employee: null })}
+                                className="absolute top-4 right-4 p-2 hover:bg-white/20 rounded-lg transition-colors"
+                            >
+                                <FiX size={18} />
+                            </button>
+                            <div className="flex items-center gap-4">
+                                <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center text-2xl font-bold">
+                                    {(viewEmployeeModal.employee.full_name || viewEmployeeModal.employee.username || 'U').charAt(0).toUpperCase()}
+                                </div>
+                                <div>
+                                    <h3 className="text-xl font-bold">{viewEmployeeModal.employee.full_name || viewEmployeeModal.employee.username || 'Unknown'}</h3>
+                                    <p className="text-white/70 text-sm">{viewEmployeeModal.employee.department || viewEmployeeModal.employee.dept || 'General'}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Content */}
+                        <div className="p-6 space-y-4">
+                            {/* Status Badge */}
+                            <div className="flex justify-center">
+                                {(() => {
+                                    const status = viewEmployeeModal.employee.status || (viewEmployeeModal.employee.check_in && !viewEmployeeModal.employee.check_out ? 'No Punch Out' : 'Absent');
+                                    const statusConfig = {
+                                        'Present': { bg: 'bg-emerald-100', text: 'text-emerald-700', border: 'border-emerald-200' },
+                                        'Late': { bg: 'bg-amber-100', text: 'text-amber-700', border: 'border-amber-200' },
+                                        'Absent': { bg: 'bg-rose-100', text: 'text-rose-700', border: 'border-rose-200' },
+                                        'No Punch Out': { bg: 'bg-orange-100', text: 'text-orange-700', border: 'border-orange-200' }
+                                    };
+                                    const config = statusConfig[status] || statusConfig['Absent'];
+                                    return (
+                                        <span className={`px-4 py-2 rounded-full text-sm font-bold border ${config.bg} ${config.text} ${config.border}`}>
+                                            {status}
+                                        </span>
+                                    );
+                                })()}
+                            </div>
+
+                            {/* Time Info */}
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="bg-slate-50 rounded-xl p-4 text-center">
+                                    <div className="text-xs text-slate-500 mb-1 font-semibold">Check-In</div>
+                                    <div className="text-lg font-bold text-slate-800">
+                                        {viewEmployeeModal.employee.check_in
+                                            ? new Date(viewEmployeeModal.employee.check_in).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true }).toUpperCase()
+                                            : '--:--'}
+                                    </div>
+                                </div>
+                                <div className="bg-slate-50 rounded-xl p-4 text-center">
+                                    <div className="text-xs text-slate-500 mb-1 font-semibold">Check-Out</div>
+                                    <div className={`text-lg font-bold ${viewEmployeeModal.employee.check_out ? 'text-slate-800' : 'text-rose-500'}`}>
+                                        {viewEmployeeModal.employee.check_out
+                                            ? new Date(viewEmployeeModal.employee.check_out).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true }).toUpperCase()
+                                            : 'Not Recorded'}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Hours Worked */}
+                            {viewEmployeeModal.employee.check_in && viewEmployeeModal.employee.check_out && (
+                                <div className="bg-emerald-50 rounded-xl p-4 text-center border border-emerald-100">
+                                    <div className="text-xs text-emerald-600 mb-1 font-semibold">Total Hours Worked</div>
+                                    <div className="text-2xl font-bold text-emerald-700">
+                                        {(() => {
+                                            const hours = (new Date(viewEmployeeModal.employee.check_out) - new Date(viewEmployeeModal.employee.check_in)) / 36e5;
+                                            return `${Math.floor(hours)}h ${Math.round((hours % 1) * 60)}m`;
+                                        })()}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* No Punch Out Reason if available */}
+                            {viewEmployeeModal.employee.no_punch_out_reason && (
+                                <div className="bg-orange-50 rounded-xl p-4 border border-orange-100">
+                                    <div className="text-xs text-orange-600 mb-1 font-semibold">Reason for No Punch Out</div>
+                                    <p className="text-sm text-slate-700">{viewEmployeeModal.employee.no_punch_out_reason}</p>
+                                </div>
+                            )}
+
+                            {/* Date */}
+                            <div className="text-center text-xs text-slate-400 pt-2">
+                                Date: {viewEmployeeModal.employee.date ? new Date(viewEmployeeModal.employee.date).toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) : 'N/A'}
+                            </div>
+                        </div>
+
+                        {/* Footer */}
+                        <div className="p-4 bg-slate-50 border-t border-slate-100">
+                            <button
+                                onClick={() => setViewEmployeeModal({ isOpen: false, employee: null })}
+                                className="w-full py-3 bg-slate-800 hover:bg-slate-900 text-white rounded-xl font-semibold transition-colors"
+                            >
+                                Close
+                            </button>
+                        </div>
+                    </motion.div>
+                </div>
+            )}
         </div>
     );
 };
