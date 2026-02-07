@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
     FiChevronLeft, FiSearch, FiFilter, FiDownload,
-    FiMoreVertical, FiCalendar, FiClock
+    FiMoreVertical, FiCalendar, FiClock, FiTrendingUp
 } from 'react-icons/fi';
 import { motion } from 'framer-motion';
 import api from '../api/axios';
@@ -149,8 +149,8 @@ const EmployeeDetailPage = () => {
                                         key={tab}
                                         onClick={() => setActiveTab(tab)}
                                         className={`py-4 text-sm font-bold border-b-2 transition-all whitespace-nowrap ${activeTab === tab
-                                                ? 'text-emerald-600 border-emerald-500'
-                                                : 'text-slate-400 border-transparent hover:text-slate-600 hover:border-slate-200'
+                                            ? 'text-emerald-600 border-emerald-500'
+                                            : 'text-slate-400 border-transparent hover:text-slate-600 hover:border-slate-200'
                                             }`}
                                     >
                                         {tab}
