@@ -124,6 +124,14 @@ def fix_all_tables():
     for col, ctype in notif_cols:
         add_column_if_missing(inspector, 'notifications', col, ctype)
 
+    # Attendance table - No Punch Out tracking
+    attendance_cols = [
+        ("no_punch_out_reason", "VARCHAR"),
+        ("no_punch_out_notified", "TIMESTAMP")
+    ]
+    for col, ctype in attendance_cols:
+        add_column_if_missing(inspector, 'attendance', col, ctype)
+
 def fix_users_table():
     fix_all_tables()
 
