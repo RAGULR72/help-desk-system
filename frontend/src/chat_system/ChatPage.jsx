@@ -819,27 +819,8 @@ const ChatPage = () => {
                             />
                         </div>
 
-                        {/* Stories / Online Users */}
-                        <div className="flex gap-3 overflow-x-auto no-scrollbar py-2 mb-2">
-                            <div className="flex flex-col items-center gap-1 cursor-pointer min-w-[56px] flex-shrink-0">
-                                <div className="w-14 h-14 rounded-full border-2 border-dashed border-violet-300 p-0.5 hover:border-violet-500 transition-colors">
-                                    <div className="w-full h-full bg-violet-50 dark:bg-slate-800 rounded-full flex items-center justify-center text-violet-500">
-                                        <IoAdd size={24} />
-                                    </div>
-                                </div>
-                                <span className="text-[10px] text-gray-500 font-bold">Add Story</span>
-                            </div>
-                            {rooms.filter(r => r.room_type === 'direct' && r.is_online).slice(0, 10).map(room => (
-                                <div key={room.id} className="flex flex-col items-center gap-1 cursor-pointer min-w-[56px] flex-shrink-0" onClick={() => handleSelectRoom(room)}>
-                                    <div className="w-14 h-14 rounded-full border-2 border-violet-500 p-0.5">
-                                        <img src={getFullAvatarUrl(room.users?.find(u => u.id !== user.id)?.avatar) || `https://ui-avatars.com/api/?name=${room.name}`} className="w-full h-full object-cover rounded-full" />
-                                    </div>
-                                    <span className="text-[10px] text-gray-600 dark:text-gray-300 font-bold truncate w-14 text-center">
-                                        {room.name.split(' ')[0]}
-                                    </span>
-                                </div>
-                            ))}
-                        </div>
+
+
                     </div>
 
                     {/* Chat List */}
@@ -997,15 +978,7 @@ const ChatPage = () => {
                                         </p>
                                     </div>
                                 </div>
-                                <div className="flex items-center gap-2">
-                                    <div className="flex bg-gray-50 dark:bg-slate-800 rounded-full p-1 border border-gray-100 dark:border-slate-700">
-                                        <button className="p-2 text-gray-400 hover:text-violet-600 hover:bg-white dark:hover:bg-slate-700 rounded-full transition-all shadow-sm"><IoCall size={18} /></button>
-                                        <button className="p-2 text-gray-400 hover:text-violet-600 hover:bg-white dark:hover:bg-slate-700 rounded-full transition-all shadow-sm"><IoVideocam size={18} /></button>
-                                    </div>
-                                    <button onClick={() => setShowGroupInfo(!showGroupInfo)} className={`p-2.5 rounded-full transition-all ${showGroupInfo ? 'bg-violet-100 text-violet-600 dark:bg-slate-800 dark:text-violet-400' : 'text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-800'}`}>
-                                        <IoEllipsisHorizontal size={20} />
-                                    </button>
-                                </div>
+
                             </div>
 
                             {/* Messages List */}
@@ -1179,7 +1152,7 @@ const ChatPage = () => {
 
                 {/* 3. RIGHT SIDEBAR (DETAILS) */}
                 {showGroupInfo && roomDetails && (
-                    <div className="w-full md:w-[320px] bg-white dark:bg-slate-900 border-l border-gray-100 dark:border-slate-800 flex flex-col h-full overflow-y-auto custom-scrollbar flex-shrink-0 z-10 absolute md:relative right-0 top-0 shadow-2xl md:shadow-none transition-all duration-300">
+                    <div className="w-full xl:w-[320px] lg:w-[300px] md:w-[280px] bg-white dark:bg-slate-900 border-l border-gray-100 dark:border-slate-800 flex flex-col h-full overflow-y-auto custom-scrollbar flex-shrink-0 z-10 absolute md:relative right-0 top-0 shadow-2xl md:shadow-none transition-all duration-300">
                         {/* Header */}
                         <div className="p-6 pb-4 flex flex-col items-center border-b border-gray-50 dark:border-slate-800 relative">
                             <button onClick={() => setShowGroupInfo(false)} className="absolute top-4 right-4 p-2 bg-gray-50 dark:bg-slate-800 text-gray-400 hover:text-gray-600 dark:hover:text-white rounded-full transition-colors md:hidden">
@@ -1239,12 +1212,14 @@ const ChatPage = () => {
                                     </div>
                                     <span className="text-[10px] font-bold text-gray-400 group-hover:text-violet-600 transition-colors uppercase tracking-wide">Search</span>
                                 </div>
-                                <div className="flex flex-col items-center gap-2 cursor-pointer group">
-                                    <div className="w-10 h-10 rounded-full bg-red-50 dark:bg-red-900/10 flex items-center justify-center text-red-500 group-hover:bg-red-100 dark:group-hover:bg-red-900/30 transition-colors shadow-sm">
-                                        <IoTrash size={18} />
+                                {activeRoom.room_type === 'group' && (
+                                    <div className="flex flex-col items-center gap-2 cursor-pointer group">
+                                        <div className="w-10 h-10 rounded-full bg-red-50 dark:bg-red-900/10 flex items-center justify-center text-red-500 group-hover:bg-red-100 dark:group-hover:bg-red-900/30 transition-colors shadow-sm">
+                                            <IoTrash size={18} />
+                                        </div>
+                                        <span className="text-[10px] font-bold text-gray-400 group-hover:text-red-500 transition-colors uppercase tracking-wide">Leave</span>
                                     </div>
-                                    <span className="text-[10px] font-bold text-gray-400 group-hover:text-red-500 transition-colors uppercase tracking-wide">Leave</span>
-                                </div>
+                                )}
                             </div>
                         </div>
 
@@ -1276,7 +1251,7 @@ const ChatPage = () => {
                             <div className="flex items-center justify-between p-3 hover:bg-gray-50 dark:hover:bg-slate-800 rounded-2xl cursor-pointer group transition-colors">
                                 <div className="flex items-center gap-3">
                                     <div className="w-9 h-9 rounded-xl bg-blue-50 dark:bg-blue-900/20 text-blue-500 flex items-center justify-center"><IoDocument size={18} /></div>
-                                    <span className="text-sm font-bold text-gray-700 dark:text-gray-200">Media, Links & Docs</span>
+                                    <span className="text-sm font-bold text-gray-700 dark:text-gray-200 truncate">Media, Links & Docs</span>
                                 </div>
                                 <div className="flex items-center gap-2">
                                     <span className="text-xs font-bold text-gray-400 group-hover:text-blue-500">230</span>
@@ -1286,79 +1261,81 @@ const ChatPage = () => {
                             <div className="flex items-center justify-between p-3 hover:bg-gray-50 dark:hover:bg-slate-800 rounded-2xl cursor-pointer transition-colors">
                                 <div className="flex items-center gap-3">
                                     <div className="w-9 h-9 rounded-xl bg-amber-50 dark:bg-amber-900/20 text-amber-500 flex items-center justify-center"><IoHappyOutline size={18} /></div>
-                                    <span className="text-sm font-bold text-gray-700 dark:text-gray-200">Starred Messages</span>
+                                    <span className="text-sm font-bold text-gray-700 dark:text-gray-200 truncate">Starred Messages</span>
                                 </div>
                                 <span className="text-[10px] font-bold text-gray-400 border border-gray-200 dark:border-slate-700 px-2 py-0.5 rounded-md">None</span>
                             </div>
                         </div>
 
-                        {/* Members List */}
-                        <div className="p-4 flex-1">
-                            <div className="flex items-center justify-between mb-4">
-                                <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Members ({roomDetails.participants.length})</h4>
-                                <IoSearch className="text-gray-400" />
+                        {/* Members List - Only for Groups */}
+                        {activeRoom.room_type === 'group' && (
+                            <div className="p-4 flex-1">
+                                <div className="flex items-center justify-between mb-4">
+                                    <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Members ({roomDetails.participants.length})</h4>
+                                    <IoSearch className="text-gray-400" />
+                                </div>
+
+                                <div className="space-y-4">
+                                    {/* Add Member Button */}
+                                    {(roomDetails.room.creator_id === user.id || ['admin', 'manager'].includes(user.role)) && (
+                                        <div className="space-y-3">
+                                            <div className="relative">
+                                                <input
+                                                    placeholder="Add people..."
+                                                    value={addMemberQuery}
+                                                    onChange={e => setAddMemberQuery(e.target.value)}
+                                                    className="w-full pl-9 pr-3 py-2 bg-gray-50 dark:bg-slate-800 rounded-xl text-sm outline-none focus:ring-1 focus:ring-violet-500 dark:text-white"
+                                                />
+                                                <IoAdd className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                                            </div>
+                                            {searchedMembers.length > 0 && (
+                                                <div className="max-h-40 overflow-y-auto border border-gray-100 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900 shadow-lg">
+                                                    {searchedMembers.map(u => (
+                                                        <div key={u.id} onClick={() => handleSelectMember(u)} className="p-2 hover:bg-gray-50 dark:hover:bg-slate-800 cursor-pointer flex items-center gap-2">
+                                                            <div className="w-6 h-6 rounded-full bg-indigo-100 flex items-center justify-center text-xs font-bold">{u.full_name[0]}</div>
+                                                            <span className="text-sm font-medium dark:text-gray-200">{u.full_name}</span>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
+                                            {pendingMembers.length > 0 && (
+                                                <div className="flex flex-wrap gap-2">
+                                                    {pendingMembers.map(u => (
+                                                        <span key={u.id} className="text-[10px] font-bold bg-violet-100 text-violet-600 px-2 py-1 rounded-lg flex items-center gap-1">
+                                                            {u.full_name} <button onClick={() => setPendingMembers(pendingMembers.filter(p => p.id !== u.id))}><IoClose /></button>
+                                                        </span>
+                                                    ))}
+                                                    <button onClick={confirmAddMembers} className="text-[10px] font-bold bg-violet-600 text-white px-3 py-1 rounded-lg hover:bg-violet-700">Add</button>
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+
+                                    {/* Participants */}
+                                    {roomDetails.participants.map(p => (
+                                        <div key={p.user_id} className="flex items-center gap-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-800 p-2.5 -mx-2 rounded-2xl transition-colors group relative" onClick={() => handleViewProfile(p.user_id)}>
+                                            <div className="relative">
+                                                <img src={getFullAvatarUrl(p.avatar)} className="w-10 h-10 rounded-full bg-gray-100 object-cover" />
+                                                {p.is_online && <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 border-2 border-white dark:border-slate-900 rounded-full"></div>}
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <p className="text-sm font-bold text-gray-800 dark:text-white truncate">{p.name} {p.user_id === user.id && <span className="text-gray-400 font-normal">(You)</span>}</p>
+                                                <p className="text-[10px] text-gray-400 truncate font-medium capitalize">{p.role}</p>
+                                            </div>
+
+                                            {/* Admin Controls */}
+                                            {p.user_id !== user.id && (['admin', 'manager'].includes(user.role) || roomDetails.participants.find(mp => mp.user_id === user.id && mp.role === 'admin')) && (
+                                                <div className="opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
+                                                    <button onClick={(e) => { e.stopPropagation(); handleRemoveMember(p.user_id); }} className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors">
+                                                        <IoTrash size={16} />
+                                                    </button>
+                                                </div>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
-
-                            <div className="space-y-4">
-                                {/* Add Member Button */}
-                                {activeRoom.room_type === 'group' && (roomDetails.room.creator_id === user.id || ['admin', 'manager'].includes(user.role)) && (
-                                    <div className="space-y-3">
-                                        <div className="relative">
-                                            <input
-                                                placeholder="Add people..."
-                                                value={addMemberQuery}
-                                                onChange={e => setAddMemberQuery(e.target.value)}
-                                                className="w-full pl-9 pr-3 py-2 bg-gray-50 dark:bg-slate-800 rounded-xl text-sm outline-none focus:ring-1 focus:ring-violet-500 dark:text-white"
-                                            />
-                                            <IoAdd className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                                        </div>
-                                        {searchedMembers.length > 0 && (
-                                            <div className="max-h-40 overflow-y-auto border border-gray-100 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900 shadow-lg">
-                                                {searchedMembers.map(u => (
-                                                    <div key={u.id} onClick={() => handleSelectMember(u)} className="p-2 hover:bg-gray-50 dark:hover:bg-slate-800 cursor-pointer flex items-center gap-2">
-                                                        <div className="w-6 h-6 rounded-full bg-indigo-100 flex items-center justify-center text-xs font-bold">{u.full_name[0]}</div>
-                                                        <span className="text-sm font-medium dark:text-gray-200">{u.full_name}</span>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        )}
-                                        {pendingMembers.length > 0 && (
-                                            <div className="flex flex-wrap gap-2">
-                                                {pendingMembers.map(u => (
-                                                    <span key={u.id} className="text-[10px] font-bold bg-violet-100 text-violet-600 px-2 py-1 rounded-lg flex items-center gap-1">
-                                                        {u.full_name} <button onClick={() => setPendingMembers(pendingMembers.filter(p => p.id !== u.id))}><IoClose /></button>
-                                                    </span>
-                                                ))}
-                                                <button onClick={confirmAddMembers} className="text-[10px] font-bold bg-violet-600 text-white px-3 py-1 rounded-lg hover:bg-violet-700">Add</button>
-                                            </div>
-                                        )}
-                                    </div>
-                                )}
-
-                                {/* Participants */}
-                                {roomDetails.participants.map(p => (
-                                    <div key={p.user_id} className="flex items-center gap-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-800 p-2.5 -mx-2 rounded-2xl transition-colors group relative" onClick={() => handleViewProfile(p.user_id)}>
-                                        <div className="relative">
-                                            <img src={getFullAvatarUrl(p.avatar)} className="w-10 h-10 rounded-full bg-gray-100 object-cover" />
-                                            {p.is_online && <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 border-2 border-white dark:border-slate-900 rounded-full"></div>}
-                                        </div>
-                                        <div className="flex-1 min-w-0">
-                                            <p className="text-sm font-bold text-gray-800 dark:text-white truncate">{p.name} {p.user_id === user.id && <span className="text-gray-400 font-normal">(You)</span>}</p>
-                                            <p className="text-[10px] text-gray-400 truncate font-medium capitalize">{p.role}</p>
-                                        </div>
-
-                                        {/* Admin Controls */}
-                                        {p.user_id !== user.id && (['admin', 'manager'].includes(user.role) || roomDetails.participants.find(mp => mp.user_id === user.id && mp.role === 'admin')) && (
-                                            <div className="opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
-                                                <button onClick={(e) => { e.stopPropagation(); handleRemoveMember(p.user_id); }} className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors">
-                                                    <IoTrash size={16} />
-                                                </button>
-                                            </div>
-                                        )}
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
+                        )}
                     </div>
                 )}
 
