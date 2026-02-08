@@ -187,6 +187,7 @@ const ChatPage = () => {
         if (activeRoom) {
             api.post(`/api/chat/rooms/${activeRoom.id}/read`).catch(console.error);
             setSelectedMsgs([]); // Clear selection on room change
+            setShowGroupInfo(false);
         }
     }, [activeRoom]);
 
@@ -776,94 +777,130 @@ const ChatPage = () => {
             <div className="flex h-full bg-[#efeae2] dark:bg-slate-950 border-t border-gray-200 dark:border-slate-800 overflow-hidden relative">
 
                 {/* Sidebar */}
-                <div className={`w-full md:w-80 flex flex-col border-r border-gray-100 dark:border-slate-800 bg-white dark:bg-slate-900 h-full ${activeRoom || showNewChat || showCreateGroup ? 'hidden md:flex' : 'flex'}`}>
-                    <div className="p-6 pb-2 shrink-0">
-                        <div className="flex items-center justify-between mb-4">
-                            <h1 className="text-2xl font-bold dark:text-white">Message</h1>
-                            <button
-                                onClick={() => { setShowNewChat(true); setShowCreateGroup(false); fetchUsers(); }}
-                                className="p-2 bg-violet-100 dark:bg-slate-800 text-violet-600 dark:text-violet-400 rounded-full hover:bg-violet-200 dark:hover:bg-slate-700 transition-colors"
-                                title="New Chat"
-                            >
-                                <IoCreate size={20} />
-                            </button>
+                {/* 1. LEFT SIDEBAR */}
+                <div className={`w-full md:w-[340px] flex-shrink-0 flex flex-col border-r border-gray-100 dark:border-slate-800 bg-white dark:bg-slate-900 ${activeRoom ? 'hidden md:flex' : 'flex'}`}>
+
+                    {/* Sidebar Header */}
+                    <div className="p-5 pb-0">
+                        <div className="flex items-center justify-between mb-6">
+                            <div className="flex items-center gap-3">
+                                <div className="relative">
+                                    <img
+                                        src={getFullAvatarUrl(user.avatar) || `https://ui-avatars.com/api/?name=${user.full_name}`}
+                                        className="w-10 h-10 rounded-full object-cover border border-gray-200 dark:border-slate-700 shadow-sm"
+                                        alt="User"
+                                    />
+                                    <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 border-2 border-white dark:border-slate-900 rounded-full"></div>
+                                </div>
+                                <div>
+                                    <h2 className="font-bold text-sm dark:text-white leading-tight">{user.full_name}</h2>
+                                    <p className="text-[10px] text-gray-500 dark:text-gray-400 font-medium">@{user.username}</p>
+                                </div>
+                            </div>
+                            <div className="flex gap-2">
+                                <button onClick={() => { setShowNewChat(true); setShowCreateGroup(false); fetchUsers(); }} className="w-8 h-8 rounded-full bg-gray-50 dark:bg-slate-800 flex items-center justify-center text-gray-500 hover:text-violet-600 transition-colors">
+                                    <IoCreate size={16} />
+                                </button>
+                                <button onClick={() => setShowCreateGroup(true)} className="w-8 h-8 rounded-full bg-gray-50 dark:bg-slate-800 flex items-center justify-center text-gray-500 hover:text-violet-600 transition-colors">
+                                    <IoPeople size={16} />
+                                </button>
+                            </div>
                         </div>
-                        <div className="relative">
-                            <IoSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+
+                        {/* Search Bar */}
+                        <div className="relative mb-4">
+                            <IoSearch className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
                             <input
                                 type="text"
                                 placeholder="Search here..."
-                                className="w-full pl-10 pr-4 py-2 bg-gray-100 dark:bg-slate-800 rounded-xl text-sm outline-none focus:ring-2 focus:ring-violet-500 transition-all dark:text-white"
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
+                                className="w-full pl-10 pr-4 py-3 bg-gray-100 dark:bg-slate-800 rounded-2xl text-sm outline-none focus:ring-1 focus:ring-violet-500 transition-all dark:text-white placeholder-gray-400 font-medium"
                             />
                         </div>
-                    </div>
 
-                    <div className="px-6 py-2 shrink-0">
-                        <div className="flex items-center justify-between mb-2">
-                            <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider">Online Now</h3>
-                            <span className="text-xs text-violet-500 font-bold cursor-pointer">See all</span>
-                        </div>
-                        <div className="flex gap-4 overflow-x-auto no-scrollbar pb-2">
-                            {rooms.filter(r => r.room_type === 'direct' && r.is_online).length === 0 && <span className="text-xs text-gray-400">No one online</span>}
-                            {rooms.filter(r => r.room_type === 'direct' && r.is_online).map(room => (
-                                <div key={room.id} className="relative flex-shrink-0 cursor-pointer" onClick={() => handleSelectRoom(room)}>
-                                    <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-white dark:border-slate-900 shadow-sm">
-                                        <img src={getFullAvatarUrl(room.users?.find(u => u.id !== user.id)?.avatar) || `https://ui-avatars.com/api/?name=${room.name}&background=random`} className="w-full h-full object-cover" />
-                                    </div>
-                                    <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white dark:border-slate-900 rounded-full"></div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-
-                    <div className="px-6 py-2 shrink-0">
-                        <div className="flex bg-gray-100 dark:bg-slate-800 p-1 rounded-xl">
-                            {['All', 'Team', 'Personal'].map(tab => (
-                                <button
-                                    key={tab}
-                                    onClick={() => setSidebarTab(tab)}
-                                    className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition-all ${sidebarTab === tab ? 'bg-white dark:bg-slate-700 shadow-sm text-gray-800 dark:text-white' : 'text-gray-500 hover:text-gray-700'}`}
-                                >
-                                    {tab}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-
-                    <div className="flex-1 overflow-y-auto px-4 custom-scrollbar">
-                        {getFilteredRooms().map(room => (
-                            <div key={room.id} onClick={() => handleSelectRoom(room)} className={`p-3 rounded-2xl mb-2 cursor-pointer transition-all flex gap-3 items-center ${activeRoom?.id === room.id ? 'bg-violet-50 dark:bg-violet-900/20' : 'hover:bg-gray-50 dark:hover:bg-slate-800'}`}>
-                                <div className="relative">
-                                    <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-200 flex-shrink-0">
-                                        <img src={getFullAvatarUrl(room.room_type === 'group' ? room.avatar : room.users?.find(u => u.id !== user.id)?.avatar) || `https://ui-avatars.com/api/?name=${room.name}`} className="w-full h-full object-cover" />
-                                    </div>
-                                    {room.room_type === 'direct' && room.is_online && <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></div>}
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                    <div className="flex justify-between items-baseline mb-0.5">
-                                        <h4 className={`font-bold text-sm truncate ${activeRoom?.id === room.id ? 'text-violet-900 dark:text-violet-100' : 'text-gray-800 dark:text-gray-100'}`}>{room.name || "Unknown"}</h4>
-                                        <span className={`text-[10px] font-medium ${activeRoom?.id === room.id ? 'text-violet-600' : 'text-gray-400'}`}>{formatMessageTime(room.last_message_at)}</span>
-                                    </div>
-                                    <div className="flex justify-between items-center">
-                                        <p className={`text-xs truncate max-w-[140px] ${activeRoom?.id === room.id ? 'text-violet-700 dark:text-violet-300' : 'text-gray-500'}`}>
-                                            {activeRoom?.id === room.id && typingStatus[room.id] ? <span className="text-violet-500 font-bold animate-pulse">Typing...</span> : formatLastMessage(room)}
-                                        </p>
-                                        {room.unread_count > 0 && <div className="w-5 h-5 rounded-full bg-red-500 text-white flex items-center justify-center text-[10px] font-bold shadow-sm shadow-red-200">{room.unread_count}</div>}
+                        {/* Stories / Online Users */}
+                        <div className="flex gap-3 overflow-x-auto no-scrollbar py-2 mb-2">
+                            <div className="flex flex-col items-center gap-1 cursor-pointer min-w-[56px] flex-shrink-0">
+                                <div className="w-14 h-14 rounded-full border-2 border-dashed border-violet-300 p-0.5 hover:border-violet-500 transition-colors">
+                                    <div className="w-full h-full bg-violet-50 dark:bg-slate-800 rounded-full flex items-center justify-center text-violet-500">
+                                        <IoAdd size={24} />
                                     </div>
                                 </div>
+                                <span className="text-[10px] text-gray-500 font-bold">Add Story</span>
                             </div>
-                        ))}
+                            {rooms.filter(r => r.room_type === 'direct' && r.is_online).slice(0, 10).map(room => (
+                                <div key={room.id} className="flex flex-col items-center gap-1 cursor-pointer min-w-[56px] flex-shrink-0" onClick={() => handleSelectRoom(room)}>
+                                    <div className="w-14 h-14 rounded-full border-2 border-violet-500 p-0.5">
+                                        <img src={getFullAvatarUrl(room.users?.find(u => u.id !== user.id)?.avatar) || `https://ui-avatars.com/api/?name=${room.name}`} className="w-full h-full object-cover rounded-full" />
+                                    </div>
+                                    <span className="text-[10px] text-gray-600 dark:text-gray-300 font-bold truncate w-14 text-center">
+                                        {room.name.split(' ')[0]}
+                                    </span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Chat List */}
+                    <div className="flex-1 overflow-y-auto custom-scrollbar px-3 space-y-1 pb-4">
+                        {getFilteredRooms().map(room => {
+                            const isActive = activeRoom?.id === room.id;
+                            const isUnread = room.unread_count > 0;
+
+                            return (
+                                <div
+                                    key={room.id}
+                                    onClick={() => handleSelectRoom(room)}
+                                    className={`p-3.5 rounded-3xl cursor-pointer transition-all duration-200 flex gap-4 items-center group relative ${isActive ? 'bg-violet-600 shadow-lg shadow-violet-200 dark:shadow-none' : 'hover:bg-gray-50 dark:hover:bg-slate-800'}`}
+                                >
+                                    <div className="relative flex-shrink-0">
+                                        <div className={`w-12 h-12 rounded-full overflow-hidden ${isActive ? 'bg-white/20' : 'bg-gray-200'}`}>
+                                            <img
+                                                src={getFullAvatarUrl(room.room_type === 'group' ? room.avatar : room.users?.find(u => u.id !== user.id)?.avatar) || `https://ui-avatars.com/api/?name=${room.name}`}
+                                                className="w-full h-full object-cover"
+                                            />
+                                        </div>
+                                        {room.room_type === 'direct' && room.is_online && (
+                                            <div className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-green-500 border-2 border-white dark:border-slate-900 rounded-full"></div>
+                                        )}
+                                    </div>
+
+                                    <div className="flex-1 min-w-0">
+                                        <div className="flex justify-between items-baseline mb-1">
+                                            <h4 className={`font-bold text-[15px] truncate ${isActive ? 'text-white' : 'text-gray-900 dark:text-white'} ${isUnread && !isActive ? 'font-extrabold' : ''}`}>
+                                                {room.name}
+                                            </h4>
+                                            <span className={`text-[11px] font-medium ${isActive ? 'text-violet-200' : (isUnread ? 'text-violet-600' : 'text-gray-400')}`}>
+                                                {formatMessageTime(room.last_message_at)}
+                                            </span>
+                                        </div>
+                                        <div className="flex justify-between items-center h-5">
+                                            <p className={`text-xs truncate max-w-[150px] ${isActive ? 'text-violet-100' : 'text-gray-500 dark:text-gray-400'} ${isUnread && !isActive ? 'font-semibold text-gray-800 dark:text-gray-200' : ''}`}>
+                                                {typingStatus[room.id] && Object.keys(typingStatus[room.id]).length > 0 ? (
+                                                    <span className={`${isActive ? 'text-white' : 'text-violet-500'} font-bold animate-pulse`}>Typing...</span>
+                                                ) : formatLastMessage(room)}
+                                            </p>
+                                            {isUnread && (
+                                                <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold shadow-sm ${isActive ? 'bg-white text-violet-600' : 'bg-red-500 text-white shadow-red-200'}`}>
+                                                    {room.unread_count}
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                            );
+                        })}
                     </div>
                 </div>
                 {/* Main Content */}
-                <div className={`flex-1 flex flex-col bg-[#efeae2] dark:bg-[#0b141a] h-full relative overflow-hidden transition-all duration-300 ${!activeRoom && !showNewChat && !showCreateGroup ? 'hidden md:flex' : 'flex'}`}>
+                {/* 2. MAIN CHAT AREA */}
+                <div className={`flex-1 flex flex-col bg-slate-50 dark:bg-[#0c111d] h-full relative transition-all duration-300 ${!activeRoom && !showNewChat && !showCreateGroup ? 'hidden md:flex' : 'flex'}`}>
 
                     {/* Security Blur Overlay */}
                     {activeRoom?.is_restricted && isBlur && (
                         <div className="absolute inset-0 bg-white/50 dark:bg-slate-900/50 backdrop-blur-xl z-[9999] flex items-center justify-center">
-                            <div className="text-center p-6 bg-white dark:bg-slate-800 rounded-2xl shadow-2xl">
+                            <div className="text-center p-6 bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-gray-100 dark:border-slate-700">
                                 <IoShieldCheckmark size={48} className="mx-auto text-green-500 mb-4" />
                                 <h3 className="text-xl font-bold dark:text-white">Secure Chat</h3>
                                 <p className="text-gray-500 dark:text-gray-400">Content hidden for privacy.</p>
@@ -882,265 +919,185 @@ const ChatPage = () => {
                         </div>
                     )}
 
-                    {/* Create Group Modal */}
-                    {showCreateGroup ? (
-                        <div className="flex-1 overflow-y-auto no-scrollbar bg-white dark:bg-slate-900 absolute inset-0 z-[100]">
-                            <div className="max-w-xl mx-auto w-full p-4 sm:p-8 space-y-5">
-                                <div className="mb-6 flex items-center gap-4">
-                                    <button onClick={() => setShowCreateGroup(false)} className="p-2 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-full transition-colors">
-                                        <IoArrowBack size={20} className="dark:text-white" />
-                                    </button>
-                                    <h2 className="text-xl font-bold dark:text-white">Create New Group</h2>
-                                </div>
-
-                                <div className="space-y-4">
-                                    <div>
-                                        <label className="block text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-1.5 ml-1">Group Name</label>
-                                        <input
-                                            type="text"
-                                            placeholder="e.g. IT Team, Project Alpha"
-                                            value={groupName}
-                                            onChange={e => setGroupName(e.target.value)}
-                                            className="w-full px-4 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all dark:text-white"
-                                        />
+                    {(showNewChat || showCreateGroup) ? (
+                        /* New Chat / Create Group View in Main Pane */
+                        <div className="flex-1 overflow-y-auto p-4 sm:p-8 flex items-center justify-center bg-white dark:bg-slate-900 absolute inset-0 z-50">
+                            {showCreateGroup ? (
+                                <div className="bg-white dark:bg-slate-900 p-0 sm:p-8 rounded-3xl w-full max-w-lg">
+                                    <div className="flex items-center gap-4 mb-6">
+                                        <button onClick={() => setShowCreateGroup(false)} className="p-2 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-full transition-colors"><IoArrowBack size={20} className="dark:text-white" /></button>
+                                        <h2 className="text-xl font-bold dark:text-white">Create Group</h2>
                                     </div>
+                                    <div className="space-y-4">
+                                        <input value={groupName} onChange={e => setGroupName(e.target.value)} placeholder="Group Name" className="w-full p-3.5 bg-gray-50 dark:bg-slate-800 rounded-2xl text-sm outline-none focus:ring-1 focus:ring-violet-500 dark:text-white border border-transparent focus:border-violet-500 transition-all font-medium" />
+                                        <textarea value={groupDescription} onChange={e => setGroupDescription(e.target.value)} placeholder="Description (Optional)" className="w-full p-3.5 bg-gray-50 dark:bg-slate-800 rounded-2xl text-sm outline-none focus:ring-1 focus:ring-violet-500 dark:text-white border border-transparent focus:border-violet-500 transition-all font-medium resize-none h-24" />
 
-                                    <div>
-                                        <label className="block text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-1.5 ml-1">Group Description</label>
-                                        <textarea
-                                            placeholder="What is this group about?"
-                                            value={groupDescription}
-                                            onChange={e => setGroupDescription(e.target.value)}
-                                            className="w-full px-4 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all resize-none h-24 dark:text-white"
-                                        />
-                                    </div>
-
-                                    {user.role === 'admin' && (
-                                        <div className="flex items-center gap-3 p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-xl border border-yellow-200 dark:border-yellow-700/50">
-                                            <input
-                                                type="checkbox"
-                                                checked={isRestrictedGroup}
-                                                onChange={e => setIsRestrictedGroup(e.target.checked)}
-                                                className="w-5 h-5 text-indigo-600 rounded focus:ring-indigo-500"
-                                                id="restrict-mode"
-                                            />
-                                            <label htmlFor="restrict-mode" className="flex-1 cursor-pointer">
-                                                <span className="block font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                                                    <IoShieldCheckmark className="text-green-500" /> High Security Mode
-                                                </span>
-                                                <span className="block text-[11px] text-gray-500 dark:text-gray-400 mt-0.5">
-                                                    Prevents downloading media, blocks screenshots (watermark/blur), and disables right-click.
-                                                </span>
-                                            </label>
-                                        </div>
-                                    )}
-
-                                    <div className="pt-2">
-                                        <label className="block text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-2 ml-1">Select Members</label>
-                                        <input
-                                            type="text"
-                                            placeholder="Search users..."
-                                            value={searchQuery}
-                                            onChange={(e) => setSearchQuery(e.target.value)}
-                                            className="w-full px-4 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl mb-3 text-sm focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all dark:text-white"
-                                        />
-                                        <div className="max-h-56 overflow-y-auto border border-gray-100 dark:border-slate-800 rounded-xl divide-y dark:divide-slate-800/50 bg-gray-50/50 dark:bg-slate-900/50">
-                                            {filteredUsers.map(u => (
-                                                <div
-                                                    key={u.id}
-                                                    onClick={() => {
-                                                        if (selectedUsers.includes(u.id)) {
-                                                            setSelectedUsers(selectedUsers.filter(id => id !== u.id));
-                                                        } else {
-                                                            setSelectedUsers([...selectedUsers, u.id]);
-                                                        }
-                                                    }}
-                                                    className={`p-3 flex items-center justify-between cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-800 ${selectedUsers.includes(u.id) ? 'bg-indigo-50 dark:bg-indigo-900/20' : ''}`}
-                                                >
-                                                    <div className="flex items-center gap-3">
-                                                        <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center font-bold text-xs">{u.full_name?.[0]}</div>
-                                                        <div>
-                                                            <p className="text-sm font-medium dark:text-white">{u.full_name}</p>
-                                                            <p className="text-xs text-gray-500">{u.role}</p>
-                                                        </div>
-                                                    </div>
-                                                    {selectedUsers.includes(u.id) && <IoPeople className="text-indigo-600" />}
-                                                </div>
-                                            ))}
-                                        </div>
-                                        <p className="text-[11px] text-emerald-600 dark:text-emerald-400 mt-2 font-bold uppercase tracking-tight ml-1">{selectedUsers.length} members selected</p>
-                                    </div>
-
-                                    <button
-                                        onClick={handleCreateGroup}
-                                        disabled={!groupName || selectedUsers.length === 0}
-                                        className="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-black text-sm uppercase tracking-widest transition-all shadow-lg shadow-emerald-200 dark:shadow-none disabled:opacity-30 disabled:cursor-not-allowed transform active:scale-[0.98]"
-                                    >
-                                        Create Group
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    ) : showNewChat ? (
-                        <div className="flex-1 overflow-y-auto no-scrollbar bg-white dark:bg-slate-900 absolute inset-0 z-[100]">
-                            <div className="max-w-xl mx-auto w-full p-4 sm:p-8 space-y-5">
-                                <div className="mb-6 flex items-center gap-4">
-                                    <button onClick={() => setShowNewChat(false)} className="p-2 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-full transition-colors">
-                                        <IoArrowBack size={20} className="dark:text-white" />
-                                    </button>
-                                    <h2 className="text-xl font-bold dark:text-white">New Direct Message</h2>
-                                </div>
-                                <div className="relative">
-                                    <IoSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                                    <input
-                                        type="text"
-                                        placeholder="Search people..."
-                                        value={searchQuery}
-                                        onChange={(e) => setSearchQuery(e.target.value)}
-                                        className="w-full pl-10 pr-4 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all dark:text-white shadow-sm"
-                                        autoFocus
-                                    />
-                                </div>
-                                <div className="space-y-1 mt-4">
-                                    <label className="block text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-2 ml-1">Suggested Contacts</label>
-                                    {filteredUsers.map(u => (
-                                        <div
-                                            key={u.id}
-                                            onClick={() => handleStartNewChat(u)}
-                                            className="flex items-center gap-4 p-3 hover:bg-gray-50 dark:hover:bg-slate-800 rounded-xl cursor-pointer transition-all group/user"
-                                        >
-                                            <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-emerald-500 to-teal-500 flex items-center justify-center text-white font-bold shadow-sm group-hover/user:scale-105 transition-transform">
-                                                {u.full_name?.[0]?.toUpperCase()}
-                                            </div>
-                                            <div className="flex-1 min-w-0">
-                                                <p className="font-semibold text-[15px] dark:text-white truncate">{u.full_name}</p>
-                                                <p className="text-xs text-gray-500 capitalize">{u.role}</p>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
-                    : activeRoom ? (
-                            <>
-                                <div className="h-20 border-b border-gray-100 dark:border-slate-800 bg-white dark:bg-slate-900 px-6 flex items-center justify-between shrink-0">
-                                    <div className="flex items-center gap-4 cursor-pointer" onClick={handleFetchRoomInfo}>
-                                        <button onClick={(e) => { e.stopPropagation(); setActiveRoom(null); }} className="md:hidden p-2 -ml-2 text-gray-500"><IoArrowBack size={24} /></button>
-                                        <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-100">
-                                            <img src={getFullAvatarUrl(activeRoom.room_type === 'group' ? activeRoom.avatar : activeRoom.users?.find(u => u.id !== user.id)?.avatar) || `https://ui-avatars.com/api/?name=${activeRoom.name}`} className="w-full h-full object-cover" />
-                                        </div>
+                                        {/* Simplified User Selection for Creation */}
                                         <div>
-                                            <h2 className="font-bold text-lg dark:text-white leading-tight">{activeRoom.name}</h2>
-                                            <p className="text-xs text-gray-500 dark:text-gray-400 font-medium flex items-center gap-2">
-                                                {getStatusString(activeRoom)}
-                                            </p>
+                                            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Select Members</p>
+                                            <div className="max-h-60 overflow-y-auto custom-scrollbar border border-gray-100 dark:border-slate-800 rounded-xl p-2">
+                                                {availableUsers.filter(u => u.full_name.toLowerCase().includes(searchQuery.toLowerCase())).map(u => (
+                                                    <div key={u.id} onClick={() => {
+                                                        if (selectedUsers.includes(u.id)) setSelectedUsers(selectedUsers.filter(id => id !== u.id));
+                                                        else setSelectedUsers([...selectedUsers, u.id]);
+                                                    }} className={`flex items-center gap-3 p-2.5 rounded-xl cursor-pointer ${selectedUsers.includes(u.id) ? 'bg-violet-50 dark:bg-violet-900/20' : 'hover:bg-gray-50 dark:hover:bg-slate-800'}`}>
+                                                        <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs ${selectedUsers.includes(u.id) ? 'bg-violet-500 text-white' : 'bg-gray-200 text-gray-600'}`}>
+                                                            {selectedUsers.includes(u.id) ? <IoCheckmark size={16} /> : u.full_name[0]}
+                                                        </div>
+                                                        <span className="text-sm font-medium dark:text-white">{u.full_name}</span>
+                                                    </div>
+                                                ))}
+                                            </div>
                                         </div>
-                                    </div>
-                                    <div className="flex items-center gap-1 text-gray-400">
-                                        <button className="p-3 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-full transition-colors"><IoCall size={20} /></button>
-                                        <button className="p-3 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-full transition-colors"><IoVideocam size={20} /></button>
-                                        <button onClick={handleFetchRoomInfo} className="p-3 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-full transition-colors"><IoEllipsisHorizontal size={20} /></button>
+
+                                        <button onClick={handleCreateGroup} disabled={!groupName || selectedUsers.length === 0} className="w-full bg-violet-600 text-white py-3.5 rounded-2xl font-bold hover:bg-violet-700 transition shadow-lg shadow-violet-200 dark:shadow-none disabled:opacity-50 disabled:cursor-not-allowed">Create Group</button>
                                     </div>
                                 </div>
+                            ) : (
+                                <div className="bg-white dark:bg-slate-900 p-0 sm:p-8 rounded-3xl w-full max-w-lg">
+                                    <div className="flex items-center gap-4 mb-6">
+                                        <button onClick={() => setShowNewChat(false)} className="p-2 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-full transition-colors"><IoArrowBack size={20} className="dark:text-white" /></button>
+                                        <h2 className="text-xl font-bold dark:text-white">New Chat</h2>
+                                    </div>
+                                    <div className="relative mb-4">
+                                        <IoSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+                                        <input autoFocus value={searchQuery} onChange={e => setSearchQuery(e.target.value)} placeholder="Search people..." className="w-full pl-10 pr-4 py-3.5 bg-gray-50 dark:bg-slate-800 rounded-2xl text-sm outline-none focus:ring-1 focus:ring-violet-500 dark:text-white transition-all font-medium" />
+                                    </div>
+                                    <div className="space-y-2 max-h-[60vh] overflow-y-auto custom-scrollbar">
+                                        {filteredUsers.map(u => (
+                                            <div key={u.id} onClick={() => handleStartNewChat(u)} className="flex items-center gap-3 p-3 hover:bg-gray-50 dark:hover:bg-slate-800 rounded-2xl cursor-pointer transition-colors">
+                                                <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-violet-500 to-fuchsia-500 flex items-center justify-center text-white font-bold shadow-sm">{u.full_name[0]}</div>
+                                                <div>
+                                                    <p className="text-sm font-bold dark:text-white">{u.full_name}</p>
+                                                    <p className="text-xs text-gray-500 capitalize">{u.role}</p>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    ) : activeRoom ? (
+                        <>
+                            {/* Chat Header */}
+                            <div className="h-20 bg-white dark:bg-slate-900 px-6 flex items-center justify-between shrink-0 border-b border-gray-50 dark:border-slate-800 sticky top-0 z-20">
+                                <div className="flex items-center gap-4 cursor-pointer" onClick={() => { if (!showGroupInfo) handleFetchRoomInfo(); else setShowGroupInfo(false); }}>
+                                    <button onClick={(e) => { e.stopPropagation(); setActiveRoom(null); }} className="md:hidden p-2 -ml-2 text-gray-400 hover:text-gray-600"><IoArrowBack size={22} /></button>
+                                    <div className="relative">
+                                        <img src={getFullAvatarUrl(activeRoom.room_type === 'group' ? activeRoom.avatar : activeRoom.users?.find(u => u.id !== user.id)?.avatar) || `https://ui-avatars.com/api/?name=${activeRoom.name}`} className="w-10 h-10 rounded-full object-cover shadow-sm bg-gray-100" />
+                                        {activeRoom.room_type === 'direct' && activeRoom.is_online && <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 border-2 border-white dark:border-slate-900 rounded-full"></div>}
+                                    </div>
+                                    <div>
+                                        <h2 className="font-bold text-base dark:text-white leading-tight flex items-center gap-2">
+                                            {activeRoom.name}
+                                            {activeRoom.room_type === 'group' && <span className="px-1.5 py-0.5 bg-gray-100 dark:bg-slate-800 text-gray-500 text-[10px] rounded-md font-bold uppercase tracking-wider">Group</span>}
+                                        </h2>
+                                        <p className="text-xs text-green-500 font-bold tracking-wide">
+                                            {getStatusString(activeRoom)}
+                                        </p>
+                                    </div>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <div className="flex bg-gray-50 dark:bg-slate-800 rounded-full p-1 border border-gray-100 dark:border-slate-700">
+                                        <button className="p-2 text-gray-400 hover:text-violet-600 hover:bg-white dark:hover:bg-slate-700 rounded-full transition-all shadow-sm"><IoCall size={18} /></button>
+                                        <button className="p-2 text-gray-400 hover:text-violet-600 hover:bg-white dark:hover:bg-slate-700 rounded-full transition-all shadow-sm"><IoVideocam size={18} /></button>
+                                    </div>
+                                    <button onClick={() => setShowGroupInfo(!showGroupInfo)} className={`p-2.5 rounded-full transition-all ${showGroupInfo ? 'bg-violet-100 text-violet-600 dark:bg-slate-800 dark:text-violet-400' : 'text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-800'}`}>
+                                        <IoEllipsisHorizontal size={20} />
+                                    </button>
+                                </div>
+                            </div>
 
-                                <div className="flex-1 overflow-y-auto p-6 scroll-smooth custom-scrollbar space-y-6" ref={scrollRef} onScroll={handleScroll}>
-                                    {messages[activeRoom.id]?.map((msg, index) => {
+                            {/* Messages List */}
+                            <div className="flex-1 overflow-y-auto p-4 sm:p-6 scroll-smooth custom-scrollbar relative z-0" ref={scrollRef} onScroll={handleScroll}>
+                                <div className="space-y-6">
+                                    {/* Date Separator Example */}
+                                    <div className="flex justify-center mb-6 sticky top-0 z-10">
+                                        <span className="px-3 py-1 bg-gray-100/90 dark:bg-slate-800/90 backdrop-blur text-gray-500 dark:text-gray-400 text-[10px] font-bold uppercase tracking-wider rounded-full shadow-sm">Today</span>
+                                    </div>
+
+                                    {messages[activeRoom.id]?.map((msg) => {
                                         const isMe = msg.sender_id === user.id;
                                         return (
-                                            <div key={msg.id} className={`flex ${isMe ? 'justify-end' : 'justify-start'} group mb-2`}>
+                                            <div key={msg.id} className={`flex ${isMe ? 'justify-end' : 'justify-start'} group items-end gap-3 mb-1 animate-in fade-in slide-in-from-bottom-2 duration-300`}>
                                                 {!isMe && (
-                                                    <div className="w-8 h-8 rounded-full overflow-hidden mr-3 mt-1 shadow-sm flex-shrink-0">
-                                                        <img src={getFullAvatarUrl(msg.sender_avatar) || `https://ui-avatars.com/api/?name=${msg.sender_name}`} className="w-full h-full object-cover" />
-                                                    </div>
+                                                    <img src={getFullAvatarUrl(msg.sender_avatar) || `https://ui-avatars.com/api/?name=${msg.sender_name}`} className="w-8 h-8 rounded-full mb-1 object-cover shadow-sm bg-gray-100" />
                                                 )}
-                                                <div className="max-w-[70%]">
-                                                    {activeRoom.room_type === 'group' && !isMe && (
-                                                        <p className="text-[10px] font-bold text-gray-400 ml-1 mb-1">{msg.sender_name}</p>
-                                                    )}
-                                                    <div className={`relative px-5 py-3 rounded-2xl text-[15px] shadow-sm ${isMe ? 'bg-violet-600 text-white rounded-br-none' : 'bg-white dark:bg-slate-800 text-gray-800 dark:text-gray-100 rounded-bl-none border border-gray-100 dark:border-slate-700'}`}>
+
+                                                <div className={`max-w-[75%] sm:max-w-[70%] relative group/msg`}>
+                                                    {activeRoom.room_type === 'group' && !isMe && <p className="text-[10px] text-gray-400 ml-1 mb-1 font-bold">{msg.sender_name}</p>}
+
+                                                    <div
+                                                        className={`px-5 py-3 text-[15px] shadow-sm leading-relaxed ${isMe
+                                                            ? 'bg-violet-600 text-white rounded-2xl rounded-tr-sm'
+                                                            : 'bg-white dark:bg-slate-900 text-gray-800 dark:text-gray-100 rounded-2xl rounded-tl-sm border border-gray-100 dark:border-slate-800'}`}
+                                                    >
                                                         {renderMessageContent(msg)}
-                                                        <div className={`text-[10px] font-bold mt-1 text-right flex items-center justify-end gap-1 ${isMe ? 'text-violet-200' : 'text-gray-400'}`}>
-                                                            {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                                            {isMe && <span>{msg.read_status === 'read' ? <IoCheckmarkDone size={14} /> : <IoCheckmark size={14} />}</span>}
-                                                        </div>
+                                                    </div>
+
+                                                    <div className={`flex items-center gap-1 mt-1 text-[10px] font-bold ${isMe ? 'justify-end text-gray-300' : 'justify-start text-gray-400'}`}>
+                                                        <span>{new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                                                        {isMe && (msg.read_status === 'read' ? <IoCheckmarkDone className="text-violet-500" size={14} /> : <IoCheckmark size={14} />)}
                                                     </div>
                                                 </div>
                                             </div>
                                         );
                                     })}
-                                    {Object.keys(typingStatus[activeRoom.id] || {}).length > 0 && (
-                                        <motion.div
-                                            initial={{ opacity: 0, scale: 0.8 }}
-                                            animate={{ opacity: 1, scale: 1 }}
-                                            className="flex items-center gap-2 text-gray-500 text-[10px] ml-2 mb-2 font-bold uppercase tracking-wider"
-                                        >
-                                            <div className="flex gap-2 items-center bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm px-4 py-2 rounded-full shadow-lg border border-violet-200 dark:border-violet-900/30">
-                                                <div className="flex gap-1">
-                                                    <span className="w-1.5 h-1.5 bg-violet-500 rounded-full animate-bounce"></span>
-                                                    <span className="w-1.5 h-1.5 bg-violet-500 rounded-full animate-bounce [animation-delay:0.2s]"></span>
-                                                    <span className="w-1.5 h-1.5 bg-violet-500 rounded-full animate-bounce [animation-delay:0.4s]"></span>
-                                                </div>
-                                                <span className="text-violet-600 dark:text-violet-400">
-                                                    {Object.values(typingStatus[activeRoom.id]).join(', ')}
-                                                    {Object.keys(typingStatus[activeRoom.id]).length > 1 ? ' are typing' : ' is typing'}...
-                                                </span>
-                                            </div>
-                                        </motion.div>
-                                    )}
 
-                                    <AnimatePresence>
-                                        {showScrollBottom && (
-                                            <motion.button
-                                                initial={{ opacity: 0, scale: 0.5 }}
-                                                animate={{ opacity: 1, scale: 1 }}
-                                                exit={{ opacity: 0, scale: 0.5 }}
-                                                onClick={scrollToBottom}
-                                                className="fixed bottom-24 right-6 z-[60] w-10 h-10 bg-white dark:bg-slate-800 text-gray-500 dark:text-gray-400 rounded-full flex items-center justify-center shadow-lg border border-gray-100 dark:border-slate-700 hover:bg-gray-50 transition-all"
-                                            >
-                                                <IoChevronDown size={20} />
-                                                {activeRoom && (rooms.find(r => r.id === activeRoom.id)?.unread_count || 0) > 0 && (
-                                                    <span className="absolute -top-1 -right-1 w-5 h-5 bg-violet-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center border-2 border-white dark:border-slate-800">
-                                                        {rooms.find(r => r.id === activeRoom.id).unread_count}
-                                                    </span>
-                                                )}
-                                            </motion.button>
-                                        )}
-                                    </AnimatePresence>
+                                    {Object.keys(typingStatus[activeRoom.id] || {}).length > 0 && (
+                                        <div className="flex items-center gap-2 ml-11">
+                                            <div className="bg-white dark:bg-slate-800 px-4 py-2 rounded-2xl rounded-tl-sm border border-gray-100 dark:border-slate-700 shadow-sm flex items-center gap-1">
+                                                <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce"></span>
+                                                <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce [animation-delay:0.2s]"></span>
+                                                <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce [animation-delay:0.4s]"></span>
+                                            </div>
+                                        </div>
+                                    )}
                                     <div ref={scrollRef} />
                                 </div>
+                            </div>
 
-                                <div className="p-4 bg-white dark:bg-slate-900 border-t border-gray-100 dark:border-slate-800 shrink-0">
-                                    <div className="flex items-center gap-2 bg-gray-50 dark:bg-slate-800 p-2 rounded-2xl border border-gray-100 dark:border-slate-700 focus-within:ring-2 focus-within:ring-violet-500/20 focus-within:border-violet-500 transition-all">
-                                        <button onClick={() => fileInputRef.current?.click()} className="p-2 text-gray-400 hover:text-violet-600 hover:bg-violet-50 rounded-full transition-colors"><IoAdd size={24} /></button>
-                                        <button className="p-2 text-gray-400 hover:text-amber-500 hover:bg-amber-50 rounded-full transition-colors"><IoHappyOutline size={24} /></button>
-
+                            {/* Input Area */}
+                            <div className="p-4 bg-white dark:bg-slate-900 border-t border-gray-50 dark:border-slate-800 shrink-0 z-20">
+                                <div className="max-w-4xl mx-auto flex items-end gap-3">
+                                    <button onClick={() => fileInputRef.current?.click()} className="p-3 text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-full transition-colors flex-shrink-0">
+                                        <IoAdd size={24} />
+                                    </button>
+                                    <div className="flex-1 bg-gray-50 dark:bg-slate-800 rounded-2xl flex items-center p-1.5 focus-within:ring-2 focus-within:ring-violet-100 dark:focus-within:ring-violet-900/30 border border-transparent focus-within:border-violet-200 dark:focus-within:border-violet-800 transition-all">
+                                        <button className="p-2 text-gray-400 hover:text-amber-500 transition-colors"><IoHappyOutline size={22} /></button>
                                         <input
                                             type="text"
                                             value={inputValue}
                                             onChange={(e) => setInputValue(e.target.value)}
                                             onKeyDown={handleKeyPress}
-                                            placeholder="Type message..."
-                                            className="flex-1 bg-transparent dark:text-white outline-none text-sm px-2 font-medium"
+                                            placeholder="Type a message..."
+                                            className="flex-1 bg-transparent border-none outline-none text-sm px-2 text-gray-800 dark:text-white placeholder-gray-400 h-10 font-medium"
                                         />
-
-                                        {inputValue.trim() ? (
-                                            <button onClick={handleSend} className="p-2 bg-violet-600 text-white rounded-xl hover:bg-violet-700 transition-all shadow-lg shadow-violet-200"><IoSend /></button>
-                                        ) : (
-                                            <button onClick={isRecording ? stopRecording : startRecording} className={`p-2 rounded-xl transition-all ${isRecording ? 'bg-red-500 text-white animate-pulse' : 'text-gray-400 hover:bg-gray-200'}`}><IoMic size={22} /></button>
-                                        )}
+                                        <button onClick={() => fileInputRef.current?.click()} className="p-2 text-gray-400 hover:text-gray-600 transition-colors"><IoImage size={20} /></button>
+                                        <button onClick={() => fileInputDocRef.current?.click()} className="p-2 text-gray-400 hover:text-gray-600 transition-colors"><IoAttach size={20} /></button>
                                     </div>
-                                    <input type="file" ref={fileInputRef} hidden onChange={handleFileUpload} accept="image/*,video/*" />
-                                    <input type="file" ref={fileInputDocRef} hidden onChange={handleFileUpload} accept=".pdf,.doc,.docx,.xls,.xlsx,.zip" />
+                                    {inputValue.trim() ? (
+                                        <button onClick={handleSend} className="p-3 bg-violet-600 hover:bg-violet-700 text-white rounded-full shadow-lg shadow-violet-200 dark:shadow-none transition-all transform active:scale-95 flex-shrink-0">
+                                            <IoSend size={20} />
+                                        </button>
+                                    ) : (
+                                        <button onClick={isRecording ? stopRecording : startRecording} className={`p-3 rounded-full transition-all flex-shrink-0 shadow-lg ${isRecording ? 'bg-red-500 text-white animate-pulse shadow-red-200' : 'bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-700'}`}>
+                                            <IoMic size={20} />
+                                        </button>
+                                    )}
                                 </div>
-                            </>
-                        ) : (
-                            <div className="flex-1 flex flex-col items-center justify-center text-gray-400">
-                                <div className="w-24 h-24 bg-violet-100 rounded-full flex items-center justify-center text-violet-500 mb-4">
-                                    <IoChatbubblesOutline size={48} />
-                                </div>
-                                <p className="font-bold text-lg text-gray-600 dark:text-gray-300">Select a chat to start messaging</p>
+                                <input type="file" ref={fileInputRef} hidden onChange={handleFileUpload} accept="image/*,video/*" />
+                                <input type="file" ref={fileInputDocRef} hidden onChange={handleFileUpload} accept=".pdf,.doc,.docx,.xls,.xlsx,.zip" />
                             </div>
-                        )
+                        </>
+                    ) : (
+                        <div className="flex-1 flex flex-col items-center justify-center text-gray-400">
+                            <div className="w-24 h-24 bg-white dark:bg-slate-800 rounded-full flex items-center justify-center text-violet-200 shadow-sm mb-6 animate-bounce-slow">
+                                <IoChatbubblesOutline size={48} />
+                            </div>
+                            <h3 className="font-bold text-xl text-gray-700 dark:text-white mb-2">Welcome to Chat</h3>
+                            <p className="text-gray-400 max-w-xs text-center font-medium">Select a conversation from the sidebar or start a new one to begin messaging.</p>
+                        </div>
                     )}
                 </div>
 
@@ -1220,254 +1177,199 @@ const ChatPage = () => {
                     </div>
                 )}
 
-                {/* Group Info Modal */}
+                {/* 3. RIGHT SIDEBAR (DETAILS) */}
                 {showGroupInfo && roomDetails && (
-                    <div className="fixed inset-0 z-[200] bg-black/50 flex items-center justify-end" onClick={() => setShowGroupInfo(false)}>
-                        <motion.div
-                            initial={{ x: "100%" }}
-                            animate={{ x: 0 }}
-                            exit={{ x: "100%" }}
-                            className="bg-white dark:bg-slate-900 w-80 h-full p-6 shadow-xl relative overflow-y-auto"
-                            onClick={e => e.stopPropagation()}
-                        >
-                            <button onClick={() => setShowGroupInfo(false)} className="absolute top-4 right-4 p-2 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-full transition-colors z-10">
-                                <IoClose size={24} className="dark:text-white" />
+                    <div className="w-full md:w-[320px] bg-white dark:bg-slate-900 border-l border-gray-100 dark:border-slate-800 flex flex-col h-full overflow-y-auto custom-scrollbar flex-shrink-0 z-10 absolute md:relative right-0 top-0 shadow-2xl md:shadow-none transition-all duration-300">
+                        {/* Header */}
+                        <div className="p-6 pb-4 flex flex-col items-center border-b border-gray-50 dark:border-slate-800 relative">
+                            <button onClick={() => setShowGroupInfo(false)} className="absolute top-4 right-4 p-2 bg-gray-50 dark:bg-slate-800 text-gray-400 hover:text-gray-600 dark:hover:text-white rounded-full transition-colors md:hidden">
+                                <IoClose size={20} />
                             </button>
-                            <h2 className="text-xl font-bold mb-6 dark:text-white">
-                                {activeRoom.room_type === 'group' ? 'Group Info' : 'User Profile'}
-                            </h2>
 
-                            <div className="flex flex-col items-center mb-8">
-                                {activeRoom.room_type === 'group' ? (
-                                    <>
-                                        <div className="relative group/avatar mb-4">
-                                            <div className="w-24 h-24 rounded-3xl bg-indigo-500 flex items-center justify-center text-white text-4xl font-bold shadow-lg overflow-hidden">
-                                                {roomDetails.room.avatar ? (
-                                                    <img src={getFullAvatarUrl(roomDetails.room.avatar)} className="w-full h-full object-cover" />
-                                                ) : (
-                                                    (roomDetails.room.name?.[0] || activeRoom?.name?.[0] || '?').toUpperCase()
-                                                )}
-                                            </div>
-                                            {(roomDetails.room.creator_id === user.id || ['admin', 'manager'].includes(user.role)) && (
-                                                <button
-                                                    onClick={() => groupAvatarInputRef.current?.click()}
-                                                    className="absolute inset-0 bg-black/40 flex items-center justify-center text-white opacity-0 group-hover/avatar:opacity-100 transition-opacity rounded-3xl"
-                                                >
-                                                    <IoCamera size={24} />
-                                                </button>
-                                            )}
-                                            <input type="file" ref={groupAvatarInputRef} className="hidden" accept="image/*" onChange={handleGroupAvatarUpload} />
-                                        </div>
-
-                                        {isEditingName ? (
-                                            <div className="flex items-center gap-2">
-                                                <input
-                                                    type="text"
-                                                    value={editedName}
-                                                    onChange={(e) => setEditedName(e.target.value)}
-                                                    className="bg-gray-100 dark:bg-slate-800 border-none rounded px-2 py-1 text-center font-bold dark:text-white focus:ring-1 focus:ring-indigo-500 text-lg"
-                                                    autoFocus
-                                                    onBlur={handleUpdateRoomName}
-                                                    onKeyPress={(e) => e.key === 'Enter' && handleUpdateRoomName()}
-                                                />
-                                            </div>
-                                        ) : (
-                                            <div className="flex items-center gap-2 group/name">
-                                                <h3 className="font-bold text-xl dark:text-white">{roomDetails.room.name}</h3>
-                                                {(roomDetails.room.creator_id === user.id || ['admin', 'manager'].includes(user.role)) && (
-                                                    <button
-                                                        onClick={() => { setIsEditingName(true); setEditedName(roomDetails.room.name); }}
-                                                        className="p-1 opacity-0 group-hover/name:opacity-100 text-gray-400 hover:text-indigo-500 transition-opacity"
-                                                    >
-                                                        <IoCreate size={16} />
-                                                    </button>
-                                                )}
-                                            </div>
-                                        )}
-
-                                        <div className="mt-4 w-full text-center">
-                                            <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Description</h4>
-                                            {isEditingDescription ? (
-                                                <textarea
-                                                    value={editedDescription}
-                                                    onChange={(e) => setEditedDescription(e.target.value)}
-                                                    className="w-full bg-gray-100 dark:bg-slate-800 border-none rounded-xl px-3 py-2 text-sm dark:text-gray-200 focus:ring-1 focus:ring-indigo-500 resize-none h-20"
-                                                    autoFocus
-                                                    onBlur={handleUpdateRoomDescription}
-                                                />
-                                            ) : (
-                                                <div className="group/desc relative">
-                                                    <p className="text-sm dark:text-gray-300 px-4 italic">
-                                                        {roomDetails.room.description || "No description set"}
-                                                    </p>
-                                                    {(roomDetails.room.creator_id === user.id || ['admin', 'manager'].includes(user.role)) && (
-                                                        <button
-                                                            onClick={() => { setIsEditingDescription(true); setEditedDescription(roomDetails.room.description || ""); }}
-                                                            className="absolute -right-2 top-0 p-1 opacity-0 group-hover/desc:opacity-100 text-gray-400 hover:text-indigo-500 transition-opacity"
-                                                        >
-                                                            <IoCreate size={14} />
-                                                        </button>
-                                                    )}
-                                                </div>
-                                            )}
-                                        </div>
-
-                                        <div className="flex flex-col items-center mt-4">
-                                            <p className="text-[10px] text-gray-400">Created {new Date(roomDetails.room.created_at).toLocaleDateString()}</p>
-                                            <p className="text-[10px] text-indigo-500 font-bold uppercase tracking-tighter">By {roomDetails.room.creator_name}</p>
-                                        </div>
-                                    </>
-                                ) : (
-                                    roomDetails.participants.filter(p => p.user_id !== user.id).map(p => (
-                                        <div key={p.user_id} className="flex flex-col items-center px-4 w-full">
-                                            <div className="w-28 h-28 rounded-full bg-indigo-500 flex items-center justify-center text-white text-4xl font-bold mb-4 shadow-xl overflow-hidden border-4 border-white dark:border-slate-800">
-                                                {p.avatar ? (
-                                                    <img src={getFullAvatarUrl(p.avatar)} className="w-full h-full object-cover" />
-                                                ) : (
-                                                    p.name?.[0]?.toUpperCase()
-                                                )}
-                                            </div>
-                                            <h3 className="font-bold text-2xl dark:text-white text-center mb-1">{p.name}</h3>
-                                            <div className="flex items-center gap-2 mb-6">
-                                                <div className={`w-2 h-2 rounded-full ${p.is_online ? 'bg-green-500 animate-pulse' : 'bg-gray-300'}`} />
-                                                <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                                                    {p.is_online ? 'Active Now' : (p.last_seen ? `Last seen ${new Date(p.last_seen).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` : 'Offline')}
-                                                </span>
-                                            </div>
-
-                                            <div className="w-full space-y-5 pt-6 border-t border-gray-100 dark:border-slate-800">
-                                                {p.job_title && (
-                                                    <div className="flex flex-col gap-0.5">
-                                                        <span className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Position</span>
-                                                        <span className="text-sm dark:text-gray-200 font-medium">{p.job_title}</span>
-                                                    </div>
-                                                )}
-                                                {p.department && (
-                                                    <div className="flex flex-col gap-0.5">
-                                                        <span className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Department</span>
-                                                        <span className="text-sm dark:text-gray-200 font-medium">{p.department}</span>
-                                                    </div>
-                                                )}
-                                                {p.email && (
-                                                    <div className="flex flex-col gap-0.5">
-                                                        <span className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Email Address</span>
-                                                        <a href={`mailto:${p.email}`} className="text-sm text-indigo-500 dark:text-indigo-400 font-medium hover:underline">{p.email}</a>
-                                                    </div>
-                                                )}
-                                                {p.phone && (
-                                                    <div className="flex flex-col gap-0.5">
-                                                        <span className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Mobile Number</span>
-                                                        <span className="text-sm dark:text-gray-200 font-medium">{p.phone}</span>
-                                                    </div>
-                                                )}
-
-                                                {/* Admin Actions for Direct Chats */}
-                                                {user.role === 'admin' && (
-                                                    <div className="w-full mt-8 pt-6 border-t border-gray-100 dark:border-slate-800">
-                                                        <h4 className="text-[10px] font-black text-red-400 uppercase tracking-[0.2em] mb-4">Admin Controls</h4>
-                                                        <div className="grid grid-cols-2 gap-3">
-                                                            <button
-                                                                onClick={(e) => { e.stopPropagation(); handleStartEditUser(p); }}
-                                                                className="flex items-center justify-center gap-2 py-2.5 px-3 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-xl hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-colors text-xs font-bold"
-                                                            >
-                                                                <IoCreate size={16} /> Edit
-                                                            </button>
-                                                            <button
-                                                                onClick={(e) => { e.stopPropagation(); handleDeleteUser(p.user_id); }}
-                                                                className="flex items-center justify-center gap-2 py-2.5 px-3 bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-xl hover:bg-red-100 dark:hover:bg-red-900/50 transition-colors text-xs font-bold"
-                                                            >
-                                                                <IoTrash size={16} /> Delete
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </div>
-                                    ))
+                            <div className="relative group/avatar mb-4">
+                                <div className="w-24 h-24 rounded-full p-1 border-2 border-dashed border-gray-200 dark:border-slate-700 hover:border-violet-500 transition-colors cursor-pointer">
+                                    <div className="w-full h-full rounded-full overflow-hidden bg-gray-100 dark:bg-slate-800 flex items-center justify-center">
+                                        <img src={getFullAvatarUrl(roomDetails.room.avatar || activeRoom.avatar) || `https://ui-avatars.com/api/?name=${roomDetails.room.name}`} className="w-full h-full object-cover" />
+                                    </div>
+                                </div>
+                                {(roomDetails.room.creator_id === user.id || ['admin', 'manager'].includes(user.role)) && activeRoom.room_type === 'group' && (
+                                    <button onClick={() => groupAvatarInputRef.current?.click()} className="absolute bottom-1 right-1 p-2 bg-violet-600 text-white rounded-full shadow-md hover:bg-violet-700 transition-colors">
+                                        <IoCamera size={14} />
+                                    </button>
                                 )}
+                                <input type="file" ref={groupAvatarInputRef} className="hidden" accept="image/*" onChange={handleGroupAvatarUpload} />
                             </div>
 
-                            {/* Add Member (Group Only - Admin/Manager/Creator) */}
-                            {roomDetails.room.room_type === 'group' && (roomDetails.room.creator_id === user.id || ['admin', 'manager'].includes(user.role)) && (
-                                <div className="mb-6 relative">
-                                    <h4 className="font-semibold mb-2 dark:text-white">Add Members</h4>
-                                    <div className="flex gap-2">
-                                        <input
-                                            value={addMemberQuery}
-                                            onChange={e => setAddMemberQuery(e.target.value)}
-                                            placeholder="Search user..."
-                                            className="w-full px-3 py-2 bg-gray-100 dark:bg-slate-800 rounded-lg text-sm outline-none dark:text-white"
-                                        />
-                                    </div>
-                                    {searchedMembers.length > 0 && (
-                                        <div className="absolute top-full left-0 w-full bg-white dark:bg-slate-800 shadow-xl rounded-lg mt-1 z-10 max-h-40 overflow-y-auto border dark:border-slate-700">
-                                            {searchedMembers.map(u => (
-                                                <div key={u.id} onClick={() => handleSelectMember(u)} className="p-2 hover:bg-gray-100 dark:hover:bg-slate-700 cursor-pointer flex items-center gap-2">
-                                                    <div className="w-6 h-6 rounded-full bg-indigo-100 flex items-center justify-center text-xs">{u.full_name[0]}</div>
-                                                    <span className="text-sm dark:text-gray-200">{u.full_name}</span>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    )}
-
-                                    {/* Selected Pending Members */}
-                                    {pendingMembers.length > 0 && (
-                                        <div className="mt-3 flex flex-wrap gap-2">
-                                            {pendingMembers.map(u => (
-                                                <div key={u.id} className="bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 px-2 py-1 rounded-lg text-xs font-bold flex items-center gap-1">
-                                                    {u.full_name}
-                                                    <button onClick={() => setPendingMembers(pendingMembers.filter(p => p.id !== u.id))} className="hover:text-indigo-800 dark:hover:text-indigo-200">
-                                                        <IoClose size={12} />
-                                                    </button>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    )}
-
-                                    {pendingMembers.length > 0 && (
-                                        <button
-                                            onClick={confirmAddMembers}
-                                            className="w-full mt-3 py-2 bg-indigo-600 text-white rounded-xl font-bold text-sm shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition-colors"
-                                        >
-                                            Add {pendingMembers.length} Members
-                                        </button>
+                            {isEditingName ? (
+                                <input
+                                    autoFocus
+                                    value={editedName}
+                                    onChange={e => setEditedName(e.target.value)}
+                                    onBlur={handleUpdateRoomName}
+                                    onKeyDown={e => e.key === 'Enter' && handleUpdateRoomName()}
+                                    className="text-lg font-bold text-center bg-gray-50 dark:bg-slate-800 border-none rounded-lg px-2 py-1 w-full dark:text-white outline-none focus:ring-2 focus:ring-violet-500"
+                                />
+                            ) : (
+                                <div className="flex items-center gap-2 group/name justify-center">
+                                    <h3 className="font-bold text-lg text-gray-800 dark:text-white text-center">{roomDetails.room.name}</h3>
+                                    {(roomDetails.room.creator_id === user.id || ['admin', 'manager'].includes(user.role)) && activeRoom.room_type === 'group' && (
+                                        <button onClick={() => { setIsEditingName(true); setEditedName(roomDetails.room.name); }} className="opacity-0 group-hover/name:opacity-100 text-gray-400 hover:text-violet-600 transition-opacity"><IoCreate size={16} /></button>
                                     )}
                                 </div>
                             )}
 
-                            {activeRoom.room_type === 'group' && (
-                                <div className="space-y-4 pt-4 border-t border-gray-100 dark:border-slate-800">
-                                    <h4 className="font-bold text-xs text-gray-400 uppercase tracking-widest mb-4">Participants ({roomDetails.participants.length})</h4>
+                            <p className="text-gray-400 text-xs font-medium mb-6 flex items-center gap-2 mt-1">
+                                {activeRoom.room_type === 'group' ? (
+                                    <><span>{activeRoom.room_type === 'group' ? 'Group' : 'Direct'}</span> • <span>{roomDetails?.participants?.length || 0} Members</span></>
+                                ) : (
+                                    <span className={activeRoom.is_online ? 'text-green-500' : 'text-gray-400'}>{activeRoom.is_online ? 'Online' : 'Offline'}</span>
+                                )}
+                            </p>
+
+                            <div className="flex gap-6 w-full justify-center mb-2">
+                                <div className="flex flex-col items-center gap-2 cursor-pointer group">
+                                    <div className="w-10 h-10 rounded-full bg-gray-50 dark:bg-slate-800 flex items-center justify-center text-gray-600 dark:text-gray-400 group-hover:bg-violet-50 dark:group-hover:bg-violet-900/20 group-hover:text-violet-600 transition-colors shadow-sm">
+                                        <IoMic size={18} />
+                                    </div>
+                                    <span className="text-[10px] font-bold text-gray-400 group-hover:text-violet-600 transition-colors uppercase tracking-wide">Mute</span>
+                                </div>
+                                <div className="flex flex-col items-center gap-2 cursor-pointer group">
+                                    <div className="w-10 h-10 rounded-full bg-gray-50 dark:bg-slate-800 flex items-center justify-center text-gray-600 dark:text-gray-400 group-hover:bg-violet-50 dark:group-hover:bg-violet-900/20 group-hover:text-violet-600 transition-colors shadow-sm">
+                                        <IoSearch size={18} />
+                                    </div>
+                                    <span className="text-[10px] font-bold text-gray-400 group-hover:text-violet-600 transition-colors uppercase tracking-wide">Search</span>
+                                </div>
+                                <div className="flex flex-col items-center gap-2 cursor-pointer group">
+                                    <div className="w-10 h-10 rounded-full bg-red-50 dark:bg-red-900/10 flex items-center justify-center text-red-500 group-hover:bg-red-100 dark:group-hover:bg-red-900/30 transition-colors shadow-sm">
+                                        <IoTrash size={18} />
+                                    </div>
+                                    <span className="text-[10px] font-bold text-gray-400 group-hover:text-red-500 transition-colors uppercase tracking-wide">Leave</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Description */}
+                        {activeRoom.room_type === 'group' && (
+                            <div className="p-4 border-b border-gray-50 dark:border-slate-800 relative group/desc">
+                                <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Description</h4>
+                                {isEditingDescription ? (
+                                    <textarea
+                                        autoFocus
+                                        value={editedDescription}
+                                        onChange={e => setEditedDescription(e.target.value)}
+                                        onBlur={handleUpdateRoomDescription}
+                                        className="w-full bg-gray-50 dark:bg-slate-800 border-none rounded-lg p-3 text-sm dark:text-white resize-none h-24 focus:ring-2 focus:ring-violet-500"
+                                    />
+                                ) : (
+                                    <p className="text-sm font-medium text-gray-600 dark:text-gray-300 leading-relaxed relative">
+                                        {roomDetails.room.description || "No description set"}
+                                        {(roomDetails.room.creator_id === user.id || ['admin', 'manager'].includes(user.role)) && (
+                                            <button onClick={() => { setIsEditingDescription(true); setEditedDescription(roomDetails.room.description || ""); }} className="absolute -right-2 -top-1 p-1 opacity-0 group-hover/desc:opacity-100 text-violet-600 transition-opacity"><IoCreate size={14} /></button>
+                                        )}
+                                    </p>
+                                )}
+                            </div>
+                        )}
+
+                        {/* Menu Items */}
+                        <div className="p-4 space-y-1 border-b border-gray-50 dark:border-slate-800">
+                            <div className="flex items-center justify-between p-3 hover:bg-gray-50 dark:hover:bg-slate-800 rounded-2xl cursor-pointer group transition-colors">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-9 h-9 rounded-xl bg-blue-50 dark:bg-blue-900/20 text-blue-500 flex items-center justify-center"><IoDocument size={18} /></div>
+                                    <span className="text-sm font-bold text-gray-700 dark:text-gray-200">Media, Links & Docs</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <span className="text-xs font-bold text-gray-400 group-hover:text-blue-500">230</span>
+                                    <IoChevronForward size={14} className="text-gray-400" />
+                                </div>
+                            </div>
+                            <div className="flex items-center justify-between p-3 hover:bg-gray-50 dark:hover:bg-slate-800 rounded-2xl cursor-pointer transition-colors">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-9 h-9 rounded-xl bg-amber-50 dark:bg-amber-900/20 text-amber-500 flex items-center justify-center"><IoHappyOutline size={18} /></div>
+                                    <span className="text-sm font-bold text-gray-700 dark:text-gray-200">Starred Messages</span>
+                                </div>
+                                <span className="text-[10px] font-bold text-gray-400 border border-gray-200 dark:border-slate-700 px-2 py-0.5 rounded-md">None</span>
+                            </div>
+                        </div>
+
+                        {/* Members List */}
+                        <div className="p-4 flex-1">
+                            <div className="flex items-center justify-between mb-4">
+                                <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Members ({roomDetails.participants.length})</h4>
+                                <IoSearch className="text-gray-400" />
+                            </div>
+
+                            <div className="space-y-4">
+                                {/* Add Member Button */}
+                                {activeRoom.room_type === 'group' && (roomDetails.room.creator_id === user.id || ['admin', 'manager'].includes(user.role)) && (
                                     <div className="space-y-3">
-                                        {roomDetails.participants.map(p => (
-                                            <div key={p.user_id} className="flex items-center justify-between p-2 hover:bg-gray-50 dark:hover:bg-slate-800/50 rounded-2xl transition-all group/p">
-                                                <div className="flex items-center gap-3 cursor-pointer" onClick={() => handleViewProfile(p.user_id)}>
-                                                    <div className="relative">
-                                                        <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden border-2 border-transparent group-hover/p:border-indigo-400 transition-all">
-                                                            {p.avatar ? (
-                                                                <img src={getFullAvatarUrl(p.avatar)} className="w-full h-full object-cover" />
-                                                            ) : (
-                                                                <div className="w-full h-full flex items-center justify-center bg-indigo-100 text-indigo-600 font-bold">{p.name[0]}</div>
-                                                            )}
-                                                        </div>
-                                                        {p.is_online && <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></span>}
+                                        <div className="relative">
+                                            <input
+                                                placeholder="Add people..."
+                                                value={addMemberQuery}
+                                                onChange={e => setAddMemberQuery(e.target.value)}
+                                                className="w-full pl-9 pr-3 py-2 bg-gray-50 dark:bg-slate-800 rounded-xl text-sm outline-none focus:ring-1 focus:ring-violet-500 dark:text-white"
+                                            />
+                                            <IoAdd className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                                        </div>
+                                        {searchedMembers.length > 0 && (
+                                            <div className="max-h-40 overflow-y-auto border border-gray-100 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900 shadow-lg">
+                                                {searchedMembers.map(u => (
+                                                    <div key={u.id} onClick={() => handleSelectMember(u)} className="p-2 hover:bg-gray-50 dark:hover:bg-slate-800 cursor-pointer flex items-center gap-2">
+                                                        <div className="w-6 h-6 rounded-full bg-indigo-100 flex items-center justify-center text-xs font-bold">{u.full_name[0]}</div>
+                                                        <span className="text-sm font-medium dark:text-gray-200">{u.full_name}</span>
                                                     </div>
-                                                    <div>
-                                                        <p className="font-semibold text-sm dark:text-gray-200">{p.name} {p.user_id === user.id && '(You)'}</p>
-                                                        <p className="text-[10px] text-gray-500 capitalize">{p.role}</p>
-                                                    </div>
-                                                </div>
-                                                {p.user_id !== user.id && (['admin', 'manager'].includes(user.role) || roomDetails.participants.find(mp => mp.user_id === user.id && mp.role === 'admin')) && (
-                                                    <button onClick={() => handleRemoveMember(p.user_id)} className="p-2 text-gray-400 hover:text-red-500 transition-colors">
-                                                        <IoTrash size={16} />
-                                                    </button>
-                                                )}
+                                                ))}
                                             </div>
-                                        ))}
+                                        )}
+                                        {pendingMembers.length > 0 && (
+                                            <div className="flex flex-wrap gap-2">
+                                                {pendingMembers.map(u => (
+                                                    <span key={u.id} className="text-[10px] font-bold bg-violet-100 text-violet-600 px-2 py-1 rounded-lg flex items-center gap-1">
+                                                        {u.full_name} <button onClick={() => setPendingMembers(pendingMembers.filter(p => p.id !== u.id))}><IoClose /></button>
+                                                    </span>
+                                                ))}
+                                                <button onClick={confirmAddMembers} className="text-[10px] font-bold bg-violet-600 text-white px-3 py-1 rounded-lg hover:bg-violet-700">Add</button>
+                                            </div>
+                                        )}
                                     </div>
-                                </div>
-                            )}
-                        </motion.div>
+                                )}
+
+                                {/* Participants */}
+                                {roomDetails.participants.map(p => (
+                                    <div key={p.user_id} className="flex items-center gap-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-800 p-2.5 -mx-2 rounded-2xl transition-colors group relative" onClick={() => handleViewProfile(p.user_id)}>
+                                        <div className="relative">
+                                            <img src={getFullAvatarUrl(p.avatar)} className="w-10 h-10 rounded-full bg-gray-100 object-cover" />
+                                            {p.is_online && <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 border-2 border-white dark:border-slate-900 rounded-full"></div>}
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <p className="text-sm font-bold text-gray-800 dark:text-white truncate">{p.name} {p.user_id === user.id && <span className="text-gray-400 font-normal">(You)</span>}</p>
+                                            <p className="text-[10px] text-gray-400 truncate font-medium capitalize">{p.role}</p>
+                                        </div>
+
+                                        {/* Admin Controls */}
+                                        {p.user_id !== user.id && (['admin', 'manager'].includes(user.role) || roomDetails.participants.find(mp => mp.user_id === user.id && mp.role === 'admin')) && (
+                                            <div className="opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
+                                                <button onClick={(e) => { e.stopPropagation(); handleRemoveMember(p.user_id); }} className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors">
+                                                    <IoTrash size={16} />
+                                                </button>
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Undo Toast */}
+                {undoDeletion && (
+                    <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-[500] flex items-center gap-4 bg-gray-900 text-white px-6 py-3 rounded-2xl shadow-2xl animate-in fade-in slide-in-from-bottom-4 duration-300">
+                        <div className="flex flex-col">
+                            <span className="font-bold text-sm">Message deleted</span>
+                            <span className="text-[10px] text-gray-400">Undo available for {undoDeletion.countdown}s</span>
+                        </div>
+                        <button onClick={handleUndoDeletion} className="px-4 py-2 bg-indigo-600 rounded-xl font-bold text-xs hover:bg-indigo-500 transition-colors shadow-lg shadow-indigo-900/50">Undo</button>
                     </div>
                 )}
 
