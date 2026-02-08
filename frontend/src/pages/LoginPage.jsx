@@ -427,12 +427,12 @@ const LoginPage = () => {
             setTimeout(() => {
                 setForgotStep(0);
                 generateCaptcha();
-                setError('Session limit resolved. Please sign in.');
-                setSuccessMessage('');
+                setSuccessMessage('Session limit resolved. Please sign in.');
             }, 1500);
 
         } catch (err) {
             setError(err.response?.data?.detail || "Failed to terminate session.");
+        } finally {
             setLoading(false);
         }
     };

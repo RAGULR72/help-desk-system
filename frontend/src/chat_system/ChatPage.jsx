@@ -168,6 +168,7 @@ const ChatPage = () => {
     };
 
     const scrollRef = useRef(null);
+    const messagesEndRef = useRef(null);
     const canCreateGroup = ['admin', 'manager'].includes(user?.role) || (user?.permissions && (typeof user.permissions === 'string' ? JSON.parse(user.permissions).can_create_group : user.permissions.can_create_group));
 
     // Fetch rooms on mount
@@ -177,9 +178,7 @@ const ChatPage = () => {
 
     // Scroll to bottom
     useEffect(() => {
-        if (scrollRef.current) {
-            scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-        }
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [messages, activeRoom]);
 
     // Mark Read on Room Entry
@@ -602,7 +601,7 @@ const ChatPage = () => {
                         <img
                             src={url}
                             alt="Shared"
-                            className="max-w-[280px] sm:max-w-xs rounded-xl select-none cursor-pointer hover:brightness-95 transition-all shadow-sm border border-black/5"
+                            className="w-[260px] h-[260px] object-cover rounded-2xl select-none cursor-pointer hover:brightness-95 transition-all shadow-sm border border-black/5"
                             draggable="false"
                             onContextMenu={(e) => isRestricted && e.preventDefault()}
                             onClick={() => !isRestricted && setPreviewImage(url)}
@@ -1026,7 +1025,7 @@ const ChatPage = () => {
                                             </div>
                                         </div>
                                     )}
-                                    <div ref={scrollRef} />
+                                    <div ref={messagesEndRef} />
                                 </div>
                             </div>
 
