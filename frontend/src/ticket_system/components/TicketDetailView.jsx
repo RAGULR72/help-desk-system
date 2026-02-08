@@ -1202,9 +1202,11 @@ const TicketDetailView = () => {
                                 <h1 className="text-3xl md:text-4xl font-black text-gray-900 dark:text-white leading-tight mb-2">
                                     {ticket.subject}
                                 </h1>
-                                <p className="text-red-500 text-xs font-bold uppercase tracking-widest flex items-center gap-2">
-                                    <FiArrowLeft className="rotate-90" /> SLA: Priority Response Overdue
-                                </p>
+                                {ticket.sla_deadline && new Date(ticket.sla_deadline) < new Date() && ticket.status !== 'resolved' && ticket.status !== 'closed' && (
+                                    <p className="text-red-500 text-xs font-bold uppercase tracking-widest flex items-center gap-2">
+                                        <FiArrowLeft className="rotate-90" /> SLA: Deadline Exceeded
+                                    </p>
+                                )}
                             </div>
                             <div className="flex flex-col items-end gap-2">
                                 {(user.role === 'admin' || user?.permissions?.ticket_edit) && (

@@ -1210,7 +1210,7 @@ const AttendanceView = () => {
                                             <td className="px-4 py-3">
                                                 <button
                                                     onClick={() => handleViewEmployee(log)}
-                                                    className="px-3 py-1.5 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 rounded-lg text-xs font-semibold transition-all opacity-0 group-hover:opacity-100"
+                                                    className="px-3 py-1.5 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 rounded-lg text-xs font-semibold transition-all"
                                                 >
                                                     View
                                                 </button>
@@ -1277,7 +1277,7 @@ const AttendanceView = () => {
                         </div>
                     </div>
                 </div>
-            </div>
+            </div >
         );
     };
 

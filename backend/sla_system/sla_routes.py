@@ -476,13 +476,25 @@ async def get_sla_monitoring_data(
         
         # Real-time Status Calculation helper
         def get_realtime_status(tracking):
+            # 1. DB Flag Priority
+            if tracking.resolution_breached:
+                return 'breached'
+
             now = datetime.utcnow()
-            if tracking.resolution_completed_at:
-                return 'breached' if tracking.resolution_breached else 'compliant'
             
+            # 2. If resolved/closed but flag wasn't set (legacy catch), check times
+            if tracking.resolution_completed_at:
+                if tracking.resolution_completed_at > tracking.resolution_due:
+                    return 'breached'
+                return 'compliant'
+            
+            # 3. Active Ticket Calculation
             total_time = (tracking.resolution_due - tracking.started_at).total_seconds()
             elapsed_time = (now - tracking.started_at).total_seconds()
-            percent_consumed = (elapsed_time / total_time) * 100 if total_time > 0 else 0
+            
+            if total_time <= 0: return 'breached' # Zero duration rule = instant breach
+
+            percent_consumed = (elapsed_time / total_time) * 100
             
             if percent_consumed >= 100:
                 return 'breached'
@@ -607,7 +619,6 @@ async def get_sla_monitoring_data(
                 ).count()
                 
                 breached_count = db.query(Ticket).filter(
-                    Ticket.status.in_(['resolved', 'closed']),
                     Ticket.updated_at.between(day_start, day_end)
                 ).join(TicketSLATracking).filter(
                     TicketSLATracking.resolution_breached == True

@@ -4,7 +4,7 @@ import {
     FiChevronLeft, FiSearch, FiFilter, FiDownload,
     FiMoreVertical, FiCalendar, FiClock, FiTrendingUp
 } from 'react-icons/fi';
-import { motion } from 'framer-motion';
+
 import api from '../api/axios';
 
 const EmployeeDetailPage = () => {
@@ -20,39 +20,12 @@ const EmployeeDetailPage = () => {
         const fetchEmployeeData = async () => {
             try {
                 setLoading(true);
-                // 1. Fetch employee details (using admin user endpoint or specific detail endpoint)
-                // For now, we might need a dedicated endpoint, but let's try to get history first which contains user info in our previous implementation, 
-                // or we can fetch user profile if available. 
-                // Creating a specific endpoint to get user details by ID for admin would be best, 
-                // but let's use the history endpoint we just made and extract info from the first record or a separate call if needed.
-
-                // Ideally backend should have /api/users/:id, but let's check what we have.
-                // We'll use the history endpoint we created which returns records. 
-                // We might need to fetch the user profile separately or update the backend to support it.
-                // Let's assume we can get basic info from the history for now, OR we add a proper endpoint.
-
-                // Let's fetch history first
-                const historyRes = await api.get(`/api/attendance/user/${id}/history`);
+                const [empRes, historyRes] = await Promise.all([
+                    api.get(`/api/admin/users/${id}`),
+                    api.get(`/api/attendance/user/${id}/history`)
+                ]);
+                setEmployee(empRes.data);
                 setHistory(historyRes.data || []);
-
-                // For employee details, if we don't have a direct endpoint, we might have to rely on the history 
-                // OR better, let's look at the existing code to see how it gets user list.
-                // It gets it from /api/attendance/all. We could use that, but it's heavy.
-                // Let's assume for now we can get the user info from the first history record 
-                // or we might need to add a small backend endpoint to get user details.
-
-                // Let's assume we mock the user details for a moment if history is empty, 
-                // but usually we should have a `GET /api/admin/users/:id` or similar.
-
-                // Let's try to fetch user details. 
-                // If we don't have a specific endpoint, we can use the history response 
-                // (which we updated to return some user info? No, it returns ID).
-
-                // Wait, the history endpoint returns:
-                // { id, user_id, date, check_in, check_out, status, work_location, no_punch_out_reason }
-                // It does NOT return name/dept in the new compact version I wrote?
-                // Let me check the backend code I just wrote.
-
             } catch (err) {
                 console.error("Failed to fetch data", err);
             } finally {
@@ -62,16 +35,6 @@ const EmployeeDetailPage = () => {
 
         fetchEmployeeData();
     }, [id]);
-
-    // We need to fetch user details too. 
-    // Let's add a backend endpoint for getting user details by ID for admin to be safe.
-    // Or we can use the existing `api.get('/api/auth/users')` (admin only) and filter? 
-    // That might be inefficient but works for now if we don't want to touch backend again immediately. 
-    // Actually, in `AttendanceView.jsx`, we had `attendanceData` which had all users. 
-    // But since this is a separate page, we don't have that context.
-
-    // Let's fetch the user details using a new simple endpoint or existing one.
-    // I'll update the component to fetch both.
 
     return (
         <div className="min-h-screen bg-slate-50">
@@ -192,7 +155,7 @@ const EmployeeDetailPage = () => {
                                         <div className="text-3xl font-extrabold text-slate-800">
                                             {history.filter(h => h.status === 'Present' || h.status === 'Late').length} <span className="text-sm font-medium text-slate-400">days</span>
                                         </div>
-                                        <span className="text-[10px] text-slate-400 font-medium mt-1 block">Current Month</span>
+                                        <span className="text-[10px] text-slate-400 font-medium mt-1 block">In loaded history</span>
                                     </div>
 
                                     {/* Late */}
@@ -282,7 +245,8 @@ const EmployeeDetailPage = () => {
                                                     .filter(h => {
                                                         if (!searchQuery) return true;
                                                         const q = searchQuery.toLowerCase();
-                                                        return (h.date && h.date.includes(q)) || (h.status && h.status.toLowerCase().includes(q));
+                                                        const dateStr = h.date ? new Date(h.date).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' }).toLowerCase() : '';
+                                                        return dateStr.includes(q) || (h.status && h.status.toLowerCase().includes(q));
                                                     })
                                                     .map((record, idx) => {
                                                         const statusColors = {

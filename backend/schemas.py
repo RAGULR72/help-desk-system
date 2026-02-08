@@ -32,6 +32,8 @@ class UserBase(BaseModel):
     is_2fa_setup: Optional[bool] = False
     has_security_keys: Optional[bool] = False
     has_backup_codes: Optional[bool] = False
+    work_location: Optional[str] = None
+    address: Optional[str] = None
 
 
 class UserCreate(UserBase):

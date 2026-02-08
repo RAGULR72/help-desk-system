@@ -721,41 +721,55 @@ def extend_ticket_sla(
     return {"message": f"Deadline extended by {extension.extension_hours} hours", "new_deadline": db_ticket.sla_deadline}
 
 def check_sla_expirations(db: Session):
-    """Helper to check and notify about expired tickets"""
+    """Helper to check and notify about expired tickets AND update breach status"""
     try:
         now = ticket_models.get_ist()
     
-        # Query all active tickets that haven't been notified for expiration yet
-        active_tickets = db.query(ticket_models.Ticket).filter(
+        # Query ALL active tickets that have expired deadlines
+        expired_active_tickets = db.query(ticket_models.Ticket).filter(
             ticket_models.Ticket.status.notin_(["resolved", "closed"]),
-            ticket_models.Ticket.sla_expired_notified == 0
+            ticket_models.Ticket.sla_deadline < now
         ).all()
         
-        expired_tickets = []
-        for t in active_tickets:
-            deadline = t.sla_deadline or (t.created_at + timedelta(hours=48))
-            if deadline < now:
-                expired_tickets.append(t)
-        
-        if not expired_tickets:
+        if not expired_active_tickets:
             return
-            
+
         admin_users = db.query(User).filter(User.role.in_(["admin", "manager"])).all()
         
-        for ticket in expired_tickets:
-            # Mark as notified immediately to avoid racing
-            ticket.sla_expired_notified = 1
-            db.commit()
+        for ticket in expired_active_tickets:
+            # 1. Update SLA Tracking Status
+            tracking = db.query(sla_models.TicketSLATracking).filter(
+                sla_models.TicketSLATracking.ticket_id == ticket.id
+            ).first()
             
-            for recipient in admin_users:
-                if recipient.email_notifications_enabled:
-                    email_service.send_ticket_update_email(
-                        to_email=recipient.email,
-                        username=recipient.username,
-                        ticket_id=ticket.id,
-                        status="EXPIRED (SLA Violation)",
-                        subject=f"Urgent: SLA EXPIRED for Ticket #{ticket.id} - {ticket.subject}"
-                    )
+            if tracking:
+                if not tracking.resolution_breached:
+                    tracking.resolution_breached = True
+                    tracking.current_status = 'breached'
+                    db.add(tracking)
+            
+            # 2. Send Notification if not yet notified
+            if ticket.sla_expired_notified == 0:
+                ticket.sla_expired_notified = 1
+                db.add(ticket)
+                
+                # Check notification settings
+                for recipient in admin_users:
+                    if recipient.email_notifications_enabled:
+                         # Send email in background via a separate task if possible, 
+                         # but here we call it directly as per original code structure
+                        try:
+                            email_service.send_ticket_update_email(
+                                to_email=recipient.email,
+                                username=recipient.username,
+                                ticket_id=ticket.id,
+                                status="EXPIRED (SLA Violation)",
+                                subject=f"Urgent: SLA EXPIRED for Ticket #{ticket.id} - {ticket.subject}"
+                            )
+                        except Exception as e:
+                            logging.error(f"Failed to send expiration email: {e}")
+
+        db.commit()
     except Exception as e:
         logging.error(f"Error in SLA expiration check: {str(e)}")
 

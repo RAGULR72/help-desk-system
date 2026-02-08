@@ -88,13 +88,18 @@ def process_sla_escalations():
             new_status = 'compliant'
             if percent >= 100:
                 new_status = 'breached'
+                if not tracking.resolution_breached:
+                    tracking.resolution_breached = True
+                    logger.warning(f"Ticket {ticket.id} marked as RESOLUTION BREACHED")
             elif percent >= 75:
                 new_status = 'at_risk'
             
             # Update status if changed
-            if tracking.current_status != new_status:
+            if tracking.current_status != new_status or (percent >= 100 and not tracking.resolution_breached):
                 logger.warning(f"Ticket {ticket.id} status changed: {tracking.current_status} -> {new_status}")
                 tracking.current_status = new_status
+                if percent >= 100:
+                    tracking.resolution_breached = True
                 db.commit()
 
             # 2. Check for Escalation Triggers
