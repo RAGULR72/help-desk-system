@@ -1,8 +1,13 @@
 import axios from 'axios';
 
-const apiHost = import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE_URL || `http://${window.location.hostname}:8000`;
+// Force local backend if running on localhost to avoid connecting to production from local dev
+const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+const apiHost = isLocal
+    ? `http://${window.location.hostname}:8000`
+    : (import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE_URL || `http://${window.location.hostname}:8000`);
+
 export const baseURL = apiHost.replace(/\/$/, "");
-export const wsURL = baseURL.replace(/^http/, 'ws');
+export const wsURL = baseURL.replace(/^http/, 'ws').replace(/^https/, 'wss');
 
 const api = axios.create({
     baseURL: baseURL,

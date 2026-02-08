@@ -26,44 +26,76 @@ const NotificationCenter = () => {
         if (!user) return;
         fetchNotifications();
 
-        // WebSocket for real-time notifications
-        let ws;
+        let ws = null;
+        let reconnectTimer = null;
+        let isMounted = true;
+
         const connectWS = () => {
             const token = localStorage.getItem('token');
-            if (!token) return;
+            if (!token || !isMounted) return;
 
-            const wsUrl = `${wsURL}/api/notifications/ws?token=${token}`;
+            // Use the updated wsURL from axios which handles local/remote logic
+            // Note: wsURL passed from axios.js imports
+            // But we can check if it looks right
+            const url = `${wsURL}/api/notifications/ws?token=${token}`;
 
-            ws = new WebSocket(wsUrl);
+            try {
+                ws = new WebSocket(url);
 
-            ws.onmessage = (event) => {
-                const data = JSON.parse(event.data);
-                if (data.type === 'new_notification') {
-                    setNotifications(prev => [data.notification, ...prev]);
-                    setUnreadCount(prev => prev + 1);
+                ws.onopen = () => {
+                    if (isMounted) console.log('Connected to Notification WS');
+                };
 
-                    // Simple sound or vibration if needed
-                    if (window.navigator.vibrate) window.navigator.vibrate(100);
-                }
-            };
+                ws.onmessage = (event) => {
+                    if (!isMounted) return;
+                    try {
+                        const data = JSON.parse(event.data);
+                        if (data.type === 'new_notification') {
+                            setNotifications(prev => [data.notification, ...prev]);
+                            setUnreadCount(prev => prev + 1);
 
-            ws.onerror = (err) => {
-                console.error("Notif WS Error:", err);
-            };
+                            if (window.navigator.vibrate) window.navigator.vibrate(100);
 
-            ws.onclose = () => {
-                // Reconnect after 5 seconds
-                setTimeout(connectWS, 5000);
-            };
+                            // Optional: Play sound
+                            // const audio = new Audio('/notification.mp3');
+                            // audio.play().catch(e => {});
+                        }
+                    } catch (e) {
+                        console.error("WS Parse Error", e);
+                    }
+                };
+
+                ws.onerror = (err) => {
+                    // Just log, onclose will handle reconnect
+                    // console.error("Notif WS Error", err); 
+                };
+
+                ws.onclose = () => {
+                    if (!isMounted) return;
+                    // console.log('Notif WS Closed, reconnecting in 5s...');
+                    reconnectTimer = setTimeout(connectWS, 5000);
+                };
+            } catch (e) {
+                console.error("WS Creation Error", e);
+                reconnectTimer = setTimeout(connectWS, 5000);
+            }
         };
 
         connectWS();
 
-        // Polling as a backup (much less frequent)
-        const interval = setInterval(fetchNotifications, 60000);
+        // Polling as a backup (every 60s)
+        const interval = setInterval(() => {
+            if (isMounted) fetchNotifications();
+        }, 60000);
+
         return () => {
+            isMounted = false;
             clearInterval(interval);
-            if (ws) ws.close();
+            clearTimeout(reconnectTimer);
+            if (ws) {
+                ws.onclose = null; // Prevent reconnect logic from firing
+                ws.close();
+            }
         };
     }, [user]);
 
