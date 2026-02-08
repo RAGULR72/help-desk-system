@@ -22,6 +22,15 @@ const TicketPage = () => {
     const [portalSettings, setPortalSettings] = useState({ active: false, allowed: false });
 
     useEffect(() => {
+        if (user) {
+            if (user.role === 'admin') navigate('/dashboard/admin');
+            else if (user.role === 'manager') navigate('/dashboard/manager');
+            else if (user.role === 'technician') navigate('/dashboard/technician');
+            else navigate('/dashboard/user');
+        }
+    }, [user, navigate]);
+
+    useEffect(() => {
         const checkPortal = async () => {
             try {
                 const res = await api.get('/api/portal/settings');

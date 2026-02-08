@@ -10,7 +10,7 @@ import { RepairWorkflow, RepairInitiationModal } from './RepairWorkflow';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from '../../context/TranslationContext';
 import { useAuth } from '../../context/AuthContext';
-import api from '../../api/axios';
+import api, { baseURL } from '../../api/axios';
 import DOMPurify from 'dompurify';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
@@ -1665,7 +1665,7 @@ const TicketDetailView = () => {
                                         const cleanFile = file.trim();
                                         const fileUrl = cleanFile.startsWith('http')
                                             ? cleanFile
-                                            : `${api.defaults.baseURL}${cleanFile.startsWith('/') ? '' : '/'}${cleanFile}`;
+                                            : `${baseURL}${cleanFile.startsWith('/') ? '' : '/'}${cleanFile}`;
 
                                         const isImage = cleanFile.match(/\.(jpg|jpeg|png|gif|webp)$/i);
 
