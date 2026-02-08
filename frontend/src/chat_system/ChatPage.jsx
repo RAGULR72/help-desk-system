@@ -1203,18 +1203,7 @@ const ChatPage = () => {
                             </p>
 
                             <div className="flex gap-6 w-full justify-center mb-2">
-                                <div className="flex flex-col items-center gap-2 cursor-pointer group">
-                                    <div className="w-10 h-10 rounded-full bg-gray-50 dark:bg-slate-800 flex items-center justify-center text-gray-600 dark:text-gray-400 group-hover:bg-violet-50 dark:group-hover:bg-violet-900/20 group-hover:text-violet-600 transition-colors shadow-sm">
-                                        <IoMic size={18} />
-                                    </div>
-                                    <span className="text-[10px] font-bold text-gray-400 group-hover:text-violet-600 transition-colors uppercase tracking-wide">Mute</span>
-                                </div>
-                                <div className="flex flex-col items-center gap-2 cursor-pointer group">
-                                    <div className="w-10 h-10 rounded-full bg-gray-50 dark:bg-slate-800 flex items-center justify-center text-gray-600 dark:text-gray-400 group-hover:bg-violet-50 dark:group-hover:bg-violet-900/20 group-hover:text-violet-600 transition-colors shadow-sm">
-                                        <IoSearch size={18} />
-                                    </div>
-                                    <span className="text-[10px] font-bold text-gray-400 group-hover:text-violet-600 transition-colors uppercase tracking-wide">Search</span>
-                                </div>
+
                                 {activeRoom.room_type === 'group' && (
                                     <div className="flex flex-col items-center gap-2 cursor-pointer group">
                                         <div className="w-10 h-10 rounded-full bg-red-50 dark:bg-red-900/10 flex items-center justify-center text-red-500 group-hover:bg-red-100 dark:group-hover:bg-red-900/30 transition-colors shadow-sm">
@@ -1249,7 +1238,6 @@ const ChatPage = () => {
                             </div>
                         )}
 
-                        {/* Menu Items */}
                         <div className="p-4 space-y-1 border-b border-gray-50 dark:border-slate-800">
                             <div className="flex items-center justify-between p-3 hover:bg-gray-50 dark:hover:bg-slate-800 rounded-2xl cursor-pointer group transition-colors">
                                 <div className="flex items-center gap-3">
@@ -1257,7 +1245,9 @@ const ChatPage = () => {
                                     <span className="text-sm font-bold text-gray-700 dark:text-gray-200 truncate">Media, Links & Docs</span>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                    <span className="text-xs font-bold text-gray-400 group-hover:text-blue-500">230</span>
+                                    <span className="text-xs font-bold text-gray-400 group-hover:text-blue-500">
+                                        {(messages[activeRoom.id] || []).filter(m => ['image', 'video', 'file', 'audio'].includes(m.type)).length}
+                                    </span>
                                     <IoChevronForward size={14} className="text-gray-400" />
                                 </div>
                             </div>
@@ -1266,7 +1256,9 @@ const ChatPage = () => {
                                     <div className="w-9 h-9 rounded-xl bg-amber-50 dark:bg-amber-900/20 text-amber-500 flex items-center justify-center"><IoHappyOutline size={18} /></div>
                                     <span className="text-sm font-bold text-gray-700 dark:text-gray-200 truncate">Starred Messages</span>
                                 </div>
-                                <span className="text-[10px] font-bold text-gray-400 border border-gray-200 dark:border-slate-700 px-2 py-0.5 rounded-md">None</span>
+                                <span className={`text-[10px] font-bold border border-gray-200 dark:border-slate-700 px-2 py-0.5 rounded-md ${(messages[activeRoom.id] || []).some(m => m.is_starred) ? 'text-amber-500' : 'text-gray-400'}`}>
+                                    {(messages[activeRoom.id] || []).filter(m => m.is_starred).length || 'None'}
+                                </span>
                             </div>
                         </div>
 
