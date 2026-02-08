@@ -1,5 +1,6 @@
 import sys # Updated imports structure
 import os
+import logging
 # Ensure parent directory is in path for imports
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
