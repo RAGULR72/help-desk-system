@@ -621,7 +621,8 @@ async def get_sla_monitoring_data(
                 breached_count = db.query(Ticket).filter(
                     Ticket.updated_at.between(day_start, day_end)
                 ).join(TicketSLATracking).filter(
-                    TicketSLATracking.resolution_breached == True
+                    (TicketSLATracking.resolution_breached == True) | 
+                    ((Ticket.status.notin_(['resolved', 'closed'])) & (TicketSLATracking.resolution_due < now))
                 ).count()
                 
                 trend_data.append({"label": label, "resolved": resolved, "breached": breached_count})

@@ -693,7 +693,7 @@ const TicketList = ({ userRole, currentUserId }) => {
         high_priority: filteredByDate.filter(t => ['Critical', 'High'].includes(t.priority)).length,
         sla_risk: filteredByDate.filter(t => {
             const tr = calculateDetailedTimeRemaining(t.created_at, t.status, t.sla_deadline);
-            return tr.urgency === 'critical';
+            return ['critical', 'breached'].includes(tr.urgency);
         }).length,
         pending_approval: filteredByDate.filter(t => t.status === 'Pending').length
     };
@@ -713,7 +713,7 @@ const TicketList = ({ userRole, currentUserId }) => {
         } else if (activeTab === 'sla_risk') {
             tickets = tickets.filter(t => {
                 const tr = calculateDetailedTimeRemaining(t.created_at, t.status, t.sla_deadline);
-                return tr.urgency === 'critical';
+                return ['critical', 'breached'].includes(tr.urgency);
             });
         } else if (activeTab === 'pending_approval') {
             tickets = tickets.filter(t => t.status === 'Pending');
