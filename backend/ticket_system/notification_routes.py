@@ -12,6 +12,7 @@ import schemas
 from database import get_db
 import auth
 import json
+from ws_manager import manager
 
 router = APIRouter(prefix="/api/notifications", tags=["notifications"])
 
@@ -85,29 +86,8 @@ def create_notification(
     return new_notif
 
 
-# --- WebSocket Manager (Simple Implementation) ---
-
-class ConnectionManager:
-    def __init__(self):
-        self.active_connections: Dict[int, List[WebSocket]] = {}
-
-    async def connect(self, websocket: WebSocket, user_id: int):
-        await websocket.accept()
-        if user_id not in self.active_connections:
-            self.active_connections[user_id] = []
-        self.active_connections[user_id].append(websocket)
-
-    def disconnect(self, websocket: WebSocket, user_id: int):
-        if user_id in self.active_connections:
-            if websocket in self.active_connections[user_id]:
-                self.active_connections[user_id].remove(websocket)
-
-    async def send_personal_message(self, message: str, user_id: int):
-        if user_id in self.active_connections:
-            for connection in self.active_connections[user_id]:
-                await connection.send_text(message)
-
-manager = ConnectionManager()
+# --- WebSocket Manager (Using Shared Instance) ---
+# manager is imported from ws_manager.py
 
 @router.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket, token: str, db: Session = Depends(get_db)):

@@ -198,6 +198,10 @@ class SecurityMiddleware(BaseHTTPMiddleware):
     
     async def dispatch(self, request: Request, call_next):
         """Main middleware handler"""
+        # Bypass for WebSockets - they have their own auth/handling and BaseHTTPMiddleware can interfere
+        if request.scope.get("type") == "websocket":
+            return await call_next(request)
+
         # Bypass for CORS preflight requests
         if request.method == "OPTIONS":
             return await call_next(request)
