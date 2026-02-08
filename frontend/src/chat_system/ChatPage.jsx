@@ -778,7 +778,7 @@ const ChatPage = () => {
 
                 {/* Sidebar */}
                 {/* 1. LEFT SIDEBAR */}
-                <div className={`w-full md:w-[340px] flex-shrink-0 flex flex-col border-r border-gray-100 dark:border-slate-800 bg-white dark:bg-slate-900 ${activeRoom ? 'hidden md:flex' : 'flex'}`}>
+                <div className={`w-full md:w-[290px] flex-shrink-0 flex flex-col border-r border-gray-100 dark:border-slate-800 bg-white dark:bg-slate-900 ${activeRoom ? 'hidden md:flex' : 'flex'}`}>
 
                     {/* Sidebar Header */}
                     <div className="p-5 pb-0">
@@ -1152,7 +1152,7 @@ const ChatPage = () => {
 
                 {/* 3. RIGHT SIDEBAR (DETAILS) */}
                 {showGroupInfo && roomDetails && (
-                    <div className="w-full xl:w-[320px] lg:w-[300px] md:w-[280px] bg-white dark:bg-slate-900 border-l border-gray-100 dark:border-slate-800 flex flex-col h-full overflow-y-auto custom-scrollbar flex-shrink-0 z-10 absolute md:relative right-0 top-0 shadow-2xl md:shadow-none transition-all duration-300">
+                    <div className="w-full xl:w-[350px] lg:w-[320px] md:w-[300px] bg-white dark:bg-slate-900 border-l border-gray-100 dark:border-slate-800 flex flex-col h-full overflow-y-auto custom-scrollbar flex-shrink-0 z-10 absolute md:relative right-0 top-0 shadow-2xl md:shadow-none transition-all duration-300">
                         {/* Header */}
                         <div className="p-6 pb-4 flex flex-col items-center border-b border-gray-50 dark:border-slate-800 relative">
                             <button onClick={() => setShowGroupInfo(false)} className="absolute top-4 right-4 p-2 bg-gray-50 dark:bg-slate-800 text-gray-400 hover:text-gray-600 dark:hover:text-white rounded-full transition-colors md:hidden">
@@ -1162,7 +1162,10 @@ const ChatPage = () => {
                             <div className="relative group/avatar mb-4">
                                 <div className="w-24 h-24 rounded-full p-1 border-2 border-dashed border-gray-200 dark:border-slate-700 hover:border-violet-500 transition-colors cursor-pointer">
                                     <div className="w-full h-full rounded-full overflow-hidden bg-gray-100 dark:bg-slate-800 flex items-center justify-center">
-                                        <img src={getFullAvatarUrl(roomDetails.room.avatar || activeRoom.avatar) || `https://ui-avatars.com/api/?name=${roomDetails.room.name}`} className="w-full h-full object-cover" />
+                                        <img
+                                            src={getFullAvatarUrl(activeRoom.room_type === 'group' ? activeRoom.avatar : activeRoom.users?.find(u => u.id !== user.id)?.avatar) || `https://ui-avatars.com/api/?name=${activeRoom.name}`}
+                                            className="w-full h-full object-cover"
+                                        />
                                     </div>
                                 </div>
                                 {(roomDetails.room.creator_id === user.id || ['admin', 'manager'].includes(user.role)) && activeRoom.room_type === 'group' && (
@@ -1184,9 +1187,9 @@ const ChatPage = () => {
                                 />
                             ) : (
                                 <div className="flex items-center gap-2 group/name justify-center">
-                                    <h3 className="font-bold text-lg text-gray-800 dark:text-white text-center">{roomDetails.room.name}</h3>
+                                    <h3 className="font-bold text-lg text-gray-800 dark:text-white text-center">{activeRoom.name}</h3>
                                     {(roomDetails.room.creator_id === user.id || ['admin', 'manager'].includes(user.role)) && activeRoom.room_type === 'group' && (
-                                        <button onClick={() => { setIsEditingName(true); setEditedName(roomDetails.room.name); }} className="opacity-0 group-hover/name:opacity-100 text-gray-400 hover:text-violet-600 transition-opacity"><IoCreate size={16} /></button>
+                                        <button onClick={() => { setIsEditingName(true); setEditedName(activeRoom.name); }} className="opacity-0 group-hover/name:opacity-100 text-gray-400 hover:text-violet-600 transition-opacity"><IoCreate size={16} /></button>
                                     )}
                                 </div>
                             )}
