@@ -1663,11 +1663,17 @@ const TicketDetailView = () => {
                                 <div className="p-8 space-y-4">
                                     {ticket.attachments && (typeof ticket.attachments === 'string' ? ticket.attachments.split(',') : ticket.attachments).map((file, i) => {
                                         const cleanFile = file.trim();
+                                        const isImage = cleanFile.match(/\.(jpg|jpeg|png|gif|webp)$/i);
+
+                                        // Ensure we have an absolute URL for the backend
+                                        let finalBaseUrl = baseURL;
+                                        if (!baseURL || !baseURL.startsWith('http')) {
+                                            finalBaseUrl = `${window.location.protocol}//${window.location.hostname}:8000`;
+                                        }
+
                                         const fileUrl = cleanFile.startsWith('http')
                                             ? cleanFile
-                                            : `${baseURL}${cleanFile.startsWith('/') ? '' : '/'}${cleanFile}`;
-
-                                        const isImage = cleanFile.match(/\.(jpg|jpeg|png|gif|webp)$/i);
+                                            : `${finalBaseUrl}${cleanFile.startsWith('/') ? '' : '/'}${cleanFile}`;
 
                                         if (isImage) {
                                             return (
