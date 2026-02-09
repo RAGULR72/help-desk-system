@@ -201,112 +201,8 @@ const AnalyticsDashboard = () => {
                 <AdminWorkloadHeatmap />
             </div>
 
-            {/* Second Row: Trend and Categories */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8 relative z-10">
-                {/* Resolution Speed */}
-                <div className="glass-card p-5 border-gray-100 dark:border-slate-800">
-                    <div className="flex items-center gap-3 mb-6">
-                        <div className="p-1.5 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-lg">
-                            <FiClock size={14} />
-                        </div>
-                        <h3 className="text-xs font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wider italic">Resolution Speed</h3>
-                    </div>
-                    <div className="h-[240px] w-full min-w-0">
-                        {isMounted && (
-                            <ResponsiveContainer width="100%" height="100%">
-                                <BarChart data={resolution_distribution}>
-                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" opacity={0.5} />
-                                    <XAxis
-                                        dataKey="name"
-                                        axisLine={false}
-                                        tickLine={false}
-                                        tick={{ fill: '#64748b', fontSize: 9, fontWeight: 700 }}
-                                        dy={5}
-                                    />
-                                    <YAxis
-                                        axisLine={false}
-                                        tickLine={false}
-                                        tick={{ fill: '#64748b', fontSize: 9, fontWeight: 700 }}
-                                        dx={-5}
-                                    />
-                                    <Tooltip
-                                        cursor={{ fill: '#f8fafc', radius: 4 }}
-                                        contentStyle={{ backgroundColor: '#fff', border: '1px solid #e2e8f0', borderRadius: '12px', fontSize: '11px', fontWeight: 'bold' }}
-                                    />
-                                    <Bar
-                                        dataKey="value"
-                                        fill="#4f46e5"
-                                        radius={[6, 6, 0, 0]}
-                                        barSize={28}
-                                    >
-                                        {resolution_distribution.map((entry, index) => (
-                                            <Cell key={`cell-${index}`} fill={index % 2 === 0 ? '#4f46e5' : '#818cf8'} />
-                                        ))}
-                                    </Bar>
-                                </BarChart>
-                            </ResponsiveContainer>
-                        )}
-                    </div>
-                </div>
-
-                {/* Tickets by Category */}
-                <div className="glass-card p-5 border-gray-100 dark:border-slate-800">
-                    <div className="flex items-center gap-3 mb-6">
-                        <div className="p-1.5 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-lg">
-                            <FiActivity size={14} style={{ transform: 'rotate(90deg)' }} />
-                        </div>
-                        <h3 className="text-xs font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wider italic">Categories</h3>
-                    </div>
-                    <div className="h-[200px] w-full flex items-center justify-center min-w-0">
-                        {isMounted && (
-                            <ResponsiveContainer width="100%" height="100%">
-                                <PieChart>
-                                    <Pie
-                                        data={category_distribution}
-                                        cx="50%"
-                                        cy="50%"
-                                        innerRadius={50}
-                                        outerRadius={75}
-                                        paddingAngle={5}
-                                        dataKey="value"
-                                        stroke="none"
-                                    >
-                                        {category_distribution.map((entry, index) => (
-                                            <Cell
-                                                key={`cell-${index}`}
-                                                fill={CATEGORY_COLORS[index % CATEGORY_COLORS.length]}
-                                            />
-                                        ))}
-                                    </Pie>
-                                    <Tooltip
-                                        contentStyle={{
-                                            backgroundColor: '#fff',
-                                            border: '1px solid #e2e8f0',
-                                            borderRadius: '8px',
-                                            fontSize: '11px',
-                                            fontWeight: 'bold'
-                                        }}
-                                    />
-                                    <Legend
-                                        layout="vertical"
-                                        verticalAlign="middle"
-                                        align="right"
-                                        iconType="circle"
-                                        iconSize={8}
-                                        formatter={(value) => (
-                                            <span className="text-gray-600 dark:text-gray-400 font-bold text-[9px] ml-1 uppercase tracking-widest">{value}</span>
-                                        )}
-                                    />
-                                </PieChart>
-                            </ResponsiveContainer>
-                        )}
-                    </div>
-                </div>
-            </div>
-
-            {/* Third Row: Time Distribution and Top Agents */}
-            <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 relative z-10">
-                {/* Ticket Performance Trend */}
+            {/* Ticket Performance Trend */}
+            <div className="mb-10 relative z-10">
                 <div className="glass-card p-5 border-gray-100 dark:border-slate-800">
                     <div className="flex items-center justify-between mb-6">
                         <div className="flex items-center gap-3">
@@ -326,7 +222,7 @@ const AnalyticsDashboard = () => {
                             </div>
                         </div>
                     </div>
-                    <div className="w-full h-[200px] min-w-0">
+                    <div className="w-full h-[240px] min-w-0">
                         {isMounted && (
                             <ResponsiveContainer width="100%" height="100%">
                                 <AreaChart data={trend_data}>
@@ -387,6 +283,122 @@ const AnalyticsDashboard = () => {
                         )}
                     </div>
                 </div>
+            </div>
+
+            {/* Second Row: Trend and Categories */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8 relative z-10">
+                {/* Resolution Speed */}
+                <div className="glass-card p-5 border-gray-200 dark:border-slate-700 shadow-sm">
+                    <div className="flex items-center gap-3 mb-6">
+                        <div className="p-1.5 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-lg">
+                            <FiClock size={14} />
+                        </div>
+                        <h3 className="text-xs font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wider italic">Resolution Speed</h3>
+                    </div>
+                    <div className="h-[240px] w-full min-w-0">
+                        {isMounted && (
+                            <ResponsiveContainer width="100%" height="100%">
+                                <BarChart data={resolution_distribution}>
+                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" opacity={0.5} />
+                                    <XAxis
+                                        dataKey="name"
+                                        axisLine={false}
+                                        tickLine={false}
+                                        tick={{ fill: '#64748b', fontSize: 9, fontWeight: 700 }}
+                                        dy={5}
+                                    />
+                                    <YAxis
+                                        axisLine={false}
+                                        tickLine={false}
+                                        tick={{ fill: '#64748b', fontSize: 9, fontWeight: 700 }}
+                                        dx={-5}
+                                    />
+                                    <Tooltip
+                                        cursor={{ fill: '#f8fafc', radius: 4 }}
+                                        contentStyle={{ backgroundColor: '#fff', border: '1px solid #e2e8f0', borderRadius: '12px', fontSize: '11px', fontWeight: 'bold' }}
+                                    />
+                                    <Bar
+                                        dataKey="value"
+                                        fill="#4f46e5"
+                                        radius={[6, 6, 0, 0]}
+                                        barSize={28}
+                                    >
+                                        {resolution_distribution.map((entry, index) => (
+                                            <Cell key={`cell-${index}`} fill={index % 2 === 0 ? '#4f46e5' : '#818cf8'} />
+                                        ))}
+                                    </Bar>
+                                </BarChart>
+                            </ResponsiveContainer>
+                        )}
+                    </div>
+                </div>
+
+                {/* Tickets by Category */}
+                <div className="glass-card p-5 border-gray-200 dark:border-slate-700 shadow-sm relative">
+                    <div className="flex items-center gap-3 mb-6">
+                        <div className="p-1.5 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-lg">
+                            <FiActivity size={14} style={{ transform: 'rotate(90deg)' }} />
+                        </div>
+                        <h3 className="text-xs font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wider italic">Categories</h3>
+                    </div>
+                    <div className="h-[200px] w-full flex items-center justify-center min-w-0 relative">
+                        {isMounted && (
+                            <>
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <PieChart>
+                                        <Pie
+                                            data={category_distribution}
+                                            cx="50%"
+                                            cy="50%"
+                                            innerRadius={50}
+                                            outerRadius={75}
+                                            paddingAngle={5}
+                                            dataKey="value"
+                                            stroke="none"
+                                        >
+                                            {category_distribution.map((entry, index) => (
+                                                <Cell
+                                                    key={`cell-${index}`}
+                                                    fill={CATEGORY_COLORS[index % CATEGORY_COLORS.length]}
+                                                />
+                                            ))}
+                                        </Pie>
+                                        <Tooltip
+                                            contentStyle={{
+                                                backgroundColor: '#fff',
+                                                border: '1px solid #e2e8f0',
+                                                borderRadius: '8px',
+                                                fontSize: '11px',
+                                                fontWeight: 'bold'
+                                            }}
+                                        />
+                                        <Legend
+                                            layout="vertical"
+                                            verticalAlign="middle"
+                                            align="right"
+                                            iconType="circle"
+                                            iconSize={8}
+                                            formatter={(value) => (
+                                                <span className="text-gray-600 dark:text-gray-400 font-bold text-[9px] ml-1 uppercase tracking-widest">{value}</span>
+                                            )}
+                                        />
+                                    </PieChart>
+                                </ResponsiveContainer>
+                                <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none pr-28">
+                                    <span className="text-2xl font-bold text-gray-800 dark:text-white">
+                                        {category_distribution.reduce((acc, curr) => acc + curr.value, 0)}
+                                    </span>
+                                    <span className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Total</span>
+                                </div>
+                            </>
+                        )}
+                    </div>
+                </div>
+            </div>
+
+            {/* Third Row: Time Distribution and Top Agents */}
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 relative z-10">
+
 
                 {/* Top Performing Agents */}
                 <div className="glass-card p-5 border-gray-100 dark:border-slate-800">
