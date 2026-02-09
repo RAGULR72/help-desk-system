@@ -201,233 +201,230 @@ const AnalyticsDashboard = () => {
                 <AdminWorkloadHeatmap />
             </div>
 
-            {/* Main Layout Grid */}
+            {/* Second Row: Trend and Categories */}
             <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-8 relative z-10">
-                {/* Left Column: Categories and Resolution Speed */}
-                <div className="space-y-6">
-                    {/* Tickets by Category */}
-                    <div className="glass-card p-5 border-gray-100 dark:border-slate-800">
-                        <div className="flex items-center gap-3 mb-6">
-                            <div className="p-1.5 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-lg">
-                                <FiActivity size={14} style={{ transform: 'rotate(90deg)' }} />
-                            </div>
-                            <h3 className="text-xs font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wider italic">Categories</h3>
+                {/* Resolution Speed */}
+                <div className="xl:col-span-2 glass-card p-5 border-gray-100 dark:border-slate-800">
+                    <div className="flex items-center gap-3 mb-6">
+                        <div className="p-1.5 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-lg">
+                            <FiClock size={14} />
                         </div>
-                        <div className="h-[200px] w-full flex items-center justify-center min-w-0">
-                            {isMounted && (
-                                <ResponsiveContainer width="100%" height="100%">
-                                    <PieChart>
-                                        <Pie
-                                            data={category_distribution}
-                                            cx="50%"
-                                            cy="50%"
-                                            innerRadius={50}
-                                            outerRadius={75}
-                                            paddingAngle={5}
-                                            dataKey="value"
-                                            stroke="none"
-                                        >
-                                            {category_distribution.map((entry, index) => (
-                                                <Cell
-                                                    key={`cell-${index}`}
-                                                    fill={CATEGORY_COLORS[index % CATEGORY_COLORS.length]}
-                                                />
-                                            ))}
-                                        </Pie>
-                                        <Tooltip
-                                            contentStyle={{
-                                                backgroundColor: '#fff',
-                                                border: '1px solid #e2e8f0',
-                                                borderRadius: '8px',
-                                                fontSize: '11px',
-                                                fontWeight: 'bold'
-                                            }}
-                                        />
-                                        <Legend
-                                            layout="vertical"
-                                            verticalAlign="middle"
-                                            align="right"
-                                            iconType="circle"
-                                            iconSize={8}
-                                            formatter={(value) => (
-                                                <span className="text-gray-600 dark:text-gray-400 font-bold text-[9px] ml-1 uppercase tracking-widest">{value}</span>
-                                            )}
-                                        />
-                                    </PieChart>
-                                </ResponsiveContainer>
-                            )}
-                        </div>
+                        <h3 className="text-xs font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wider italic">Resolution Speed</h3>
                     </div>
-
-                    {/* Resolution Time Distribution */}
-                    <div className="glass-card p-5 border-gray-100 dark:border-slate-800">
-                        <div className="flex items-center gap-3 mb-6">
-                            <div className="p-1.5 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-lg">
-                                <FiClock size={14} />
-                            </div>
-                            <h3 className="text-xs font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wider italic">Resolution Speed</h3>
-                        </div>
-                        <div className="h-[200px] w-full min-w-0">
-                            {isMounted && (
-                                <ResponsiveContainer width="100%" height="100%">
-                                    <BarChart data={resolution_distribution}>
-                                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" opacity={0.5} />
-                                        <XAxis
-                                            dataKey="name"
-                                            axisLine={false}
-                                            tickLine={false}
-                                            tick={{ fill: '#64748b', fontSize: 9, fontWeight: 700 }}
-                                            dy={5}
-                                        />
-                                        <YAxis
-                                            axisLine={false}
-                                            tickLine={false}
-                                            tick={{ fill: '#64748b', fontSize: 9, fontWeight: 700 }}
-                                            dx={-5}
-                                        />
-                                        <Tooltip
-                                            cursor={{ fill: '#f8fafc', radius: 4 }}
-                                            contentStyle={{ backgroundColor: '#fff', border: '1px solid #e2e8f0', borderRadius: '12px', fontSize: '11px', fontWeight: 'bold' }}
-                                        />
-                                        <Bar
-                                            dataKey="value"
-                                            fill="#4f46e5"
-                                            radius={[6, 6, 0, 0]}
-                                            barSize={28}
-                                        >
-                                            {resolution_distribution.map((entry, index) => (
-                                                <Cell key={`cell-${index}`} fill={index % 2 === 0 ? '#4f46e5' : '#818cf8'} />
-                                            ))}
-                                        </Bar>
-                                    </BarChart>
-                                </ResponsiveContainer>
-                            )}
-                        </div>
+                    <div className="h-[240px] w-full min-w-0">
+                        {isMounted && (
+                            <ResponsiveContainer width="100%" height="100%">
+                                <BarChart data={resolution_distribution}>
+                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" opacity={0.5} />
+                                    <XAxis
+                                        dataKey="name"
+                                        axisLine={false}
+                                        tickLine={false}
+                                        tick={{ fill: '#64748b', fontSize: 9, fontWeight: 700 }}
+                                        dy={5}
+                                    />
+                                    <YAxis
+                                        axisLine={false}
+                                        tickLine={false}
+                                        tick={{ fill: '#64748b', fontSize: 9, fontWeight: 700 }}
+                                        dx={-5}
+                                    />
+                                    <Tooltip
+                                        cursor={{ fill: '#f8fafc', radius: 4 }}
+                                        contentStyle={{ backgroundColor: '#fff', border: '1px solid #e2e8f0', borderRadius: '12px', fontSize: '11px', fontWeight: 'bold' }}
+                                    />
+                                    <Bar
+                                        dataKey="value"
+                                        fill="#4f46e5"
+                                        radius={[6, 6, 0, 0]}
+                                        barSize={28}
+                                    >
+                                        {resolution_distribution.map((entry, index) => (
+                                            <Cell key={`cell-${index}`} fill={index % 2 === 0 ? '#4f46e5' : '#818cf8'} />
+                                        ))}
+                                    </Bar>
+                                </BarChart>
+                            </ResponsiveContainer>
+                        )}
                     </div>
                 </div>
 
-                {/* Right Column: Trend and Top Agents */}
-                <div className="xl:col-span-2 space-y-6">
-                    {/* Ticket Performance Trend */}
-                    <div className="glass-card p-5 border-gray-100 dark:border-slate-800">
-                        <div className="flex items-center justify-between mb-6">
-                            <div className="flex items-center gap-3">
-                                <div className="p-1.5 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-lg">
-                                    <FiActivity size={14} />
-                                </div>
-                                <h3 className="text-xs font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wider italic">Performance Trend</h3>
-                            </div>
-                            <div className="flex items-center gap-4">
-                                <div className="flex items-center gap-2">
-                                    <span className="w-1.5 h-1.5 rounded-full bg-indigo-500"></span>
-                                    <span className="text-[9px] text-gray-500 font-bold uppercase tracking-widest italic">Created</span>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                                    <span className="text-[9px] text-gray-500 font-bold uppercase tracking-widest italic">Resolved</span>
-                                </div>
-                            </div>
+                {/* Tickets by Category */}
+                <div className="glass-card p-5 border-gray-100 dark:border-slate-800">
+                    <div className="flex items-center gap-3 mb-6">
+                        <div className="p-1.5 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-lg">
+                            <FiActivity size={14} style={{ transform: 'rotate(90deg)' }} />
                         </div>
-                        <div className="w-full h-[240px] min-w-0">
-                            {isMounted && (
-                                <ResponsiveContainer width="100%" height="100%">
-                                    <AreaChart data={trend_data}>
-                                        <defs>
-                                            <linearGradient id="colorCreated" x1="0" y1="0" x2="0" y2="1">
-                                                <stop offset="5%" stopColor="#4f46e5" stopOpacity={0.15} />
-                                                <stop offset="95%" stopColor="#4f46e5" stopOpacity={0} />
-                                            </linearGradient>
-                                            <linearGradient id="colorResolved" x1="0" y1="0" x2="0" y2="1">
-                                                <stop offset="5%" stopColor="#10b981" stopOpacity={0.15} />
-                                                <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
-                                            </linearGradient>
-                                        </defs>
-                                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" opacity={0.5} />
-                                        <XAxis
-                                            dataKey="date"
-                                            axisLine={false}
-                                            tickLine={false}
-                                            tick={{ fill: '#64748b', fontSize: 10, fontWeight: 700 }}
-                                            dy={10}
-                                        />
-                                        <YAxis
-                                            axisLine={false}
-                                            tickLine={false}
-                                            tick={{ fill: '#64748b', fontSize: 10, fontWeight: 700 }}
-                                            dx={-5}
-                                        />
-                                        <Tooltip
-                                            contentStyle={{
-                                                backgroundColor: '#fff',
-                                                border: '1px solid #e2e8f0',
-                                                borderRadius: '12px',
-                                                fontSize: '11px',
-                                                fontWeight: 'bold',
-                                                boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)'
-                                            }}
-                                        />
-                                        <Area
-                                            type="monotone"
-                                            dataKey="created"
-                                            stroke="#4f46e5"
-                                            strokeWidth={2.5}
-                                            fillOpacity={1}
-                                            fill="url(#colorCreated)"
-                                            animationDuration={1500}
-                                        />
-                                        <Area
-                                            type="monotone"
-                                            dataKey="resolved"
-                                            stroke="#10b981"
-                                            strokeWidth={2.5}
-                                            fillOpacity={1}
-                                            fill="url(#colorResolved)"
-                                            animationDuration={1500}
-                                        />
-                                    </AreaChart>
-                                </ResponsiveContainer>
-                            )}
+                        <h3 className="text-xs font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wider italic">Categories</h3>
+                    </div>
+                    <div className="h-[200px] w-full flex items-center justify-center min-w-0">
+                        {isMounted && (
+                            <ResponsiveContainer width="100%" height="100%">
+                                <PieChart>
+                                    <Pie
+                                        data={category_distribution}
+                                        cx="50%"
+                                        cy="50%"
+                                        innerRadius={50}
+                                        outerRadius={75}
+                                        paddingAngle={5}
+                                        dataKey="value"
+                                        stroke="none"
+                                    >
+                                        {category_distribution.map((entry, index) => (
+                                            <Cell
+                                                key={`cell-${index}`}
+                                                fill={CATEGORY_COLORS[index % CATEGORY_COLORS.length]}
+                                            />
+                                        ))}
+                                    </Pie>
+                                    <Tooltip
+                                        contentStyle={{
+                                            backgroundColor: '#fff',
+                                            border: '1px solid #e2e8f0',
+                                            borderRadius: '8px',
+                                            fontSize: '11px',
+                                            fontWeight: 'bold'
+                                        }}
+                                    />
+                                    <Legend
+                                        layout="vertical"
+                                        verticalAlign="middle"
+                                        align="right"
+                                        iconType="circle"
+                                        iconSize={8}
+                                        formatter={(value) => (
+                                            <span className="text-gray-600 dark:text-gray-400 font-bold text-[9px] ml-1 uppercase tracking-widest">{value}</span>
+                                        )}
+                                    />
+                                </PieChart>
+                            </ResponsiveContainer>
+                        )}
+                    </div>
+                </div>
+            </div>
+
+            {/* Third Row: Time Distribution and Top Agents */}
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 relative z-10">
+                {/* Ticket Performance Trend */}
+                <div className="glass-card p-5 border-gray-100 dark:border-slate-800">
+                    <div className="flex items-center justify-between mb-6">
+                        <div className="flex items-center gap-3">
+                            <div className="p-1.5 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-lg">
+                                <FiActivity size={14} />
+                            </div>
+                            <h3 className="text-xs font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wider italic">Performance Trend</h3>
+                        </div>
+                        <div className="flex items-center gap-4">
+                            <div className="flex items-center gap-2">
+                                <span className="w-1.5 h-1.5 rounded-full bg-indigo-500"></span>
+                                <span className="text-[9px] text-gray-500 font-bold uppercase tracking-widest italic">Created</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                <span className="text-[9px] text-gray-500 font-bold uppercase tracking-widest italic">Resolved</span>
+                            </div>
                         </div>
                     </div>
+                    <div className="w-full h-[200px] min-w-0">
+                        {isMounted && (
+                            <ResponsiveContainer width="100%" height="100%">
+                                <AreaChart data={trend_data}>
+                                    <defs>
+                                        <linearGradient id="colorCreated" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="5%" stopColor="#4f46e5" stopOpacity={0.15} />
+                                            <stop offset="95%" stopColor="#4f46e5" stopOpacity={0} />
+                                        </linearGradient>
+                                        <linearGradient id="colorResolved" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="5%" stopColor="#10b981" stopOpacity={0.15} />
+                                            <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
+                                        </linearGradient>
+                                    </defs>
+                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" opacity={0.5} />
+                                    <XAxis
+                                        dataKey="date"
+                                        axisLine={false}
+                                        tickLine={false}
+                                        tick={{ fill: '#64748b', fontSize: 10, fontWeight: 700 }}
+                                        dy={10}
+                                    />
+                                    <YAxis
+                                        axisLine={false}
+                                        tickLine={false}
+                                        tick={{ fill: '#64748b', fontSize: 10, fontWeight: 700 }}
+                                        dx={-5}
+                                    />
+                                    <Tooltip
+                                        contentStyle={{
+                                            backgroundColor: '#fff',
+                                            border: '1px solid #e2e8f0',
+                                            borderRadius: '12px',
+                                            fontSize: '11px',
+                                            fontWeight: 'bold',
+                                            boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)'
+                                        }}
+                                    />
+                                    <Area
+                                        type="monotone"
+                                        dataKey="created"
+                                        stroke="#4f46e5"
+                                        strokeWidth={2.5}
+                                        fillOpacity={1}
+                                        fill="url(#colorCreated)"
+                                        animationDuration={1500}
+                                    />
+                                    <Area
+                                        type="monotone"
+                                        dataKey="resolved"
+                                        stroke="#10b981"
+                                        strokeWidth={2.5}
+                                        fillOpacity={1}
+                                        fill="url(#colorResolved)"
+                                        animationDuration={1500}
+                                    />
+                                </AreaChart>
+                            </ResponsiveContainer>
+                        )}
+                    </div>
+                </div>
 
-                    {/* Top Performing Agents */}
-                    <div className="glass-card p-5 border-gray-100 dark:border-slate-800">
-                        <div className="flex items-center gap-3 mb-6">
-                            <div className="p-1.5 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-lg">
-                                <FiUsers size={14} />
-                            </div>
-                            <h3 className="text-xs font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wider italic">Elite Technicians</h3>
+                {/* Top Performing Agents */}
+                <div className="glass-card p-5 border-gray-100 dark:border-slate-800">
+                    <div className="flex items-center gap-3 mb-6">
+                        <div className="p-1.5 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-lg">
+                            <FiUsers size={14} />
                         </div>
-                        <div className="space-y-2">
-                            {top_agents.map((agent, index) => (
-                                <motion.div
-                                    key={index}
-                                    initial={{ opacity: 0, y: 10 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ delay: index * 0.05 }}
-                                    className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-gray-50 dark:border-slate-800 hover:border-indigo-300 dark:hover:border-indigo-800 transition-all"
-                                >
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-8 h-8 flex items-center justify-center bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-800 text-[10px] font-bold text-indigo-600 rounded-lg">
-                                            {index + 1}
-                                        </div>
-                                        <div>
-                                            <h4 className="text-[11px] font-bold text-gray-800 dark:text-gray-200 uppercase tracking-tight">{agent.name}</h4>
-                                            <div className="flex items-center gap-2 mt-0.5">
-                                                <span className="text-[8px] text-gray-400 font-semibold uppercase tracking-widest">{agent.tickets} Tickets</span>
-                                                <span className="text-[8px] text-indigo-500 font-bold uppercase tracking-tighter">AVG {agent.avgTime || agent.avg_time}H</span>
-                                            </div>
+                        <h3 className="text-xs font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wider italic">Elite Technicians</h3>
+                    </div>
+                    <div className="space-y-2">
+                        {top_agents.map((agent, index) => (
+                            <motion.div
+                                key={index}
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: index * 0.05 }}
+                                className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-gray-50 dark:border-slate-800 hover:border-indigo-300 dark:hover:border-indigo-800 transition-all"
+                            >
+                                <div className="flex items-center gap-3">
+                                    <div className="w-8 h-8 flex items-center justify-center bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-800 text-[10px] font-bold text-indigo-600 rounded-lg">
+                                        {index + 1}
+                                    </div>
+                                    <div>
+                                        <h4 className="text-[11px] font-bold text-gray-800 dark:text-gray-200 uppercase tracking-tight">{agent.name}</h4>
+                                        <div className="flex items-center gap-2 mt-0.5">
+                                            <span className="text-[8px] text-gray-400 font-semibold uppercase tracking-widest">{agent.tickets} Tickets</span>
+                                            <span className="text-[8px] text-indigo-500 font-bold uppercase tracking-tighter">AVG {agent.avgTime || agent.avg_time}H</span>
                                         </div>
                                     </div>
-                                    <div className="text-right">
-                                        <div className="text-emerald-500 text-[10px] font-bold italic">
-                                            {agent.satisfaction}%
-                                        </div>
-                                        <span className="text-[7px] text-gray-400 font-bold uppercase tracking-[0.1em] block">S-Index</span>
+                                </div>
+                                <div className="text-right">
+                                    <div className="text-emerald-500 text-[10px] font-bold italic">
+                                        {agent.satisfaction}%
                                     </div>
-                                </motion.div>
-                            ))}
-                        </div>
+                                    <span className="text-[7px] text-gray-400 font-bold uppercase tracking-[0.1em] block">S-Index</span>
+                                </div>
+                            </motion.div>
+                        ))}
                     </div>
                 </div>
             </div>
