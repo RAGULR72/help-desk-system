@@ -202,9 +202,9 @@ const AnalyticsDashboard = () => {
             </div>
 
             {/* Second Row: Trend and Categories */}
-            <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-8 relative z-10">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8 relative z-10">
                 {/* Resolution Speed */}
-                <div className="xl:col-span-2 glass-card p-5 border-gray-100 dark:border-slate-800">
+                <div className="glass-card p-5 border-gray-100 dark:border-slate-800">
                     <div className="flex items-center gap-3 mb-6">
                         <div className="p-1.5 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-lg">
                             <FiClock size={14} />
