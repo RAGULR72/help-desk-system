@@ -7,7 +7,7 @@ import { useTranslation } from '../context/TranslationContext';
 import {
     FiMonitor, FiDisc, FiWifi, FiServer, FiLock, FiLifeBuoy,
     FiArrowRight, FiActivity, FiMessageSquare, FiCheckCircle, FiPhone,
-    FiDownload, FiCheck, FiPlusCircle
+    FiDownload, FiCheck, FiPlusCircle, FiAlertTriangle
 } from 'react-icons/fi';
 import CreateTicketModal from './components/CreateTicketModal';
 import api from '../api/axios';
@@ -186,6 +186,18 @@ const TicketPage = () => {
     return (
         <div className="min-h-screen flex flex-col transition-colors duration-300">
             <Header />
+
+            {/* Self-Hosted Warning Banner */}
+            <div className="w-full bg-gradient-to-r from-amber-500 via-orange-500 to-amber-500 text-white py-2.5 px-4 flex items-center justify-center gap-3 shadow-lg shadow-orange-500/20 relative overflow-hidden z-40">
+                <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_0%,rgba(255,255,255,0.1)_50%,transparent_100%)] animate-[shimmer_3s_ease-in-out_infinite] bg-[length:200%_100%]" />
+                <FiAlertTriangle className="text-white shrink-0 animate-pulse" size={16} />
+                <p className="text-[11px] sm:text-xs font-bold tracking-wide text-center relative z-10">
+                    ⚠️ This site is <span className="underline underline-offset-2">self-hosted for testing purposes only</span>. Not intended for production use.
+                    <span className="hidden sm:inline"> &nbsp;•&nbsp; </span>
+                    <br className="sm:hidden" />
+                    <span className="font-black">Hosted by Ragul — Proserve IT Support</span>
+                </p>
+            </div>
 
             <div className="flex-grow pt-32 pb-20 px-4">
                 <div className="container mx-auto max-w-6xl">
