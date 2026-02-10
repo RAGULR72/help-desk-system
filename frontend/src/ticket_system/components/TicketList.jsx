@@ -851,18 +851,18 @@ const TicketList = ({ userRole, currentUserId }) => {
                 </div>
 
                 {/* Toolbar */}
-                <div className="mb-6 flex flex-col md:flex-row gap-4 items-center justify-between">
+                <div className="mb-6 flex flex-col md:flex-row gap-4 items-center justify-between bg-white/[0.03] dark:bg-white/[0.02] rounded-2xl p-3 border border-card-border/20">
                     {/* Left: Filter Group + Search */}
                     <div className="flex flex-wrap items-center gap-2 flex-1 min-w-0">
                         {/* Search Bar */}
                         <div className="relative flex-1 min-w-[180px] max-w-sm group">
-                            <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted group-focus-within:text-primary transition-colors text-xs" />
+                            <FiSearch className="absolute left-3.5 top-1/2 transform -translate-y-1/2 text-muted group-focus-within:text-primary group-focus-within:scale-110 transition-all text-xs" />
                             <input
                                 type="text"
-                                placeholder="Locate specific ticket..."
+                                placeholder="Search tickets..."
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                className="input-field pl-9 pr-3 py-2 text-[11px] bg-white/5 border-card-border focus:border-primary/50 rounded-lg"
+                                className="input-field pl-10 pr-4 py-2.5 text-[11px] bg-white/5 border-card-border/30 focus:border-primary/50 rounded-xl focus:shadow-[0_0_0_3px_rgba(var(--primary-rgb),0.1)] transition-all"
                             />
                         </div>
 
@@ -1152,14 +1152,16 @@ const TicketList = ({ userRole, currentUserId }) => {
 
                         {/* New Ticket Button */}
                         {checkPermission('Tickets', 'create') && (
-                            <button
+                            <motion.button
                                 onClick={() => setIsCreateTicketOpen(true)}
-                                className="btn-primary px-4 py-2 flex items-center gap-2 relative overflow-hidden group ml-2 shadow-[0_10px_20px_-10px_rgba(var(--primary-rgb),0.5)] rounded-lg"
+                                whileHover={{ scale: 1.04 }}
+                                whileTap={{ scale: 0.96 }}
+                                className="btn-primary px-5 py-2.5 flex items-center gap-2.5 relative overflow-hidden group ml-2 shadow-[0_10px_25px_-8px_rgba(var(--primary-rgb),0.5)] rounded-xl"
                             >
-                                <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
-                                <FiPlus className="relative z-10" size={14} />
-                                <span className="text-[9px] font-black uppercase tracking-[0.2em] relative z-10">{t('tickets.filters.new')}</span>
-                            </button>
+                                <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
+                                <FiPlus className="relative z-10" size={15} />
+                                <span className="text-[10px] font-black uppercase tracking-[0.15em] relative z-10">{t('tickets.filters.new')}</span>
+                            </motion.button>
                         )}
                     </div>
                 </div>
@@ -1263,10 +1265,17 @@ const TicketList = ({ userRole, currentUserId }) => {
                                         const isCritical = slaInfo.urgency === 'critical';
 
                                         return (
-                                            <div
+                                            <motion.div
                                                 key={ticket.id}
+                                                initial={{ opacity: 0, y: 8 }}
+                                                animate={{ opacity: 1, y: 0 }}
                                                 onClick={() => setSelectedTicketId(ticket.id)}
-                                                className={`glass-card p-3 border-none bg-white/5 transition-all active:scale-95 shadow-lg group hover:bg-white/10 ${isCritical ? 'ring-2 ring-rose-500/30 shadow-[0_0_20px_rgba(239,68,68,0.2)] animate-pulse !bg-rose-500/[0.05]' : ''}`}
+                                                className={`glass-card p-4 border-none bg-white/5 transition-all active:scale-[0.98] shadow-lg group hover:bg-white/10 cursor-pointer border-l-[3px] ${isCritical ? 'ring-2 ring-rose-500/30 shadow-[0_0_20px_rgba(239,68,68,0.2)] !bg-rose-500/[0.05] !border-l-rose-500'
+                                                    : ticket.priority === 'High' ? 'border-l-orange-500'
+                                                        : ticket.priority === 'Critical' ? 'border-l-rose-500'
+                                                            : ticket.priority === 'Medium' ? 'border-l-amber-400'
+                                                                : 'border-l-primary/30'
+                                                    }`}
                                             >
                                                 <div className="flex justify-between items-start mb-2">
                                                     <div className="flex items-center gap-2">
@@ -1323,7 +1332,7 @@ const TicketList = ({ userRole, currentUserId }) => {
                                                         </div>
                                                     )}
                                                 </div>
-                                            </div>
+                                            </motion.div>
                                         );
                                     })}
                                 </div>
@@ -1780,55 +1789,56 @@ const TicketList = ({ userRole, currentUserId }) => {
                                 initial={{ y: 100, opacity: 0 }}
                                 animate={{ y: 0, opacity: 1 }}
                                 exit={{ y: 100, opacity: 0 }}
+                                transition={{ type: 'spring', stiffness: 300, damping: 25 }}
                                 className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50"
                             >
-                                <div className="glass-card rounded-[2rem] shadow-[0_30px_60px_-15px_rgba(0,0,0,0.3)] border-none p-2 flex items-center gap-2 min-w-[600px] bg-white/10 relative overflow-hidden">
-                                    <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-primary via-primary-hover to-primary"></div>
-                                    <div className="px-6 py-4 border-r border-card-border/30 flex items-center gap-4">
-                                        <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center text-primary">
-                                            <FiCheckSquare size={20} />
+                                <div className="glass-card rounded-2xl shadow-[0_30px_60px_-15px_rgba(0,0,0,0.4)] border border-primary/20 p-2.5 flex items-center gap-2 min-w-[600px] bg-white/10 backdrop-blur-2xl relative overflow-hidden">
+                                    {/* Top gradient border */}
+                                    <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-primary to-transparent" />
+                                    {/* Bottom gradient border */}
+                                    <div className="absolute inset-x-0 bottom-0 h-[2px] bg-gradient-to-r from-primary via-violet-500 to-primary" />
+
+                                    <div className="px-5 py-3 border-r border-card-border/30 flex items-center gap-3">
+                                        <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary to-violet-500 flex items-center justify-center text-white shadow-lg shadow-primary/30">
+                                            <FiCheckSquare size={18} />
                                         </div>
                                         <div>
-                                            <span className="text-sm font-black text-main block leading-none mb-1">{selectedTickets.length} Operations Selected</span>
-                                            <span className="text-[9px] font-black text-muted uppercase tracking-widest opacity-60">Bulk Protocol Active</span>
+                                            <span className="text-sm font-black text-main block leading-none mb-0.5">{selectedTickets.length} Selected</span>
+                                            <span className="text-[8px] font-bold text-muted uppercase tracking-widest">Bulk Actions</span>
                                         </div>
                                     </div>
 
-                                    <div className="flex items-center gap-3 px-4">
+                                    <div className="flex items-center gap-2 px-3">
                                         <button
                                             onClick={() => setIsAssignModalOpen(true)}
-                                            className="flex items-center gap-2 px-5 py-2.5 text-[10px] font-black uppercase tracking-widest text-main bg-white/5 border border-card-border/50 rounded-xl hover:bg-primary hover:text-white hover:border-primary transition-all active:scale-95"
+                                            className="flex items-center gap-2 px-4 py-2.5 text-[10px] font-bold uppercase tracking-wider text-main bg-white/5 border border-card-border/30 rounded-xl hover:bg-primary hover:text-white hover:border-primary hover:shadow-lg hover:shadow-primary/20 transition-all active:scale-95"
                                         >
-                                            <FiUserPlus size={16} />
+                                            <FiUserPlus size={14} />
                                             Assign
                                         </button>
-                                        <button className="flex items-center gap-2 px-5 py-2.5 text-[10px] font-black uppercase tracking-widest text-main bg-white/5 border border-card-border/50 rounded-xl hover:bg-primary hover:text-white hover:border-primary transition-all active:scale-95">
-                                            <FiRefreshCw size={16} />
-                                            Sync State
-                                        </button>
-                                        <button className="flex items-center gap-2 px-5 py-2.5 text-[10px] font-black uppercase tracking-widest text-main bg-white/5 border border-card-border/50 rounded-xl hover:bg-primary hover:text-white hover:border-primary transition-all active:scale-95">
-                                            <FiFlag size={16} />
+                                        <button className="flex items-center gap-2 px-4 py-2.5 text-[10px] font-bold uppercase tracking-wider text-main bg-white/5 border border-card-border/30 rounded-xl hover:bg-primary hover:text-white hover:border-primary hover:shadow-lg hover:shadow-primary/20 transition-all active:scale-95">
+                                            <FiFlag size={14} />
                                             Priority
                                         </button>
                                         <button
                                             onClick={handleBulkResolve}
-                                            className="flex items-center gap-2 px-5 py-2.5 text-[10px] font-black uppercase tracking-widest text-emerald-500 bg-emerald-500/10 border border-emerald-500/20 rounded-xl hover:bg-emerald-500 hover:text-white transition-all active:scale-95"
+                                            className="flex items-center gap-2 px-4 py-2.5 text-[10px] font-bold uppercase tracking-wider text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 rounded-xl hover:bg-emerald-500 hover:text-white hover:shadow-lg hover:shadow-emerald-500/20 transition-all active:scale-95"
                                         >
-                                            <FiCheckCircle size={16} />
-                                            Finalize Data
+                                            <FiCheckCircle size={14} />
+                                            Resolve
                                         </button>
-                                        <button className="flex items-center gap-2 px-5 py-2.5 text-[10px] font-black uppercase tracking-widest text-rose-500 bg-rose-500/10 border border-rose-500/20 rounded-xl hover:bg-rose-500 hover:text-white transition-all active:scale-95">
-                                            <FiTrash2 size={16} />
-                                            Purge
+                                        <button className="flex items-center gap-2 px-4 py-2.5 text-[10px] font-bold uppercase tracking-wider text-rose-400 bg-rose-500/10 border border-rose-500/20 rounded-xl hover:bg-rose-500 hover:text-white hover:shadow-lg hover:shadow-rose-500/20 transition-all active:scale-95">
+                                            <FiTrash2 size={14} />
+                                            Delete
                                         </button>
                                     </div>
 
                                     <button
                                         onClick={() => setSelectedTickets([])}
-                                        className="ml-auto flex items-center gap-2 px-6 py-2 text-[10px] font-black uppercase tracking-widest text-muted hover:text-main transition-all"
+                                        className="ml-auto p-2.5 text-muted hover:text-white hover:bg-white/10 rounded-xl transition-all"
+                                        title="Clear selection"
                                     >
                                         <FiX size={18} />
-                                        Abort
                                     </button>
                                 </div>
                             </motion.div>
