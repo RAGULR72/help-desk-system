@@ -1,7 +1,12 @@
 import axios from 'axios';
 
 // Force local backend if running on localhost to avoid connecting to production from local dev
-const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+// Force local backend if running on localhost to avoid connecting to production from local dev
+const isLocal = window.location.hostname === 'localhost' ||
+    window.location.hostname === '127.0.0.1' ||
+    window.location.hostname.startsWith('192.168.') ||
+    window.location.hostname.startsWith('10.') ||
+    window.location.hostname.startsWith('172.');
 const apiHost = isLocal
     ? `http://${window.location.hostname}:8000`
     : (import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE_URL || `http://${window.location.hostname}:8000`);

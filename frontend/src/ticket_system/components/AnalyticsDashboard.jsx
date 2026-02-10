@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
     AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-    PieChart, Pie, Cell, BarChart, Bar, Legend
+    PieChart, Pie, Cell, BarChart, Bar, Legend, Label
 } from 'recharts';
 import api, { baseURL } from '../../api/axios';
 import {
@@ -362,6 +362,25 @@ const AnalyticsDashboard = () => {
                                                     fill={CATEGORY_COLORS[index % CATEGORY_COLORS.length]}
                                                 />
                                             ))}
+                                            <Label
+                                                content={({ viewBox }) => {
+                                                    if (viewBox && typeof viewBox.cx === 'number' && typeof viewBox.cy === 'number') {
+                                                        const { cx, cy } = viewBox;
+                                                        return (
+                                                            <text x={cx} y={cy} textAnchor="middle" dominantBaseline="middle">
+                                                                <tspan x={cx} y={cy} dy="-6" style={{ fontSize: '24px', fontWeight: 'bold' }} className="fill-gray-800 dark:fill-white">
+                                                                    {category_distribution.reduce((acc, curr) => acc + curr.value, 0)}
+                                                                </tspan>
+                                                                <tspan x={cx} y={cy} dy="20" style={{ fontSize: '10px', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.1em' }} className="fill-gray-500">
+                                                                    Total
+                                                                </tspan>
+                                                            </text>
+                                                        );
+                                                    }
+                                                    return null;
+                                                }}
+                                                position="center"
+                                            />
                                         </Pie>
                                         <Tooltip
                                             contentStyle={{
@@ -384,12 +403,6 @@ const AnalyticsDashboard = () => {
                                         />
                                     </PieChart>
                                 </ResponsiveContainer>
-                                <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none pr-28">
-                                    <span className="text-2xl font-bold text-gray-800 dark:text-white">
-                                        {category_distribution.reduce((acc, curr) => acc + curr.value, 0)}
-                                    </span>
-                                    <span className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Total</span>
-                                </div>
                             </>
                         )}
                     </div>

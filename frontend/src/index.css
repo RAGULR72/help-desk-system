@@ -439,4 +439,26 @@
   .animate-spin-slow {
     animation: spin-slow 8s linear infinite;
   }
+
+  /* Shimmer effect for loading / premium accents */
+  @keyframes shimmer {
+    0% {
+      background-position: -200% 0;
+    }
+
+    100% {
+      background-position: 200% 0;
+    }
+  }
+
+  .animate-shimmer {
+    background: linear-gradient(90deg, transparent 0%, rgba(var(--primary-rgb), 0.08) 50%, transparent 100%);
+    background-size: 200% 100%;
+    animation: shimmer 3s ease-in-out infinite;
+  }
+
+  /* Page background utility */
+  .bg-page-bg {
+    background: var(--bg-gradient);
+  }
 }

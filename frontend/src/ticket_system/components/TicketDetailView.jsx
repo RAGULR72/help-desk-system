@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import {
     FiArrowLeft, FiClock, FiUser, FiAlertCircle,
     FiPaperclip, FiDownload, FiMessageSquare, FiSend,
-    FiRotateCcw, FiFlag, FiPlusCircle, FiRefreshCw, FiEdit, FiCheckCircle, FiX, FiChevronDown, FiTool, FiStar, FiCheck, FiHeart, FiLock, FiZap, FiAlertTriangle, FiInfo, FiCpu, FiList, FiEye
+    FiRotateCcw, FiFlag, FiPlusCircle, FiRefreshCw, FiEdit, FiCheckCircle, FiX, FiChevronDown, FiTool, FiStar, FiCheck, FiHeart, FiLock, FiZap, FiAlertTriangle, FiInfo, FiCpu, FiList, FiEye, FiMaximize2
 } from 'react-icons/fi';
 import CreateTicketModal from './CreateTicketModal';
 import { RepairWorkflow, RepairInitiationModal } from './RepairWorkflow';
@@ -579,6 +579,46 @@ const AISuggestionModal = ({ isOpen, onClose, data }) => {
     );
 };
 
+const ImagePreviewModal = ({ isOpen, onClose, imageUrl }) => {
+    if (!isOpen || !imageUrl) return null;
+
+    return (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-black/90 backdrop-blur-md" onClick={onClose}>
+            <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                onClick={(e) => e.stopPropagation()}
+                className="relative max-w-5xl max-h-[90vh] w-full flex flex-col items-center justify-center"
+            >
+                <div className="absolute top-4 right-4 z-50 flex gap-4">
+                    <button
+                        onClick={() => window.open(imageUrl, '_blank')}
+                        className="p-3 bg-black/50 hover:bg-black/70 text-white rounded-full transition-all backdrop-blur-md border border-white/10"
+                        title="Open in new tab"
+                    >
+                        <FiMaximize2 size={20} />
+                    </button>
+                    <button
+                        onClick={onClose}
+                        className="p-3 bg-black/50 hover:bg-black/70 text-white rounded-full transition-all backdrop-blur-md border border-white/10"
+                    >
+                        <FiX size={20} />
+                    </button>
+                </div>
+                <img
+                    src={imageUrl}
+                    alt="Preview"
+                    className="max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl"
+                />
+                <div className="mt-4 px-4 py-2 bg-black/50 backdrop-blur-md rounded-full border border-white/10 text-white text-xs font-mono">
+                    Preview Mode
+                </div>
+            </motion.div>
+        </div>
+    );
+};
+
 const formatTimeAgo = (date) => {
     const now = new Date();
     const then = new Date(date);
@@ -800,6 +840,7 @@ const TicketDetailView = () => {
     const [aiLoading, setAiLoading] = useState(false);
     const [aiHistorySummary, setAiHistorySummary] = useState(null);
     const [isSummarizingHistory, setIsSummarizingHistory] = useState(false);
+    const [previewImage, setPreviewImage] = useState(null); // Added for image preview
     const ticketRef = React.useRef(null);
 
     const fetchTicketDetails = React.useCallback(async () => {
@@ -1154,6 +1195,15 @@ const TicketDetailView = () => {
                         onInit={onRepairInit}
                     />
                 )}
+
+                )}
+
+                {/* Image Preview Modal */}
+                <ImagePreviewModal
+                    isOpen={!!previewImage}
+                    onClose={() => setPreviewImage(null)}
+                    imageUrl={previewImage}
+                />
 
                 {/* Main Content Area for PDF */}
                 <div ref={ticketRef} className="space-y-6">
@@ -1679,7 +1729,7 @@ const TicketDetailView = () => {
                                             return (
                                                 <div
                                                     key={i}
-                                                    onClick={() => window.open(fileUrl, '_blank')}
+                                                    onClick={() => setPreviewImage(fileUrl)}
                                                     className="group relative rounded-2xl overflow-hidden border border-gray-100 dark:border-slate-800 cursor-pointer shadow-sm hover:shadow-md transition-all"
                                                 >
                                                     <div className="aspect-video w-full bg-gray-100 dark:bg-slate-800 relative">

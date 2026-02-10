@@ -771,11 +771,42 @@ const TicketList = ({ userRole, currentUserId }) => {
 
     return (
         <>
-            <div className="flex flex-col h-full bg-page-bg p-4 transition-colors duration-300 overflow-hidden">
+            <div className="flex flex-col h-full bg-page-bg p-4 md:p-6 transition-colors duration-300 overflow-hidden">
 
-                {/* Top Tabs */}
+                {/* Premium Stats Summary Bar */}
+                {userRole !== 'user' && (
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
+                        {[
+                            { label: 'Total Tickets', value: counts.all, icon: <FiList size={18} />, gradient: 'from-indigo-500 to-violet-500', bg: 'bg-indigo-500/5 dark:bg-indigo-500/10', border: 'border-indigo-500/20', text: 'text-indigo-600 dark:text-indigo-400' },
+                            { label: 'Unassigned', value: counts.unassigned, icon: <FiUserPlus size={18} />, gradient: 'from-amber-500 to-orange-500', bg: 'bg-amber-500/5 dark:bg-amber-500/10', border: 'border-amber-500/20', text: 'text-amber-600 dark:text-amber-400' },
+                            { label: 'High Priority', value: counts.high_priority, icon: <FiFlag size={18} />, gradient: 'from-rose-500 to-pink-500', bg: 'bg-rose-500/5 dark:bg-rose-500/10', border: 'border-rose-500/20', text: 'text-rose-600 dark:text-rose-400' },
+                            { label: 'SLA Breached', value: counts.sla_risk, icon: <FiAlertCircle size={18} />, gradient: 'from-red-600 to-rose-600', bg: 'bg-red-500/5 dark:bg-red-500/10', border: 'border-red-500/20', text: 'text-red-600 dark:text-red-400', pulse: counts.sla_risk > 0 },
+                        ].map((stat, idx) => (
+                            <motion.div
+                                key={stat.label}
+                                initial={{ opacity: 0, y: 12 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: idx * 0.07, duration: 0.4 }}
+                                className={`relative overflow-hidden rounded-2xl ${stat.bg} border ${stat.border} p-4 group hover:scale-[1.02] transition-all duration-300 cursor-default`}
+                            >
+                                <div className={`absolute top-0 right-0 w-20 h-20 bg-gradient-to-br ${stat.gradient} opacity-[0.06] rounded-full -translate-y-6 translate-x-6 group-hover:opacity-[0.12] transition-opacity`} />
+                                <div className="flex items-center justify-between relative z-10">
+                                    <div>
+                                        <p className="text-[9px] font-bold uppercase tracking-[0.15em] text-muted mb-1">{stat.label}</p>
+                                        <p className={`text-2xl font-black ${stat.text} tabular-nums tracking-tight ${stat.pulse ? 'animate-pulse' : ''}`}>{stat.value}</p>
+                                    </div>
+                                    <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${stat.gradient} flex items-center justify-center text-white shadow-lg opacity-80 group-hover:opacity-100 group-hover:scale-110 transition-all`}>
+                                        {stat.icon}
+                                    </div>
+                                </div>
+                            </motion.div>
+                        ))}
+                    </div>
+                )}
+
+                {/* Redesigned Tabs */}
                 <div className="flex items-center justify-between gap-1 mb-4 border-b border-card-border/50 overflow-x-auto transition-colors">
-                    <div className="flex items-center gap-1">
+                    <div className="flex items-center gap-0.5">
                         {[
                             { id: 'all', label: 'All Tickets', count: counts.all },
                             { id: 'my_tickets', label: t('tickets.filters.my_tickets'), count: counts.my_tickets },
@@ -794,16 +825,23 @@ const TicketList = ({ userRole, currentUserId }) => {
                             <button
                                 key={tab.id}
                                 onClick={() => setActiveTab(tab.id)}
-                                className={`px-3 py-2 text-[11px] font-semibold border-b-2 uppercase tracking-widest transition-all whitespace-nowrap flex items-center gap-2 ${activeTab === tab.id
-                                    ? 'border-primary text-primary shadow-[inset_0_-2px_0_rgba(var(--primary-rgb),0.2)] bg-primary/5'
-                                    : 'border-transparent text-slate-500 hover:text-main hover:border-card-border'
+                                className={`relative px-4 py-2.5 text-[11px] font-semibold uppercase tracking-widest transition-all whitespace-nowrap flex items-center gap-2 rounded-t-lg ${activeTab === tab.id
+                                    ? 'text-primary bg-primary/5'
+                                    : 'text-slate-500 hover:text-main hover:bg-white/5'
                                     }`}
                             >
                                 <span>{tab.label}</span>
                                 {tab.count > 0 && (
-                                    <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-bold ${activeTab === tab.id ? 'bg-primary/20 text-primary' : 'bg-card-border/50 text-slate-500'}`}>
+                                    <span className={`text-[9px] min-w-[20px] text-center px-1.5 py-0.5 rounded-full font-bold transition-all ${activeTab === tab.id ? 'bg-primary text-white shadow-sm shadow-primary/30' : 'bg-card-border/50 text-slate-500'}`}>
                                         {tab.count}
                                     </span>
+                                )}
+                                {activeTab === tab.id && (
+                                    <motion.div
+                                        layoutId="activeTabIndicator"
+                                        className="absolute bottom-0 left-2 right-2 h-[2.5px] bg-gradient-to-r from-primary to-primary-hover rounded-full"
+                                        transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                                    />
                                 )}
                             </button>
                         ))}
@@ -1216,9 +1254,9 @@ const TicketList = ({ userRole, currentUserId }) => {
                                 />
                             </div>
                         ) : (
-                            <div className="flex-1 glass-card border-none bg-white/5 flex flex-col overflow-hidden transition-colors shadow-2xl">
-
-                                {process.env.NODE_ENV === 'development' && <div className="hidden">Debug: {displayedTickets.length}</div>}
+                            <div className="flex-1 glass-card border-none bg-white/5 flex flex-col overflow-hidden transition-colors shadow-xl shadow-black/5 relative">
+                                {/* Gradient top accent */}
+                                <div className="h-[2px] w-full bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
                                 <div className="lg:hidden overflow-y-auto flex-1 p-4 space-y-4 custom-scrollbar">
                                     {displayedTickets.map((ticket) => {
                                         const slaInfo = calculateDetailedTimeRemaining(ticket.created_at, ticket.status, ticket.sla_deadline);
@@ -1292,10 +1330,10 @@ const TicketList = ({ userRole, currentUserId }) => {
 
                                 {/* Desktop Table View */}
                                 <div className="hidden lg:block overflow-x-auto overflow-y-auto flex-1 custom-scrollbar">
-                                    <table className="w-full min-w-full border-separate border-spacing-y-2 px-2 pb-12">
+                                    <table className="w-full min-w-full border-separate border-spacing-y-1.5 px-3 pb-12">
                                         <thead className="sticky top-0 z-20 text-[10px] font-semibold text-slate-500 uppercase tracking-widest">
                                             <tr>
-                                                <th className="bg-slate-50/90 dark:bg-[#0f1014]/90 backdrop-blur-xl p-3 first:rounded-l-xl last:rounded-r-xl border-y border-white/5 text-center w-12 shadow-sm">
+                                                <th className="bg-gradient-to-r from-slate-50 to-white dark:from-[#0f1014] dark:to-[#0f1014]/95 backdrop-blur-xl p-3 first:rounded-l-xl last:rounded-r-xl border-y border-white/5 text-center w-12 shadow-sm">
                                                     {userRole !== 'user' && (
                                                         <input
                                                             type="checkbox"
@@ -1305,29 +1343,39 @@ const TicketList = ({ userRole, currentUserId }) => {
                                                         />
                                                     )}
                                                 </th>
-                                                <th className="bg-slate-50/90 dark:bg-[#0f1014]/90 backdrop-blur-xl p-3 border-y border-white/5 text-left w-20 shadow-sm">{t('tickets.table.id')}</th>
-                                                <th className="bg-slate-50/90 dark:bg-[#0f1014]/90 backdrop-blur-xl p-3 border-y border-white/5 text-left shadow-sm">{t('tickets.table.title')}</th>
-                                                <th className="bg-slate-50/90 dark:bg-[#0f1014]/90 backdrop-blur-xl p-3 border-y border-white/5 text-center w-32 shadow-sm">{t('tickets.table.status')}</th>
-                                                <th className="bg-slate-50/90 dark:bg-[#0f1014]/90 backdrop-blur-xl p-3 border-y border-white/5 text-center w-32 shadow-sm font-bold text-primary">SLA Countdown</th>
-                                                <th className="bg-slate-50/90 dark:bg-[#0f1014]/90 backdrop-blur-xl p-3 border-y border-white/5 text-left w-40 shadow-sm">{t('tickets.table.requester')}</th>
-                                                <th className="bg-slate-50/90 dark:bg-[#0f1014]/90 backdrop-blur-xl p-3 border-y border-white/5 text-left w-48 shadow-sm">{t('tickets.table.assigned_to')}</th>
-                                                {userRole !== 'user' && <th className="bg-slate-50/90 dark:bg-[#0f1014]/90 backdrop-blur-xl p-3 border-y border-white/5 text-left w-40 shadow-sm">{t('tickets.table.customer')}</th>}
-                                                <th className="bg-slate-50/90 dark:bg-[#0f1014]/90 backdrop-blur-xl p-3 border-y border-white/5 text-center w-32 shadow-sm">{t('tickets.table.created_at')}</th>
-                                                <th className="bg-slate-50/90 dark:bg-[#0f1014]/90 backdrop-blur-xl p-3 border-y border-white/5 text-right w-32 shadow-sm">{t('tickets.table.last_update')}</th>
+                                                <th className="bg-gradient-to-r from-white to-slate-50/80 dark:from-[#0f1014]/95 dark:to-[#0f1014]/90 backdrop-blur-xl p-3 border-y border-white/5 text-left w-20 shadow-sm">{t('tickets.table.id')}</th>
+                                                <th className="bg-gradient-to-r from-slate-50/80 to-white dark:from-[#0f1014]/90 dark:to-[#0f1014]/85 backdrop-blur-xl p-3 border-y border-white/5 text-left shadow-sm">{t('tickets.table.title')}</th>
+                                                <th className="bg-gradient-to-r from-white to-slate-50/80 dark:from-[#0f1014]/85 dark:to-[#0f1014]/80 backdrop-blur-xl p-3 border-y border-white/5 text-center w-32 shadow-sm">{t('tickets.table.status')}</th>
+                                                <th className="bg-gradient-to-r from-slate-50/80 to-white dark:from-[#0f1014]/80 dark:to-[#0f1014]/75 backdrop-blur-xl p-3 border-y border-white/5 text-center w-32 shadow-sm font-bold text-primary">SLA Countdown</th>
+                                                <th className="bg-gradient-to-r from-white to-slate-50/80 dark:from-[#0f1014]/75 dark:to-[#0f1014]/70 backdrop-blur-xl p-3 border-y border-white/5 text-left w-40 shadow-sm">{t('tickets.table.requester')}</th>
+                                                <th className="bg-gradient-to-r from-slate-50/80 to-white dark:from-[#0f1014]/70 dark:to-[#0f1014]/65 backdrop-blur-xl p-3 border-y border-white/5 text-left w-48 shadow-sm">{t('tickets.table.assigned_to')}</th>
+                                                {userRole !== 'user' && <th className="bg-gradient-to-r from-white to-slate-50/80 dark:from-[#0f1014]/65 dark:to-[#0f1014]/60 backdrop-blur-xl p-3 border-y border-white/5 text-left w-40 shadow-sm">{t('tickets.table.customer')}</th>}
+                                                <th className="bg-gradient-to-r from-slate-50/80 to-white dark:from-[#0f1014]/60 dark:to-[#0f1014]/55 backdrop-blur-xl p-3 border-y border-white/5 text-center w-32 shadow-sm">{t('tickets.table.created_at')}</th>
+                                                <th className="bg-gradient-to-r from-white to-slate-50 dark:from-[#0f1014]/55 dark:to-[#0f1014]/50 backdrop-blur-xl p-3 border-y border-white/5 text-right w-32 shadow-sm">{t('tickets.table.last_update')}</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             {displayedTickets.length > 0 ? (
-                                                displayedTickets.map((ticket) => {
+                                                displayedTickets.map((ticket, ticketIdx) => {
                                                     const slaInfo = calculateDetailedTimeRemaining(ticket.created_at, ticket.status, ticket.sla_deadline);
                                                     const isCritical = slaInfo.urgency === 'critical';
+                                                    const priorityAccent = {
+                                                        'Critical': 'hover:border-l-rose-500',
+                                                        'High': 'hover:border-l-orange-500',
+                                                        'Medium': 'hover:border-l-amber-400',
+                                                        'Normal': 'hover:border-l-blue-400',
+                                                        'Low': 'hover:border-l-emerald-400',
+                                                    }[ticket.priority] || 'hover:border-l-primary';
 
                                                     return (
-                                                        <tr
+                                                        <motion.tr
                                                             key={ticket.id}
+                                                            initial={{ opacity: 0, x: -8 }}
+                                                            animate={{ opacity: 1, x: 0 }}
+                                                            transition={{ delay: ticketIdx * 0.02, duration: 0.3 }}
                                                             onClick={() => setSelectedTicketId(ticket.id)}
-                                                            className={`group transition-all cursor-pointer hover:scale-[0.995] active:scale-[0.99] ${selectedTickets.includes(ticket.id) ? 'bg-primary/5' : 'bg-white/5 hover:bg-white/10'
-                                                                } ${isCritical ? 'relative after:absolute after:inset-0 after:rounded-xl after:shadow-[0_0_20px_rgba(239,68,68,0.15)] after:pointer-events-none after:animate-pulse !bg-rose-500/[0.03]' : ''}`}
+                                                            className={`group transition-all duration-200 cursor-pointer border-l-[3px] border-l-transparent ${priorityAccent} ${selectedTickets.includes(ticket.id) ? 'bg-primary/5 border-l-primary' : 'bg-white/5 hover:bg-white/[0.08]'
+                                                                } ${isCritical ? 'relative after:absolute after:inset-0 after:rounded-xl after:shadow-[0_0_20px_rgba(239,68,68,0.15)] after:pointer-events-none after:animate-pulse !bg-rose-500/[0.03] !border-l-rose-500' : ''}`}
                                                         >
                                                             <td className={`p-2.5 first:rounded-l-xl border-y border-l ${isCritical ? 'border-rose-500/20' : 'border-white/5'} group-hover:border-primary/20 ${selectedTickets.includes(ticket.id) ? 'border-primary/30' : ''}`}>
                                                                 <div className="flex items-center justify-center">
@@ -1416,18 +1464,18 @@ const TicketList = ({ userRole, currentUserId }) => {
                                                                 </div>
                                                                 <div className="text-[7px] font-black text-muted uppercase tracking-widest opacity-40 mt-0.5">Today</div>
                                                             </td>
-                                                        </tr>
+                                                        </motion.tr>
                                                     );
                                                 })
                                             ) : (
                                                 <tr>
                                                     <td colSpan="100" className="opacity-50 h-64 relative">
                                                         <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-                                                            <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mb-4">
-                                                                <FiList size={24} className="text-muted" />
+                                                            <div className="w-20 h-20 bg-gradient-to-br from-primary/10 to-violet-500/10 rounded-2xl flex items-center justify-center mb-5 shadow-inner">
+                                                                <FiList size={28} className="text-primary/50" />
                                                             </div>
-                                                            <h3 className="text-sm font-black text-main uppercase tracking-widest">Tickets are empty</h3>
-                                                            <p className="text-[10px] text-muted font-bold mt-1">No items found in this view</p>
+                                                            <h3 className="text-sm font-black text-main uppercase tracking-widest mb-1">No Tickets Found</h3>
+                                                            <p className="text-[10px] text-muted font-bold">Try adjusting your filters or search query</p>
                                                         </div>
                                                     </td>
                                                 </tr>
@@ -1436,14 +1484,14 @@ const TicketList = ({ userRole, currentUserId }) => {
                                     </table>
                                 </div> {/* Desktop Table View end */}
                                 {/* Pagination Footer */}
-                                <div className="p-4 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-6 bg-white/5 backdrop-blur-md rounded-b-[2.5rem]">
+                                <div className="p-4 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-6 bg-gradient-to-r from-white/5 via-white/[0.07] to-white/5 backdrop-blur-md rounded-b-[2.5rem]">
                                     <div className="flex items-center gap-6">
                                         <div className="flex items-center gap-3">
-                                            <span className="text-[10px] font-black text-muted uppercase tracking-[0.1em]">Density</span>
+                                            <span className="text-[10px] font-black text-muted uppercase tracking-[0.1em]">Show</span>
                                             <select
                                                 value={itemsPerPage}
                                                 onChange={(e) => setItemsPerPage(Number(e.target.value))}
-                                                className="bg-white/10 border border-white/20 rounded-lg px-3 py-1.5 text-[11px] font-black text-main focus:ring-1 focus:ring-primary/20 appearance-none cursor-pointer outline-none transition-all hover:bg-white/20"
+                                                className="bg-white/10 border border-white/20 rounded-lg px-3 py-1.5 text-[11px] font-black text-main focus:ring-1 focus:ring-primary/20 appearance-none cursor-pointer outline-none transition-all hover:bg-white/20 hover:border-primary/30"
                                             >
                                                 {[5, 10, 20].map(val => (
                                                     <option key={val} value={val} className="bg-white text-gray-900 dark:bg-slate-800 dark:text-white">{val} items</option>
@@ -1511,9 +1559,11 @@ const TicketList = ({ userRole, currentUserId }) => {
                                         animate={{ x: 0, opacity: 1 }}
                                         exit={{ x: 400, opacity: 0 }}
                                         transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                                        className="w-96 glass-card border-none bg-white/10 flex flex-col overflow-hidden relative"
+                                        className="w-96 glass-card border-none bg-white/10 flex flex-col overflow-hidden relative shadow-2xl shadow-primary/5"
                                     >
-                                        <div className="absolute inset-0 bg-primary/5 pointer-events-none"></div>
+                                        {/* Gradient accent bar at top */}
+                                        <div className="h-1 w-full bg-gradient-to-r from-primary via-violet-500 to-primary-hover" />
+                                        <div className="absolute inset-0 bg-gradient-to-b from-primary/[0.03] to-transparent pointer-events-none" />
 
                                         {/* Preview Header */}
                                         <div className="p-6 border-b border-card-border/30 relative z-10">
@@ -1521,13 +1571,13 @@ const TicketList = ({ userRole, currentUserId }) => {
                                                 <div>
                                                     <div className="flex items-center gap-2 mb-2">
                                                         <StatusBadge status={selectedTicket.status} />
-                                                        <span className="text-xs font-mono font-semibold text-primary tracking-wider">{selectedTicket.id}</span>
+                                                        <span className="text-xs font-mono font-bold text-primary bg-primary/10 px-2.5 py-1 rounded-lg tracking-wider shadow-sm">{selectedTicket.id}</span>
                                                     </div>
                                                     <h3 className="text-lg font-bold text-slate-900 dark:text-white leading-tight tracking-tight">{selectedTicket.title}</h3>
                                                 </div>
                                                 <button
                                                     onClick={() => setSelectedTicketId(null)}
-                                                    className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-all text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                                                    className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-all text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:rotate-90 duration-300"
                                                 >
                                                     <FiX size={20} />
                                                 </button>
