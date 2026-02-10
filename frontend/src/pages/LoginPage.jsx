@@ -438,602 +438,617 @@ const LoginPage = () => {
     };
 
     return (
-        <div className="min-h-screen w-full flex overflow-hidden bg-white">
+        <div className="min-h-screen w-full flex flex-col overflow-hidden bg-white">
 
-            {/* Visual Side - Clean & Professional */}
-            <div className="hidden lg:flex lg:w-1/2 relative flex-col justify-center p-16 overflow-hidden bg-slate-50 border-r border-gray-100">
-                <div className="absolute inset-0 z-0 opacity-40">
-                    <div className="absolute inset-0" style={{ backgroundImage: 'radial-gradient(#cbd5e1 1px, transparent 1px)', backgroundSize: '24px 24px' }}></div>
-                </div>
-
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.6 }}
-                    className="relative z-10"
-                >
-                    <Link to="/" className="inline-flex items-center gap-2 text-indigo-600 hover:text-indigo-700 font-bold transition-colors mb-16 px-4 py-2 bg-white rounded-lg shadow-sm w-fit border border-gray-100">
-                        <FiArrowLeft />
-                        <span className="text-sm">Back to Home</span>
-                    </Link>
-
-                    <h1 className="text-5xl font-bold text-gray-900 mb-6 tracking-tight leading-tight italic">
-                        The Standard for <br />
-                        <span className="text-indigo-600">Enterprise Support.</span>
-                    </h1>
-                    <p className="text-lg text-gray-500 max-w-sm mb-12 font-medium leading-relaxed italic">
-                        Streamlined ticket management, intelligent analytics, and seamless collaboration.
-                    </p>
-
-                    <div className="space-y-4">
-                        <div className="flex items-center gap-4 p-4 bg-white/60 rounded-xl border border-gray-100 shadow-sm backdrop-blur-sm">
-                            <div className="w-10 h-10 bg-indigo-50 rounded-lg flex items-center justify-center text-indigo-600">
-                                <FiShield size={20} />
-                            </div>
-                            <span className="text-sm font-semibold text-gray-700">Enterprise Grade Security</span>
-                        </div>
-                        <div className="flex items-center gap-4 p-4 bg-white/60 rounded-xl border border-gray-100 shadow-sm backdrop-blur-sm">
-                            <div className="w-10 h-10 bg-emerald-50 rounded-lg flex items-center justify-center text-emerald-600">
-                                <FiActivity size={20} />
-                            </div>
-                            <span className="text-sm font-semibold text-gray-700">Real-time Performance Monitoring</span>
-                        </div>
-                    </div>
-                </motion.div>
+            {/* Self-Hosted Warning Banner */}
+            <div className="w-full bg-gradient-to-r from-amber-500 via-orange-500 to-amber-500 text-white py-2.5 px-4 flex items-center justify-center gap-3 shadow-lg shadow-orange-500/20 relative overflow-hidden z-50">
+                <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_0%,rgba(255,255,255,0.1)_50%,transparent_100%)] animate-[shimmer_3s_ease-in-out_infinite] bg-[length:200%_100%]" />
+                <FiAlertTriangle className="text-white shrink-0 animate-pulse" size={16} />
+                <p className="text-[11px] sm:text-xs font-bold tracking-wide text-center relative z-10">
+                    ⚠️ This site is <span className="underline underline-offset-2">self-hosted for testing purposes only</span>. Not intended for production use.
+                    <span className="hidden sm:inline"> &nbsp;•&nbsp; </span>
+                    <br className="sm:hidden" />
+                    <span className="font-black">Hosted by Ragul — Proserve IT Support</span>
+                </p>
             </div>
 
-            {/* Form Side */}
-            <div className="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-12 relative bg-white">
-                <div className="absolute top-0 right-0 p-8 lg:hidden">
-                    <Link to="/" className="text-indigo-600 font-bold text-2xl">Proserve</Link>
+            <div className="flex-1 flex overflow-hidden">
+
+                {/* Visual Side - Clean & Professional */}
+                <div className="hidden lg:flex lg:w-1/2 relative flex-col justify-center p-16 overflow-hidden bg-slate-50 border-r border-gray-100">
+                    <div className="absolute inset-0 z-0 opacity-40">
+                        <div className="absolute inset-0" style={{ backgroundImage: 'radial-gradient(#cbd5e1 1px, transparent 1px)', backgroundSize: '24px 24px' }}></div>
+                    </div>
+
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.6 }}
+                        className="relative z-10"
+                    >
+                        <Link to="/" className="inline-flex items-center gap-2 text-indigo-600 hover:text-indigo-700 font-bold transition-colors mb-16 px-4 py-2 bg-white rounded-lg shadow-sm w-fit border border-gray-100">
+                            <FiArrowLeft />
+                            <span className="text-sm">Back to Home</span>
+                        </Link>
+
+                        <h1 className="text-5xl font-bold text-gray-900 mb-6 tracking-tight leading-tight italic">
+                            The Standard for <br />
+                            <span className="text-indigo-600">Enterprise Support.</span>
+                        </h1>
+                        <p className="text-lg text-gray-500 max-w-sm mb-12 font-medium leading-relaxed italic">
+                            Streamlined ticket management, intelligent analytics, and seamless collaboration.
+                        </p>
+
+                        <div className="space-y-4">
+                            <div className="flex items-center gap-4 p-4 bg-white/60 rounded-xl border border-gray-100 shadow-sm backdrop-blur-sm">
+                                <div className="w-10 h-10 bg-indigo-50 rounded-lg flex items-center justify-center text-indigo-600">
+                                    <FiShield size={20} />
+                                </div>
+                                <span className="text-sm font-semibold text-gray-700">Enterprise Grade Security</span>
+                            </div>
+                            <div className="flex items-center gap-4 p-4 bg-white/60 rounded-xl border border-gray-100 shadow-sm backdrop-blur-sm">
+                                <div className="w-10 h-10 bg-emerald-50 rounded-lg flex items-center justify-center text-emerald-600">
+                                    <FiActivity size={20} />
+                                </div>
+                                <span className="text-sm font-semibold text-gray-700">Real-time Performance Monitoring</span>
+                            </div>
+                        </div>
+                    </motion.div>
                 </div>
 
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="w-full max-w-md"
-                >
-                    {/* Common Header & Tabs */}
-                    {forgotStep <= 0 && (
-                        <>
-                            <div className="mb-10 text-center lg:text-left">
-                                <h2 className="text-4xl font-bold text-gray-900 mb-3">
-                                    {forgotStep === -1 ? 'Instant Login' : (isLogin ? 'Welcome Back' : 'Join Proserve')}
-                                </h2>
-                                <p className="text-gray-500 font-medium">
-                                    {forgotStep === -1 ? 'Scan with your logged-in mobile device to enter.' : (isLogin ? 'Enter your details to access your account.' : 'Start your journey with professional support.')}
-                                </p>
-                            </div>
+                {/* Form Side */}
+                <div className="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-12 relative bg-white">
+                    <div className="absolute top-0 right-0 p-8 lg:hidden">
+                        <Link to="/" className="text-indigo-600 font-bold text-2xl">Proserve</Link>
+                    </div>
 
-                            <div className="flex p-1 bg-gray-50 rounded-xl mb-8 border border-gray-200">
-                                <button
-                                    onClick={() => { setIsLogin(true); setForgotStep(0); setError(''); setSuccessMessage(''); }}
-                                    className={`flex-1 py-3 rounded-lg font-bold transition-all ${isLogin && forgotStep === 0 ? 'bg-white text-indigo-600 shadow-sm border border-gray-100' : 'text-gray-500 hover:text-gray-700'}`}
-                                >
-                                    Log In
-                                </button>
-                                <button
-                                    onClick={() => { setIsLogin(false); setForgotStep(0); setError(''); setSuccessMessage(''); generateCaptcha(); }}
-                                    className={`flex-1 py-3 rounded-lg font-bold transition-all ${!isLogin && forgotStep === 0 ? 'bg-white text-indigo-600 shadow-sm border border-gray-100' : 'text-gray-500 hover:text-gray-700'}`}
-                                >
-                                    Register
-                                </button>
-                                <button
-                                    onClick={() => { setForgotStep(-1); initiateQrLogin(); setError(''); setSuccessMessage(''); }}
-                                    className={`flex-1 py-3 rounded-lg font-bold transition-all ${forgotStep === -1 ? 'bg-white text-indigo-600 shadow-sm border border-gray-100' : 'text-gray-500 hover:text-gray-700'}`}
-                                >
-                                    QR Login
-                                </button>
-                            </div>
-                        </>
-                    )}
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="w-full max-w-md"
+                    >
+                        {/* Common Header & Tabs */}
+                        {forgotStep <= 0 && (
+                            <>
+                                <div className="mb-10 text-center lg:text-left">
+                                    <h2 className="text-4xl font-bold text-gray-900 mb-3">
+                                        {forgotStep === -1 ? 'Instant Login' : (isLogin ? 'Welcome Back' : 'Join Proserve')}
+                                    </h2>
+                                    <p className="text-gray-500 font-medium">
+                                        {forgotStep === -1 ? 'Scan with your logged-in mobile device to enter.' : (isLogin ? 'Enter your details to access your account.' : 'Start your journey with professional support.')}
+                                    </p>
+                                </div>
 
-                    <AnimatePresence mode="wait">
-                        {forgotStep === 0 ? (
-                            <motion.div
-                                key="login-form"
-                                initial={{ opacity: 0, x: -20 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                exit={{ opacity: 0, x: 20 }}
-                                className="space-y-5"
-                            >
-                                {error && (
-                                    <div className="p-4 bg-red-50 border border-red-100 rounded-xl text-red-600 text-sm flex items-center gap-3">
-                                        <FiLock /> <span>{error}</span>
-                                    </div>
-                                )}
-                                {successMessage && (
-                                    <div className="p-4 bg-emerald-50 border border-emerald-100 rounded-xl text-emerald-600 text-sm flex items-center gap-3">
-                                        <FiCheckCircle /> <span>{successMessage}</span>
-                                    </div>
-                                )}
+                                <div className="flex p-1 bg-gray-50 rounded-xl mb-8 border border-gray-200">
+                                    <button
+                                        onClick={() => { setIsLogin(true); setForgotStep(0); setError(''); setSuccessMessage(''); }}
+                                        className={`flex-1 py-3 rounded-lg font-bold transition-all ${isLogin && forgotStep === 0 ? 'bg-white text-indigo-600 shadow-sm border border-gray-100' : 'text-gray-500 hover:text-gray-700'}`}
+                                    >
+                                        Log In
+                                    </button>
+                                    <button
+                                        onClick={() => { setIsLogin(false); setForgotStep(0); setError(''); setSuccessMessage(''); generateCaptcha(); }}
+                                        className={`flex-1 py-3 rounded-lg font-bold transition-all ${!isLogin && forgotStep === 0 ? 'bg-white text-indigo-600 shadow-sm border border-gray-100' : 'text-gray-500 hover:text-gray-700'}`}
+                                    >
+                                        Register
+                                    </button>
+                                    <button
+                                        onClick={() => { setForgotStep(-1); initiateQrLogin(); setError(''); setSuccessMessage(''); }}
+                                        className={`flex-1 py-3 rounded-lg font-bold transition-all ${forgotStep === -1 ? 'bg-white text-indigo-600 shadow-sm border border-gray-100' : 'text-gray-500 hover:text-gray-700'}`}
+                                    >
+                                        QR Login
+                                    </button>
+                                </div>
+                            </>
+                        )}
 
-                                <form onSubmit={handleSubmit} className="space-y-5">
-                                    <div className="space-y-2">
-                                        <label className="text-sm font-semibold text-gray-700 ml-1">Username</label>
-                                        <div className="relative group">
-                                            <FiUser className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-indigo-600 transition-colors" />
-                                            <input
-                                                type="text"
-                                                name="username"
-                                                placeholder="Enter your username"
-                                                value={formData.username}
-                                                onChange={handleChange}
-                                                required
-                                                className="w-full bg-gray-50 border border-gray-200 rounded-xl py-4 pl-12 pr-4 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/5 transition-all"
-                                            />
+                        <AnimatePresence mode="wait">
+                            {forgotStep === 0 ? (
+                                <motion.div
+                                    key="login-form"
+                                    initial={{ opacity: 0, x: -20 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    exit={{ opacity: 0, x: 20 }}
+                                    className="space-y-5"
+                                >
+                                    {error && (
+                                        <div className="p-4 bg-red-50 border border-red-100 rounded-xl text-red-600 text-sm flex items-center gap-3">
+                                            <FiLock /> <span>{error}</span>
                                         </div>
-                                    </div>
-
-                                    {!isLogin && (
-                                        <div className="space-y-5">
-                                            <div className="space-y-2">
-                                                <label className="text-sm font-semibold text-gray-700 ml-1">Email Address</label>
-                                                <div className="relative group">
-                                                    <FiMail className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-indigo-600 transition-colors" />
-                                                    <input
-                                                        type="email"
-                                                        name="email"
-                                                        placeholder="you@example.com"
-                                                        value={formData.email}
-                                                        onChange={handleChange}
-                                                        required
-                                                        className="w-full bg-gray-50 border border-gray-200 rounded-xl py-4 pl-12 pr-4 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/5 transition-all"
-                                                    />
-                                                </div>
-                                            </div>
-
-                                            <div className="space-y-2">
-                                                <label className="text-sm font-semibold text-gray-700 ml-1">Full Name</label>
-                                                <div className="relative group">
-                                                    <FiUser className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-indigo-600 transition-colors" />
-                                                    <input
-                                                        type="text"
-                                                        name="full_name"
-                                                        placeholder="Your full name"
-                                                        value={formData.full_name}
-                                                        onChange={handleChange}
-                                                        className="w-full bg-gray-50 border border-gray-200 rounded-xl py-4 pl-12 pr-4 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/5 transition-all"
-                                                    />
-                                                </div>
-                                            </div>
+                                    )}
+                                    {successMessage && (
+                                        <div className="p-4 bg-emerald-50 border border-emerald-100 rounded-xl text-emerald-600 text-sm flex items-center gap-3">
+                                            <FiCheckCircle /> <span>{successMessage}</span>
                                         </div>
                                     )}
 
-                                    <div className="space-y-2">
-                                        <div className="flex justify-between items-center ml-1">
-                                            <label className="text-sm font-semibold text-gray-700">Password</label>
-                                            {isLogin && (
-                                                <button
-                                                    type="button"
-                                                    onClick={() => { setForgotStep(1); setError(''); setSuccessMessage(''); }}
-                                                    className="text-xs text-indigo-600 hover:text-indigo-800 font-bold transition-colors"
-                                                >
-                                                    Forgot Password?
-                                                </button>
-                                            )}
+                                    <form onSubmit={handleSubmit} className="space-y-5">
+                                        <div className="space-y-2">
+                                            <label className="text-sm font-semibold text-gray-700 ml-1">Username</label>
+                                            <div className="relative group">
+                                                <FiUser className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-indigo-600 transition-colors" />
+                                                <input
+                                                    type="text"
+                                                    name="username"
+                                                    placeholder="Enter your username"
+                                                    value={formData.username}
+                                                    onChange={handleChange}
+                                                    required
+                                                    className="w-full bg-gray-50 border border-gray-200 rounded-xl py-4 pl-12 pr-4 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/5 transition-all"
+                                                />
+                                            </div>
                                         </div>
-                                        <div className="relative group">
-                                            <FiLock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-indigo-600 transition-colors" />
-                                            <input
-                                                type="password"
-                                                name="password"
-                                                placeholder="••••••••"
-                                                value={formData.password}
-                                                onChange={handleChange}
-                                                required
-                                                className="w-full bg-gray-50 border border-gray-200 rounded-xl py-4 pl-12 pr-4 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/5 transition-all"
-                                            />
-                                            {!isLogin && (
-                                                <p className="text-[10px] text-gray-400 mt-1 ml-1 font-medium">
-                                                    Minimum 12 characters, including uppercase, lowercase, numbers, and symbols.
-                                                </p>
-                                            )}
+
+                                        {!isLogin && (
+                                            <div className="space-y-5">
+                                                <div className="space-y-2">
+                                                    <label className="text-sm font-semibold text-gray-700 ml-1">Email Address</label>
+                                                    <div className="relative group">
+                                                        <FiMail className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-indigo-600 transition-colors" />
+                                                        <input
+                                                            type="email"
+                                                            name="email"
+                                                            placeholder="you@example.com"
+                                                            value={formData.email}
+                                                            onChange={handleChange}
+                                                            required
+                                                            className="w-full bg-gray-50 border border-gray-200 rounded-xl py-4 pl-12 pr-4 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/5 transition-all"
+                                                        />
+                                                    </div>
+                                                </div>
+
+                                                <div className="space-y-2">
+                                                    <label className="text-sm font-semibold text-gray-700 ml-1">Full Name</label>
+                                                    <div className="relative group">
+                                                        <FiUser className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-indigo-600 transition-colors" />
+                                                        <input
+                                                            type="text"
+                                                            name="full_name"
+                                                            placeholder="Your full name"
+                                                            value={formData.full_name}
+                                                            onChange={handleChange}
+                                                            className="w-full bg-gray-50 border border-gray-200 rounded-xl py-4 pl-12 pr-4 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/5 transition-all"
+                                                        />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        <div className="space-y-2">
+                                            <div className="flex justify-between items-center ml-1">
+                                                <label className="text-sm font-semibold text-gray-700">Password</label>
+                                                {isLogin && (
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => { setForgotStep(1); setError(''); setSuccessMessage(''); }}
+                                                        className="text-xs text-indigo-600 hover:text-indigo-800 font-bold transition-colors"
+                                                    >
+                                                        Forgot Password?
+                                                    </button>
+                                                )}
+                                            </div>
+                                            <div className="relative group">
+                                                <FiLock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-indigo-600 transition-colors" />
+                                                <input
+                                                    type="password"
+                                                    name="password"
+                                                    placeholder="••••••••"
+                                                    value={formData.password}
+                                                    onChange={handleChange}
+                                                    required
+                                                    className="w-full bg-gray-50 border border-gray-200 rounded-xl py-4 pl-12 pr-4 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/5 transition-all"
+                                                />
+                                                {!isLogin && (
+                                                    <p className="text-[10px] text-gray-400 mt-1 ml-1 font-medium">
+                                                        Minimum 12 characters, including uppercase, lowercase, numbers, and symbols.
+                                                    </p>
+                                                )}
+                                            </div>
                                         </div>
+
+                                        {showCaptcha && (
+                                            <div className="space-y-4 pt-2 border-t border-gray-100">
+                                                <div className="flex justify-between items-center ml-1">
+                                                    <label className="text-sm font-semibold text-gray-700">Security Check</label>
+                                                    <button
+                                                        type="button"
+                                                        onClick={generateCaptcha}
+                                                        className="text-[10px] text-indigo-600 font-bold uppercase tracking-wider hover:underline"
+                                                    >
+                                                        Refresh Code
+                                                    </button>
+                                                </div>
+                                                <div className="flex gap-3">
+                                                    <div className="flex-1 relative group">
+                                                        <FiLock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-indigo-600 transition-colors" />
+                                                        <input
+                                                            type="text"
+                                                            placeholder="Enter Code"
+                                                            value={captchaInput}
+                                                            onChange={(e) => setCaptchaInput(e.target.value)}
+                                                            required={showCaptcha}
+                                                            className="w-full bg-gray-50 border border-gray-200 rounded-xl py-4 pl-12 pr-4 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:bg-white focus:border-indigo-500 transition-all font-mono tracking-widest uppercase"
+                                                        />
+                                                    </div>
+                                                    <div className="w-32 bg-indigo-50 border-2 border-dashed border-indigo-200 rounded-xl flex items-center justify-center select-none overflow-hidden relative">
+                                                        <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'repeating-linear-gradient(45deg, #4f46e5 0, #4f46e5 1px, transparent 0, transparent 50%)', backgroundSize: '10px 10px' }}></div>
+                                                        <span className="text-xl font-black text-indigo-600 tracking-widest italic drop-shadow-sm z-10">
+                                                            {captcha}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        <button
+                                            type="submit"
+                                            disabled={loading}
+                                            className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-4 rounded-xl shadow-lg shadow-indigo-600/20 transition-all active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2"
+                                        >
+                                            {loading ? (
+                                                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                                            ) : (
+                                                <span>{isLogin ? 'Sign In' : 'Create Account'}</span>
+                                            )}
+                                        </button>
+                                    </form>
+
+                                    <div className="mt-8 text-center">
+                                        <p className="text-gray-500 text-sm font-medium">
+                                            {isLogin ? "Don't have an account?" : "Already have an account?"}
+                                            <button
+                                                onClick={() => { setIsLogin(!isLogin); setForgotStep(0); setError(''); setSuccessMessage(''); }}
+                                                className="ml-2 text-indigo-600 hover:text-indigo-800 font-bold transition-colors underline underline-offset-4"
+                                            >
+                                                {isLogin ? 'Register Now' : 'Sign In'}
+                                            </button>
+                                        </p>
+                                    </div>
+                                </motion.div>
+                            ) : forgotStep === -1 ? (
+                                <motion.div
+                                    key="qr-view"
+                                    initial={{ opacity: 0, scale: 0.95 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    exit={{ opacity: 0, scale: 0.95 }}
+                                    className="bg-white p-8 rounded-3xl border border-gray-100 shadow-xl text-center"
+                                >
+                                    <div className="relative mx-auto w-64 h-64 mb-10 bg-slate-50 rounded-3xl p-8 flex items-center justify-center border-2 border-dashed border-indigo-100 shadow-inner">
+                                        {qrStatus === 'loading' ? (
+                                            <div className="flex flex-col items-center gap-3">
+                                                <div className="w-12 h-12 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
+                                                <p className="text-xs text-indigo-600 font-bold animate-pulse">Generating...</p>
+                                            </div>
+                                        ) : qrStatus === 'active' ? (
+                                            <div className="bg-white p-3 rounded-2xl shadow-sm border border-gray-100">
+                                                <QRCodeSVG
+                                                    value={`${window.location.origin}/qr-auth?sid=${qrSession?.session_id}`}
+                                                    size={180}
+                                                    level="H"
+                                                    includeMargin={true}
+                                                />
+                                            </div>
+                                        ) : qrStatus === 'expired' ? (
+                                            <div className="text-red-500">
+                                                <FiAlertCircle size={40} className="mx-auto mb-3" />
+                                                <p className="font-bold mb-2 text-sm">Session Expired</p>
+                                                <button onClick={initiateQrLogin} className="bg-indigo-600 text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-slate-900 transition-colors">Generate New</button>
+                                            </div>
+                                        ) : (
+                                            <button onClick={initiateQrLogin} className="bg-indigo-600 text-white px-6 py-3 rounded-xl font-bold shadow-lg shadow-indigo-600/20">Generate QR Code</button>
+                                        )}
+
+                                        {qrStatus === 'active' && (
+                                            <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 bg-indigo-600 text-white text-[10px] font-black px-5 py-2 rounded-full whitespace-nowrap shadow-xl tracking-widest ring-4 ring-white flex items-center gap-2">
+                                                <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></div>
+                                                REFRESHING IN {qrCountdown}s
+                                            </div>
+                                        )}
                                     </div>
 
-                                    {showCaptcha && (
-                                        <div className="space-y-4 pt-2 border-t border-gray-100">
-                                            <div className="flex justify-between items-center ml-1">
-                                                <label className="text-sm font-semibold text-gray-700">Security Check</label>
-                                                <button
-                                                    type="button"
-                                                    onClick={generateCaptcha}
-                                                    className="text-[10px] text-indigo-600 font-bold uppercase tracking-wider hover:underline"
-                                                >
-                                                    Refresh Code
-                                                </button>
-                                            </div>
-                                            <div className="flex gap-3">
-                                                <div className="flex-1 relative group">
-                                                    <FiLock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-indigo-600 transition-colors" />
-                                                    <input
-                                                        type="text"
-                                                        placeholder="Enter Code"
-                                                        value={captchaInput}
-                                                        onChange={(e) => setCaptchaInput(e.target.value)}
-                                                        required={showCaptcha}
-                                                        className="w-full bg-gray-50 border border-gray-200 rounded-xl py-4 pl-12 pr-4 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:bg-white focus:border-indigo-500 transition-all font-mono tracking-widest uppercase"
-                                                    />
+                                    <p className="text-[10px] text-gray-400 uppercase font-black tracking-widest leading-relaxed">
+                                        Secure • End-to-End • Proserve Auth
+                                    </p>
+                                </motion.div>
+                            ) : forgotStep === 4 ? (
+                                <motion.div
+                                    key="session-mgmt"
+                                    initial={{ opacity: 0, scale: 0.95 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    exit={{ opacity: 0, scale: 0.95 }}
+                                    className="space-y-6"
+                                >
+                                    <div className="text-center mb-6">
+                                        <div className="w-16 h-16 bg-rose-100 text-rose-600 rounded-2xl flex items-center justify-center mx-auto mb-4 animate-bounce">
+                                            <FiAlertTriangle size={32} />
+                                        </div>
+                                        <h3 className="text-2xl font-black text-gray-900 mb-2">Maximum Sessions Reached</h3>
+                                        <p className="text-gray-500 font-medium">You have reached the maximum active sessions limit. Please logout from at least one session to continue.</p>
+                                    </div>
+
+                                    <div className="bg-amber-50 border border-amber-100 p-4 rounded-xl mb-6">
+                                        <p className="text-xs text-amber-800 font-bold uppercase tracking-wider text-center">👇 Select a session to logout & continue</p>
+                                    </div>
+
+                                    <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+                                        {activeSessions.map((session) => (
+                                            <div key={session.id} className="bg-white border border-gray-100 p-4 rounded-2xl shadow-sm hover:border-rose-200 transition-all group relative overflow-hidden">
+                                                <div className="flex items-center justify-between relative z-10">
+                                                    <div className="flex items-center gap-4">
+                                                        <div className="w-10 h-10 bg-gray-50 text-gray-400 rounded-xl flex items-center justify-center group-hover:bg-rose-50 group-hover:text-rose-600 transition-colors">
+                                                            {session.device === 'Desktop' ? <FiMonitor size={20} /> : <FiSmartphone size={20} />}
+                                                        </div>
+                                                        <div>
+                                                            <h5 className="text-sm font-bold text-gray-900">{session.os} • {session.browser}</h5>
+                                                            <p className="text-[10px] text-gray-400 font-medium uppercase tracking-wider">
+                                                                IP: {session.ip} • Logged: {session.time}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                    <button
+                                                        onClick={() => handleTerminateSession(session.id)}
+                                                        disabled={loading}
+                                                        className="px-4 py-2 bg-rose-50 text-rose-600 hover:bg-rose-600 hover:text-white rounded-xl text-xs font-black transition-all active:scale-95 flex items-center gap-2"
+                                                    >
+                                                        {loading ? '...' : (
+                                                            <>
+                                                                <FiLogOut />
+                                                                LOGOUT
+                                                            </>
+                                                        )}
+                                                    </button>
                                                 </div>
-                                                <div className="w-32 bg-indigo-50 border-2 border-dashed border-indigo-200 rounded-xl flex items-center justify-center select-none overflow-hidden relative">
-                                                    <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'repeating-linear-gradient(45deg, #4f46e5 0, #4f46e5 1px, transparent 0, transparent 50%)', backgroundSize: '10px 10px' }}></div>
-                                                    <span className="text-xl font-black text-indigo-600 tracking-widest italic drop-shadow-sm z-10">
-                                                        {captcha}
-                                                    </span>
-                                                </div>
                                             </div>
+                                        ))}
+                                    </div>
+
+                                    <button
+                                        onClick={() => { setForgotStep(0); setError(''); setSuccessMessage(''); }}
+                                        className="w-full py-3 text-gray-400 font-bold hover:text-gray-600 transition-all text-sm flex items-center justify-center gap-2"
+                                    >
+                                        <FiArrowLeft /> Back to Login
+                                    </button>
+                                </motion.div>
+                            ) : forgotStep === 5 ? (
+                                <motion.div
+                                    key="2fa-verify"
+                                    initial={{ opacity: 0, scale: 0.95 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    exit={{ opacity: 0, scale: 0.95 }}
+                                    className="space-y-6"
+                                >
+                                    <div className="text-center">
+                                        <div className="w-16 h-16 bg-indigo-100 text-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                                            <FiShield size={32} />
+                                        </div>
+                                        <h3 className="text-2xl font-black text-gray-900 mb-2">Two-Factor Authentication</h3>
+                                        <p className="text-gray-500 font-medium text-sm">Please enter the 6-digit code from your authenticator app.</p>
+                                    </div>
+
+                                    <form onSubmit={handleTwoFactorVerify} className="space-y-4">
+                                        <div className="relative group">
+                                            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                                <FiLock className="text-gray-400 group-focus-within:text-indigo-600 transition-colors" />
+                                            </div>
+                                            <input
+                                                type="text"
+                                                maxLength="6"
+                                                value={twoFactorCode}
+                                                onChange={(e) => setTwoFactorCode(e.target.value.replace(/[^0-9]/g, ''))}
+                                                className="w-full pl-11 pr-4 py-4 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-600 focus:border-transparent outline-none transition-all placeholder:text-gray-400 font-bold tracking-[0.5em] text-center text-xl"
+                                                placeholder="000000"
+                                                required
+                                            />
+                                        </div>
+
+                                        <button
+                                            type="submit"
+                                            disabled={loading || twoFactorCode.length < 6}
+                                            className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-4 rounded-xl shadow-lg transition-all disabled:opacity-50"
+                                        >
+                                            {loading ? "Verifying..." : "Verify & Sign In"}
+                                        </button>
+                                    </form>
+
+                                    {twoFactorMethod === 'app' ? (
+                                        <div className="text-center">
+                                            <p className="text-xs text-gray-400 mb-3">Authenticator app not working?</p>
+                                            <button
+                                                onClick={handleRequestEmailOTP}
+                                                disabled={loading}
+                                                className="text-sm font-bold text-indigo-600 hover:text-indigo-800 flex items-center justify-center gap-2 mx-auto"
+                                            >
+                                                <FiMail /> Receive code via Email
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <div className="text-center">
+                                            <p className="text-xs text-gray-400 mb-3">Didn't receive the email?</p>
+                                            <button
+                                                onClick={() => { setTwoFactorMethod('app'); setTwoFactorCode(''); }}
+                                                className="text-sm font-bold text-indigo-600 hover:text-indigo-800 flex items-center justify-center gap-2 mx-auto"
+                                            >
+                                                <FiSmartphone /> Use Authenticator App
+                                            </button>
                                         </div>
                                     )}
 
                                     <button
-                                        type="submit"
-                                        disabled={loading}
-                                        className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-4 rounded-xl shadow-lg shadow-indigo-600/20 transition-all active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2"
+                                        onClick={() => setForgotStep(0)}
+                                        className="w-full py-2 text-gray-400 font-bold hover:text-gray-600 transition-all text-sm"
                                     >
-                                        {loading ? (
-                                            <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                                        ) : (
-                                            <span>{isLogin ? 'Sign In' : 'Create Account'}</span>
-                                        )}
+                                        Back to Login
                                     </button>
-                                </form>
-
-                                <div className="mt-8 text-center">
-                                    <p className="text-gray-500 text-sm font-medium">
-                                        {isLogin ? "Don't have an account?" : "Already have an account?"}
-                                        <button
-                                            onClick={() => { setIsLogin(!isLogin); setForgotStep(0); setError(''); setSuccessMessage(''); }}
-                                            className="ml-2 text-indigo-600 hover:text-indigo-800 font-bold transition-colors underline underline-offset-4"
-                                        >
-                                            {isLogin ? 'Register Now' : 'Sign In'}
-                                        </button>
-                                    </p>
-                                </div>
-                            </motion.div>
-                        ) : forgotStep === -1 ? (
-                            <motion.div
-                                key="qr-view"
-                                initial={{ opacity: 0, scale: 0.95 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                exit={{ opacity: 0, scale: 0.95 }}
-                                className="bg-white p-8 rounded-3xl border border-gray-100 shadow-xl text-center"
-                            >
-                                <div className="relative mx-auto w-64 h-64 mb-10 bg-slate-50 rounded-3xl p-8 flex items-center justify-center border-2 border-dashed border-indigo-100 shadow-inner">
-                                    {qrStatus === 'loading' ? (
-                                        <div className="flex flex-col items-center gap-3">
-                                            <div className="w-12 h-12 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
-                                            <p className="text-xs text-indigo-600 font-bold animate-pulse">Generating...</p>
-                                        </div>
-                                    ) : qrStatus === 'active' ? (
-                                        <div className="bg-white p-3 rounded-2xl shadow-sm border border-gray-100">
-                                            <QRCodeSVG
-                                                value={`${window.location.origin}/qr-auth?sid=${qrSession?.session_id}`}
-                                                size={180}
-                                                level="H"
-                                                includeMargin={true}
-                                            />
-                                        </div>
-                                    ) : qrStatus === 'expired' ? (
-                                        <div className="text-red-500">
-                                            <FiAlertCircle size={40} className="mx-auto mb-3" />
-                                            <p className="font-bold mb-2 text-sm">Session Expired</p>
-                                            <button onClick={initiateQrLogin} className="bg-indigo-600 text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-slate-900 transition-colors">Generate New</button>
-                                        </div>
-                                    ) : (
-                                        <button onClick={initiateQrLogin} className="bg-indigo-600 text-white px-6 py-3 rounded-xl font-bold shadow-lg shadow-indigo-600/20">Generate QR Code</button>
-                                    )}
-
-                                    {qrStatus === 'active' && (
-                                        <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 bg-indigo-600 text-white text-[10px] font-black px-5 py-2 rounded-full whitespace-nowrap shadow-xl tracking-widest ring-4 ring-white flex items-center gap-2">
-                                            <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></div>
-                                            REFRESHING IN {qrCountdown}s
-                                        </div>
-                                    )}
-                                </div>
-
-                                <p className="text-[10px] text-gray-400 uppercase font-black tracking-widest leading-relaxed">
-                                    Secure • End-to-End • Proserve Auth
-                                </p>
-                            </motion.div>
-                        ) : forgotStep === 4 ? (
-                            <motion.div
-                                key="session-mgmt"
-                                initial={{ opacity: 0, scale: 0.95 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                exit={{ opacity: 0, scale: 0.95 }}
-                                className="space-y-6"
-                            >
-                                <div className="text-center mb-6">
-                                    <div className="w-16 h-16 bg-rose-100 text-rose-600 rounded-2xl flex items-center justify-center mx-auto mb-4 animate-bounce">
-                                        <FiAlertTriangle size={32} />
-                                    </div>
-                                    <h3 className="text-2xl font-black text-gray-900 mb-2">Maximum Sessions Reached</h3>
-                                    <p className="text-gray-500 font-medium">You have reached the maximum active sessions limit. Please logout from at least one session to continue.</p>
-                                </div>
-
-                                <div className="bg-amber-50 border border-amber-100 p-4 rounded-xl mb-6">
-                                    <p className="text-xs text-amber-800 font-bold uppercase tracking-wider text-center">👇 Select a session to logout & continue</p>
-                                </div>
-
-                                <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
-                                    {activeSessions.map((session) => (
-                                        <div key={session.id} className="bg-white border border-gray-100 p-4 rounded-2xl shadow-sm hover:border-rose-200 transition-all group relative overflow-hidden">
-                                            <div className="flex items-center justify-between relative z-10">
-                                                <div className="flex items-center gap-4">
-                                                    <div className="w-10 h-10 bg-gray-50 text-gray-400 rounded-xl flex items-center justify-center group-hover:bg-rose-50 group-hover:text-rose-600 transition-colors">
-                                                        {session.device === 'Desktop' ? <FiMonitor size={20} /> : <FiSmartphone size={20} />}
-                                                    </div>
-                                                    <div>
-                                                        <h5 className="text-sm font-bold text-gray-900">{session.os} • {session.browser}</h5>
-                                                        <p className="text-[10px] text-gray-400 font-medium uppercase tracking-wider">
-                                                            IP: {session.ip} • Logged: {session.time}
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                                <button
-                                                    onClick={() => handleTerminateSession(session.id)}
-                                                    disabled={loading}
-                                                    className="px-4 py-2 bg-rose-50 text-rose-600 hover:bg-rose-600 hover:text-white rounded-xl text-xs font-black transition-all active:scale-95 flex items-center gap-2"
-                                                >
-                                                    {loading ? '...' : (
-                                                        <>
-                                                            <FiLogOut />
-                                                            LOGOUT
-                                                        </>
-                                                    )}
-                                                </button>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-
-                                <button
-                                    onClick={() => { setForgotStep(0); setError(''); setSuccessMessage(''); }}
-                                    className="w-full py-3 text-gray-400 font-bold hover:text-gray-600 transition-all text-sm flex items-center justify-center gap-2"
+                                </motion.div>
+                            ) : forgotStep === 6 ? (
+                                <motion.div
+                                    key="2fa-setup"
+                                    initial={{ opacity: 0, scale: 0.95 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    exit={{ opacity: 0, scale: 0.95 }}
+                                    className="space-y-6"
                                 >
-                                    <FiArrowLeft /> Back to Login
-                                </button>
-                            </motion.div>
-                        ) : forgotStep === 5 ? (
-                            <motion.div
-                                key="2fa-verify"
-                                initial={{ opacity: 0, scale: 0.95 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                exit={{ opacity: 0, scale: 0.95 }}
-                                className="space-y-6"
-                            >
-                                <div className="text-center">
-                                    <div className="w-16 h-16 bg-indigo-100 text-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                                        <FiShield size={32} />
-                                    </div>
-                                    <h3 className="text-2xl font-black text-gray-900 mb-2">Two-Factor Authentication</h3>
-                                    <p className="text-gray-500 font-medium text-sm">Please enter the 6-digit code from your authenticator app.</p>
-                                </div>
+                                    <div className="text-center">
+                                        <h3 className="text-2xl font-black text-gray-900 mb-2">Secure Your Account</h3>
+                                        <p className="text-gray-500 font-medium text-sm mb-6">Security feature enabled. Scan this QR code with Google Authenticator or Authy to setup 2FA.</p>
 
-                                <form onSubmit={handleTwoFactorVerify} className="space-y-4">
-                                    <div className="relative group">
-                                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                            <FiLock className="text-gray-400 group-focus-within:text-indigo-600 transition-colors" />
+                                        {twoFactorData ? (
+                                            <div className="bg-white p-4 rounded-2xl border-2 border-dashed border-indigo-100 inline-block mb-6 shadow-sm">
+                                                <img src={twoFactorData.qr_code} alt="QR Code" className="w-44 h-44" />
+                                            </div>
+                                        ) : (
+                                            <div className="w-44 h-44 bg-gray-50 rounded-2xl mx-auto flex items-center justify-center animate-pulse">
+                                                <div className="w-10 h-10 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+                                            </div>
+                                        )}
+
+                                        <div className="text-left bg-indigo-50 p-4 rounded-xl mb-6">
+                                            <p className="text-[10px] font-black text-indigo-600 uppercase tracking-widest mb-1">Manual Key</p>
+                                            <code className="text-sm font-bold text-gray-700 break-all">{twoFactorData?.secret}</code>
                                         </div>
+                                    </div>
+
+                                    <form onSubmit={handleTwoFactorSetup} className="space-y-4">
                                         <input
                                             type="text"
                                             maxLength="6"
                                             value={twoFactorCode}
                                             onChange={(e) => setTwoFactorCode(e.target.value.replace(/[^0-9]/g, ''))}
-                                            className="w-full pl-11 pr-4 py-4 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-600 focus:border-transparent outline-none transition-all placeholder:text-gray-400 font-bold tracking-[0.5em] text-center text-xl"
-                                            placeholder="000000"
+                                            className="w-full px-4 py-4 bg-gray-50 border border-gray-200 rounded-xl outline-none font-bold tracking-[0.5em] text-center text-xl"
+                                            placeholder="Enter Code"
                                             required
                                         />
-                                    </div>
-
-                                    <button
-                                        type="submit"
-                                        disabled={loading || twoFactorCode.length < 6}
-                                        className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-4 rounded-xl shadow-lg transition-all disabled:opacity-50"
-                                    >
-                                        {loading ? "Verifying..." : "Verify & Sign In"}
-                                    </button>
-                                </form>
-
-                                {twoFactorMethod === 'app' ? (
-                                    <div className="text-center">
-                                        <p className="text-xs text-gray-400 mb-3">Authenticator app not working?</p>
                                         <button
-                                            onClick={handleRequestEmailOTP}
-                                            disabled={loading}
-                                            className="text-sm font-bold text-indigo-600 hover:text-indigo-800 flex items-center justify-center gap-2 mx-auto"
+                                            type="submit"
+                                            disabled={loading || twoFactorCode.length < 6}
+                                            className="w-full bg-indigo-600 text-white font-bold py-4 rounded-xl shadow-lg transition-all disabled:opacity-50"
                                         >
-                                            <FiMail /> Receive code via Email
+                                            {loading ? "Setting up..." : "Complete Setup & Login"}
                                         </button>
-                                    </div>
-                                ) : (
-                                    <div className="text-center">
-                                        <p className="text-xs text-gray-400 mb-3">Didn't receive the email?</p>
-                                        <button
-                                            onClick={() => { setTwoFactorMethod('app'); setTwoFactorCode(''); }}
-                                            className="text-sm font-bold text-indigo-600 hover:text-indigo-800 flex items-center justify-center gap-2 mx-auto"
-                                        >
-                                            <FiSmartphone /> Use Authenticator App
-                                        </button>
-                                    </div>
-                                )}
-
-                                <button
-                                    onClick={() => setForgotStep(0)}
-                                    className="w-full py-2 text-gray-400 font-bold hover:text-gray-600 transition-all text-sm"
+                                    </form>
+                                </motion.div>
+                            ) : (
+                                <motion.div
+                                    key="forgot-view"
+                                    initial={{ opacity: 0, x: 20 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    exit={{ opacity: 0, x: -20 }}
+                                    className="space-y-8"
                                 >
-                                    Back to Login
-                                </button>
-                            </motion.div>
-                        ) : forgotStep === 6 ? (
-                            <motion.div
-                                key="2fa-setup"
-                                initial={{ opacity: 0, scale: 0.95 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                exit={{ opacity: 0, scale: 0.95 }}
-                                className="space-y-6"
-                            >
-                                <div className="text-center">
-                                    <h3 className="text-2xl font-black text-gray-900 mb-2">Secure Your Account</h3>
-                                    <p className="text-gray-500 font-medium text-sm mb-6">Security feature enabled. Scan this QR code with Google Authenticator or Authy to setup 2FA.</p>
+                                    <button
+                                        onClick={() => setForgotStep(0)}
+                                        className="inline-flex items-center gap-2 text-gray-500 hover:text-gray-700 font-bold text-sm transition-colors mb-4"
+                                    >
+                                        <FiArrowLeft />
+                                        <span>Back to Login</span>
+                                    </button>
 
-                                    {twoFactorData ? (
-                                        <div className="bg-white p-4 rounded-2xl border-2 border-dashed border-indigo-100 inline-block mb-6 shadow-sm">
-                                            <img src={twoFactorData.qr_code} alt="QR Code" className="w-44 h-44" />
+                                    <div className="mb-2">
+                                        <h2 className="text-3xl font-black text-gray-900">
+                                            {forgotStep === 1 ? 'Reset Password' :
+                                                forgotStep === 2 ? 'Verify Code' : 'Set New Password'}
+                                        </h2>
+                                        <p className="text-gray-500 font-medium mt-2">
+                                            {forgotStep === 1 ? 'Enter your email, username or phone number.' :
+                                                forgotStep === 2 ? 'We sent a 6-digit code to your registered device.' :
+                                                    'Create a strong password for your account.'}
+                                        </p>
+                                    </div>
+
+                                    {error && (
+                                        <div className="p-4 bg-red-50 border border-red-100 rounded-xl text-red-600 text-sm flex items-center gap-3">
+                                            <FiLock /> <span>{error}</span>
                                         </div>
-                                    ) : (
-                                        <div className="w-44 h-44 bg-gray-50 rounded-2xl mx-auto flex items-center justify-center animate-pulse">
-                                            <div className="w-10 h-10 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+                                    )}
+                                    {successMessage && (
+                                        <div className="p-4 bg-emerald-50 border border-emerald-100 rounded-xl text-emerald-600 text-sm flex items-center gap-3">
+                                            <FiCheckCircle /> <span>{successMessage}</span>
                                         </div>
                                     )}
 
-                                    <div className="text-left bg-indigo-50 p-4 rounded-xl mb-6">
-                                        <p className="text-[10px] font-black text-indigo-600 uppercase tracking-widest mb-1">Manual Key</p>
-                                        <code className="text-sm font-bold text-gray-700 break-all">{twoFactorData?.secret}</code>
-                                    </div>
-                                </div>
+                                    {forgotStep === 1 && (
+                                        <form onSubmit={handleForgotPassword} className="space-y-6">
+                                            <div className="space-y-2">
+                                                <label className="text-sm font-bold text-gray-700 ml-1">Identification</label>
+                                                <div className="relative group">
+                                                    <FiUser className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-indigo-600" />
+                                                    <input
+                                                        type="text"
+                                                        placeholder="Email, Username or Phone"
+                                                        value={otpIdentifier}
+                                                        onChange={(e) => setOtpIdentifier(e.target.value)}
+                                                        required
+                                                        className="w-full bg-gray-50 border border-gray-200 rounded-2xl py-5 pl-12 pr-4 focus:bg-white focus:border-indigo-600 focus:ring-4 focus:ring-indigo-600/5 transition-all outline-none"
+                                                    />
+                                                </div>
+                                            </div>
+                                            <button
+                                                type="submit"
+                                                disabled={loading}
+                                                className="w-full bg-indigo-600 text-white font-black py-5 rounded-2xl shadow-xl shadow-indigo-600/20 hover:bg-slate-900 transition-all flex items-center justify-center gap-3"
+                                            >
+                                                {loading ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div> : "Send Reset Code"}
+                                            </button>
+                                        </form>
+                                    )}
 
-                                <form onSubmit={handleTwoFactorSetup} className="space-y-4">
-                                    <input
-                                        type="text"
-                                        maxLength="6"
-                                        value={twoFactorCode}
-                                        onChange={(e) => setTwoFactorCode(e.target.value.replace(/[^0-9]/g, ''))}
-                                        className="w-full px-4 py-4 bg-gray-50 border border-gray-200 rounded-xl outline-none font-bold tracking-[0.5em] text-center text-xl"
-                                        placeholder="Enter Code"
-                                        required
-                                    />
-                                    <button
-                                        type="submit"
-                                        disabled={loading || twoFactorCode.length < 6}
-                                        className="w-full bg-indigo-600 text-white font-bold py-4 rounded-xl shadow-lg transition-all disabled:opacity-50"
-                                    >
-                                        {loading ? "Setting up..." : "Complete Setup & Login"}
-                                    </button>
-                                </form>
-                            </motion.div>
-                        ) : (
-                            <motion.div
-                                key="forgot-view"
-                                initial={{ opacity: 0, x: 20 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                exit={{ opacity: 0, x: -20 }}
-                                className="space-y-8"
-                            >
-                                <button
-                                    onClick={() => setForgotStep(0)}
-                                    className="inline-flex items-center gap-2 text-gray-500 hover:text-gray-700 font-bold text-sm transition-colors mb-4"
-                                >
-                                    <FiArrowLeft />
-                                    <span>Back to Login</span>
-                                </button>
-
-                                <div className="mb-2">
-                                    <h2 className="text-3xl font-black text-gray-900">
-                                        {forgotStep === 1 ? 'Reset Password' :
-                                            forgotStep === 2 ? 'Verify Code' : 'Set New Password'}
-                                    </h2>
-                                    <p className="text-gray-500 font-medium mt-2">
-                                        {forgotStep === 1 ? 'Enter your email, username or phone number.' :
-                                            forgotStep === 2 ? 'We sent a 6-digit code to your registered device.' :
-                                                'Create a strong password for your account.'}
-                                    </p>
-                                </div>
-
-                                {error && (
-                                    <div className="p-4 bg-red-50 border border-red-100 rounded-xl text-red-600 text-sm flex items-center gap-3">
-                                        <FiLock /> <span>{error}</span>
-                                    </div>
-                                )}
-                                {successMessage && (
-                                    <div className="p-4 bg-emerald-50 border border-emerald-100 rounded-xl text-emerald-600 text-sm flex items-center gap-3">
-                                        <FiCheckCircle /> <span>{successMessage}</span>
-                                    </div>
-                                )}
-
-                                {forgotStep === 1 && (
-                                    <form onSubmit={handleForgotPassword} className="space-y-6">
-                                        <div className="space-y-2">
-                                            <label className="text-sm font-bold text-gray-700 ml-1">Identification</label>
-                                            <div className="relative group">
-                                                <FiUser className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-indigo-600" />
+                                    {forgotStep === 2 && (
+                                        <form onSubmit={handleVerifyOtp} className="space-y-6">
+                                            <div className="space-y-2">
+                                                <label className="text-sm font-bold text-gray-700 ml-1 text-center block">6-Digit Verification Code</label>
                                                 <input
                                                     type="text"
-                                                    placeholder="Email, Username or Phone"
-                                                    value={otpIdentifier}
-                                                    onChange={(e) => setOtpIdentifier(e.target.value)}
+                                                    maxLength="6"
+                                                    placeholder="••••••"
+                                                    value={otpCode}
+                                                    onChange={(e) => setOtpCode(e.target.value)}
                                                     required
-                                                    className="w-full bg-gray-50 border border-gray-200 rounded-2xl py-5 pl-12 pr-4 focus:bg-white focus:border-indigo-600 focus:ring-4 focus:ring-indigo-600/5 transition-all outline-none"
+                                                    className="w-full bg-gray-50 border-2 border-dashed border-gray-200 rounded-2xl py-6 text-center text-3xl font-black tracking-[0.5em] focus:bg-white focus:border-indigo-600 transition-all outline-none text-gray-900"
                                                 />
                                             </div>
-                                        </div>
-                                        <button
-                                            type="submit"
-                                            disabled={loading}
-                                            className="w-full bg-indigo-600 text-white font-black py-5 rounded-2xl shadow-xl shadow-indigo-600/20 hover:bg-slate-900 transition-all flex items-center justify-center gap-3"
-                                        >
-                                            {loading ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div> : "Send Reset Code"}
-                                        </button>
-                                    </form>
-                                )}
+                                            <button
+                                                type="submit"
+                                                disabled={loading}
+                                                className="w-full bg-indigo-600 text-white font-black py-5 rounded-2xl shadow-xl shadow-indigo-600/20 hover:bg-slate-900 transition-all flex items-center justify-center"
+                                            >
+                                                {loading ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div> : "Verify Code"}
+                                            </button>
+                                            <p className="text-center text-sm font-bold text-gray-400">
+                                                Didn't receive code? <button type="button" onClick={handleForgotPassword} className="text-indigo-600 hover:underline">Resend</button>
+                                            </p>
+                                        </form>
+                                    )}
 
-                                {forgotStep === 2 && (
-                                    <form onSubmit={handleVerifyOtp} className="space-y-6">
-                                        <div className="space-y-2">
-                                            <label className="text-sm font-bold text-gray-700 ml-1 text-center block">6-Digit Verification Code</label>
-                                            <input
-                                                type="text"
-                                                maxLength="6"
-                                                placeholder="••••••"
-                                                value={otpCode}
-                                                onChange={(e) => setOtpCode(e.target.value)}
-                                                required
-                                                className="w-full bg-gray-50 border-2 border-dashed border-gray-200 rounded-2xl py-6 text-center text-3xl font-black tracking-[0.5em] focus:bg-white focus:border-indigo-600 transition-all outline-none text-gray-900"
-                                            />
-                                        </div>
-                                        <button
-                                            type="submit"
-                                            disabled={loading}
-                                            className="w-full bg-indigo-600 text-white font-black py-5 rounded-2xl shadow-xl shadow-indigo-600/20 hover:bg-slate-900 transition-all flex items-center justify-center"
-                                        >
-                                            {loading ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div> : "Verify Code"}
-                                        </button>
-                                        <p className="text-center text-sm font-bold text-gray-400">
-                                            Didn't receive code? <button type="button" onClick={handleForgotPassword} className="text-indigo-600 hover:underline">Resend</button>
-                                        </p>
-                                    </form>
-                                )}
-
-                                {forgotStep === 3 && (
-                                    <form onSubmit={handleResetPassword} className="space-y-6">
-                                        <div className="space-y-2">
-                                            <label className="text-sm font-bold text-gray-700 ml-1">New Password</label>
-                                            <div className="relative group">
-                                                <FiLock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-indigo-600" />
-                                                <input
-                                                    type="password"
-                                                    placeholder="••••••••"
-                                                    value={newPass}
-                                                    onChange={(e) => setNewPass(e.target.value)}
-                                                    required
-                                                    className="w-full bg-gray-50 border border-gray-200 rounded-2xl py-5 pl-12 pr-4 focus:bg-white focus:border-indigo-600 focus:ring-4 focus:ring-indigo-600/5 transition-all outline-none"
-                                                />
+                                    {forgotStep === 3 && (
+                                        <form onSubmit={handleResetPassword} className="space-y-6">
+                                            <div className="space-y-2">
+                                                <label className="text-sm font-bold text-gray-700 ml-1">New Password</label>
+                                                <div className="relative group">
+                                                    <FiLock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-indigo-600" />
+                                                    <input
+                                                        type="password"
+                                                        placeholder="••••••••"
+                                                        value={newPass}
+                                                        onChange={(e) => setNewPass(e.target.value)}
+                                                        required
+                                                        className="w-full bg-gray-50 border border-gray-200 rounded-2xl py-5 pl-12 pr-4 focus:bg-white focus:border-indigo-600 focus:ring-4 focus:ring-indigo-600/5 transition-all outline-none"
+                                                    />
+                                                </div>
                                             </div>
-                                        </div>
-                                        <button
-                                            type="submit"
-                                            disabled={loading}
-                                            className="w-full bg-emerald-600 text-white font-black py-5 rounded-2xl shadow-xl shadow-emerald-600/20 hover:bg-emerald-700 transition-all flex items-center justify-center"
-                                        >
-                                            {loading ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div> : "Update Password"}
-                                        </button>
-                                    </form>
-                                )}
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
-                </motion.div>
+                                            <button
+                                                type="submit"
+                                                disabled={loading}
+                                                className="w-full bg-emerald-600 text-white font-black py-5 rounded-2xl shadow-xl shadow-emerald-600/20 hover:bg-emerald-700 transition-all flex items-center justify-center"
+                                            >
+                                                {loading ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div> : "Update Password"}
+                                            </button>
+                                        </form>
+                                    )}
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+                    </motion.div>
+                </div>
             </div>
         </div>
     );
