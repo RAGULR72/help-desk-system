@@ -134,6 +134,17 @@ const MessageModal = ({ isOpen, onClose, title, message, type = "success" }) => 
 
 
 
+import { baseURL } from '../../api/axios';
+
+const getAttachmentUrl = (file) => {
+    if (!file) return '';
+    if (file.startsWith('http')) return file;
+    if (file.includes('static/')) {
+        return `${baseURL}${file.startsWith('/') ? '' : '/'}${file}`;
+    }
+    return `${baseURL}/static/uploads/${file}`;
+};
+
 const PriorityBadge = ({ priority }) => {
     const { t } = useTranslation();
     const normalizedPriority = priority ? priority.toLowerCase().replace(' ', '_') : 'low';
@@ -1663,14 +1674,14 @@ const TicketList = ({ userRole, currentUserId }) => {
                                                                 </div>
                                                                 <div className="flex items-center gap-2">
                                                                     <button
-                                                                        onClick={() => window.open(file, '_blank')}
+                                                                        onClick={() => window.open(getAttachmentUrl(file), '_blank')}
                                                                         className="p-2 hover:bg-white/10 rounded-lg text-muted hover:text-primary transition-all"
                                                                         title="Preview"
                                                                     >
                                                                         <FiEye size={16} />
                                                                     </button>
                                                                     <a
-                                                                        href={file}
+                                                                        href={getAttachmentUrl(file)}
                                                                         download
                                                                         className="p-2 hover:bg-white/10 rounded-lg text-muted hover:text-primary transition-all"
                                                                         title="Download"
