@@ -461,6 +461,9 @@ async def get_sla_monitoring_data(
     Returns statistics, trend data (weekly/monthly/yearly), category breakdown, at-risk tickets, and system metrics
     """
     try:
+        # Ensure latest SLA statuses are applied
+        sla_service.check_all_expirations(db)
+
         from sqlalchemy import func, case, text
         from ticket_system.models import Ticket
         

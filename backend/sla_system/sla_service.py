@@ -4,6 +4,8 @@ from sla_system.sla_models import TicketSLATracking, SLAPolicy, SLARule
 from ticket_system.models import Ticket
 import models as root_models
 from admin_system import models as admin_models
+import email_service
+import logging
 
 def get_holidays(db: Session):
     """Fetch all holiday dates from the db"""
@@ -126,3 +128,56 @@ def initialize_ticket_sla(db: Session, ticket_id: int):
     db.commit()
     db.refresh(tracking)
     return tracking
+
+def check_all_expirations(db: Session):
+    """
+    Check and update expired SLA statuses for all active tickets.
+    Updates DB flags and sends notifications.
+    """
+    try:
+        # Use UTC to match initialize_ticket_sla time usage
+        now = datetime.utcnow() 
+        
+        expired_tickets = db.query(Ticket).filter(
+            Ticket.status.notin_(['resolved', 'closed']),
+            Ticket.sla_deadline < now
+        ).all()
+        
+        if not expired_tickets:
+            return
+
+        # Fetch admins once
+        admin_users = db.query(root_models.User).filter(root_models.User.role.in_(["admin", "manager"])).all()
+        
+        for ticket in expired_tickets:
+            # Update Tracking
+            tracking = db.query(TicketSLATracking).filter(TicketSLATracking.ticket_id == ticket.id).first()
+            if tracking:
+                if not tracking.resolution_breached:
+                    tracking.resolution_breached = True
+                    tracking.current_status = 'breached'
+                    db.add(tracking)
+            
+            # Update Ticket Notification Flag
+            if ticket.sla_expired_notified == 0:
+                ticket.sla_expired_notified = 1
+                db.add(ticket)
+                
+                # Send Email Notifications
+                for admin in admin_users:
+                    if admin.email_notifications_enabled:
+                        try:
+                            email_service.send_ticket_update_email(
+                                to_email=admin.email,
+                                username=admin.username,
+                                ticket_id=ticket.id,
+                                status="EXPIRED (SLA VIOLATION)",
+                                subject=f"Urgent: SLA EXPIRED for Ticket #{ticket.id} - {ticket.subject}"
+                            )
+                        except Exception as e:
+                            logging.error(f"Failed to send expiration email: {e}")
+                            
+        db.commit()
+    except Exception as e:
+        logging.error(f"Error in check_all_expirations: {e}")
+        db.rollback()
