@@ -152,30 +152,41 @@ def check_all_expirations(db: Session):
         for ticket in expired_tickets:
             # Update Tracking
             tracking = db.query(TicketSLATracking).filter(TicketSLATracking.ticket_id == ticket.id).first()
+            breach_newly_detected = False
+            
             if tracking:
                 if not tracking.resolution_breached:
                     tracking.resolution_breached = True
                     tracking.current_status = 'breached'
                     db.add(tracking)
+                    breach_newly_detected = True
             
-            # Update Ticket Notification Flag
-            if ticket.sla_expired_notified == 0:
-                ticket.sla_expired_notified = 1
-                db.add(ticket)
+            # Update Ticket Notification Flag OR updated_at if breach newly detected
+            # This ensures the ticket appears in "Activity" trends for today
+            if ticket.sla_expired_notified == 0 or breach_newly_detected:
+                # Explicitly touch updated_at to ensure it shows in trends
+                # Use server time (UTC) converted to IST as per model convention or just UTC if model handles it
+                # Ticket model uses get_ist (UTC+5.5). We'll trust the DB to run onupdate or set it manually.
+                ticket.updated_at = datetime.utcnow() + timedelta(minutes=330) # IST
                 
-                # Send Email Notifications
-                for admin in admin_users:
-                    if admin.email_notifications_enabled:
-                        try:
-                            email_service.send_ticket_update_email(
-                                to_email=admin.email,
-                                username=admin.username,
-                                ticket_id=ticket.id,
-                                status="EXPIRED (SLA VIOLATION)",
-                                subject=f"Urgent: SLA EXPIRED for Ticket #{ticket.id} - {ticket.subject}"
-                            )
-                        except Exception as e:
-                            logging.error(f"Failed to send expiration email: {e}")
+                if ticket.sla_expired_notified == 0:
+                    ticket.sla_expired_notified = 1
+                    
+                    # Send Email Notifications
+                    for admin in admin_users:
+                        if admin.email_notifications_enabled:
+                            try:
+                                email_service.send_ticket_update_email(
+                                    to_email=admin.email,
+                                    username=admin.username,
+                                    ticket_id=ticket.id,
+                                    status="EXPIRED (SLA VIOLATION)",
+                                    subject=f"Urgent: SLA EXPIRED for Ticket #{ticket.id} - {ticket.subject}"
+                                )
+                            except Exception as e:
+                                logging.error(f"Failed to send expiration email: {e}")
+                
+                db.add(ticket)
                             
         db.commit()
     except Exception as e:
