@@ -805,7 +805,7 @@ const TicketList = ({ userRole, currentUserId }) => {
                 )}
 
                 {/* Redesigned Tabs */}
-                <div className="flex items-center justify-between gap-1 mb-4 border-b border-card-border/50 overflow-x-auto transition-colors">
+                <div className="flex items-center justify-between gap-1 mb-4 border-b border-card-border/50 transition-colors">
                     <div className="flex items-center gap-0.5">
                         {[
                             { id: 'all', label: 'All Tickets', count: counts.all },
