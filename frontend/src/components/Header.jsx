@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiMenu, FiX, FiUser, FiLogOut, FiChevronDown, FiSettings } from 'react-icons/fi';
+import { FiMenu, FiX, FiUser, FiLogOut, FiChevronDown, FiSettings, FiAlertTriangle } from 'react-icons/fi';
 import { useAuth } from '../context/AuthContext';
 import { useTranslation } from '../context/TranslationContext';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
@@ -54,6 +54,18 @@ const Header = () => {
             animate={{ y: 0 }}
             className={`fixed top-0 left-0 right-0 z-[999] transition-all duration-300 ${isScrolled ? 'glass-card shadow-2xl' : 'bg-transparent'}`}
         >
+            {/* Self-Hosted Warning Banner */}
+            <div className="w-full bg-gradient-to-r from-amber-500 via-orange-500 to-amber-500 text-white py-2 px-4 flex items-center justify-center gap-2.5 relative overflow-hidden">
+                <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_0%,rgba(255,255,255,0.1)_50%,transparent_100%)] animate-[shimmer_3s_ease-in-out_infinite] bg-[length:200%_100%]" />
+                <FiAlertTriangle className="text-white shrink-0 animate-pulse" size={14} />
+                <p className="text-[10px] sm:text-xs font-bold tracking-wide text-center relative z-10">
+                    ⚠️ This site is <span className="underline underline-offset-2">self-hosted for testing purposes only</span>.
+                    <span className="hidden sm:inline"> &nbsp;•&nbsp; </span>
+                    <br className="sm:hidden" />
+                    <span className="font-black">Hosted by Ragul — Proserve IT Support</span>
+                </p>
+            </div>
+
             <nav className="container mx-auto px-4 py-4">
                 <div className="flex items-center justify-between">
                     <Link to="/">
