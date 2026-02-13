@@ -1418,6 +1418,7 @@ const TicketList = ({ userRole, currentUserId }) => {
                                                 displayedTickets.map((ticket, ticketIdx) => {
                                                     const slaInfo = calculateDetailedTimeRemaining(ticket.created_at, ticket.status, ticket.sla_deadline);
                                                     const isCritical = slaInfo.urgency === 'critical';
+                                                    const isBreached = slaInfo.urgency === 'breached';
                                                     const priorityAccent = {
                                                         'Critical': 'hover:border-l-rose-500',
                                                         'High': 'hover:border-l-orange-500',
@@ -1434,9 +1435,9 @@ const TicketList = ({ userRole, currentUserId }) => {
                                                             transition={{ delay: ticketIdx * 0.02, duration: 0.3 }}
                                                             onClick={() => setSelectedTicketId(ticket.id)}
                                                             className={`group transition-all duration-200 cursor-pointer border-l-[3px] border-l-transparent ${priorityAccent} ${selectedTickets.includes(ticket.id) ? 'bg-primary/5 border-l-primary' : 'bg-white dark:bg-slate-900 hover:bg-white/[0.08]'
-                                                                } ${isCritical ? 'relative after:absolute after:inset-0 after:rounded-xl after:shadow-[0_0_20px_rgba(239,68,68,0.15)] after:pointer-events-none after:animate-pulse !bg-rose-500/[0.03] !border-l-rose-500' : ''}`}
+                                                                } ${(isCritical || isBreached) ? 'relative after:absolute after:inset-0 after:rounded-xl after:shadow-[0_0_20px_rgba(239,68,68,0.15)] after:pointer-events-none after:animate-pulse !bg-rose-500/[0.03] !border-l-rose-500' : ''}`}
                                                         >
-                                                            <td className={`p-2.5 first:rounded-l-xl border-y border-l ${isCritical ? 'border-rose-500/20' : 'border-white/5'} group-hover:border-primary/20 ${selectedTickets.includes(ticket.id) ? 'border-primary/30' : ''}`}>
+                                                            <td className={`p-2.5 first:rounded-l-xl border-y border-l ${(isCritical || isBreached) ? 'border-rose-500/20' : 'border-white/5'} group-hover:border-primary/20 ${selectedTickets.includes(ticket.id) ? 'border-primary/30' : ''}`}>
                                                                 <div className="flex items-center justify-center">
                                                                     {userRole !== 'user' && (
                                                                         <input

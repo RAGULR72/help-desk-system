@@ -23,7 +23,7 @@ from database import SessionLocal, engine
 from sla_system.sla_models import TicketSLATracking, SLARule, SLAEscalationRule, SLAEscalation, SLAPolicy
 from workflow_system.workflow_models import AutomationRule
 from ticket_system.models import Ticket
-from models import User, Notification
+from models import User, Notification, get_ist
 from admin_system.models import UserActivity
 from notification_service import create_notification
 from email_service import send_sla_breach_email
@@ -55,7 +55,7 @@ def calculate_percent_consumed(db: Session, tracking: TicketSLATracking):
         return 100.0
         
     # Calculate how many working minutes have passed since started_at
-    now = datetime.utcnow()
+    now = get_ist()
     # started_at can be None for old tickets, fallback to ticket created_at if possible
     started = tracking.started_at or tracking.ticket.created_at
     
@@ -126,7 +126,7 @@ def run_automation_rules():
         for rule in rules:
             if rule.action == "close_ticket" and rule.trigger == "days_resolved":
                 # Logic: Close tickets resolved > 3 days ago
-                threshold = datetime.utcnow() - timedelta(days=3)
+                threshold = get_ist() - timedelta(days=3)
                 tickets_to_close = db.query(Ticket).filter(
                     Ticket.status == "resolved",
                     Ticket.updated_at <= threshold
@@ -143,7 +143,7 @@ def run_automation_rules():
                         "new_status": "resolved",
                         "text": f"Auto-resolved by system rule: {rule.name}",
                         "user": "System",
-                        "timestamp": datetime.utcnow().isoformat()
+                        "timestamp": get_ist().isoformat()
                     })
                     t.ticket_history = json.dumps(history)
                     
@@ -197,7 +197,7 @@ def trigger_escalation_event(db: Session, tracking: TicketSLATracking, rule: SLA
         tracking_id=tracking.id,
         ticket_id=ticket.id,
         level=rule.level,
-        triggered_at=datetime.utcnow(),
+        triggered_at=get_ist(),
         reason=f"Reached {rule.trigger_percent}% of SLA limit",
         action_taken=f"Notifications sent. Priority checked.",
         notified_users=[] 
@@ -311,7 +311,7 @@ def check_no_punch_out():
         
         # Calculate yesterday's date in IST (UTC+5:30)
         ist_offset = timedelta(hours=5, minutes=30)
-        now_ist = datetime.utcnow() + ist_offset
+        now_ist = get_ist()
         yesterday = (now_ist - timedelta(days=1)).date()
         
         # Find attendance records from yesterday with check_in but no check_out
@@ -332,7 +332,7 @@ def check_no_punch_out():
         for record in records:
             # Mark as "No Punch Out"
             record.status = "No Punch Out"
-            record.no_punch_out_notified = datetime.utcnow()
+            record.no_punch_out_notified = get_ist()
             
             # Get user details for email
             user = db.query(User).filter(User.id == record.user_id).first()

@@ -21,7 +21,7 @@ from sla_system.sla_models import (
     SLAPolicy, SLARule, SLAEscalationRule, TicketSLATracking,
     SLAEscalation, SLAHoliday, SLACategoryOverride
 )
-from models import User
+from models import User, get_ist
 from ticket_system.models import Ticket
 
 router = APIRouter(prefix="/api/sla", tags=["SLA Management"])
@@ -256,7 +256,7 @@ async def save_sla_configuration(
         
         # Create new policy
         policy = SLAPolicy(
-            name=f"SLA Policy - {datetime.utcnow().strftime('%Y-%m-%d %H:%M')}",
+            name=f"SLA Policy - {get_ist().strftime('%Y-%m-%d %H:%M')}",
             description="Active SLA configuration",
             is_active=True,
             business_hours_mode=config.businessHours.mode,
@@ -426,7 +426,7 @@ async def get_ticket_sla_status(
         )
     
     # Calculate time remaining
-    now = datetime.utcnow()
+    now = get_ist()
     
     if not tracking.resolution_completed_at:
         time_remaining = (tracking.resolution_due - now).total_seconds() / 60
@@ -537,7 +537,7 @@ async def get_sla_monitoring_data(
                 status_counts[current_status] += 1
                 
             if current_status in ['at_risk', 'breached']:
-                now = datetime.utcnow()
+                now = get_ist()
                 total = (t.resolution_due - t.started_at).total_seconds()
                 elapsed = (now - t.started_at).total_seconds()
                 urgency = (elapsed / total) * 100 if total > 0 else 100
@@ -558,7 +558,7 @@ async def get_sla_monitoring_data(
         avg_response_str = f"{int(avg_response_minutes)}m {int((avg_response_minutes % 1) * 60)}s"
         
         # --- DYNAMIC TREND DATA ---
-        now = datetime.utcnow()
+        now = get_ist()
         trend_data = []
         
         if time_range == 'yearly':
@@ -719,7 +719,7 @@ async def get_sla_monitoring_data(
             ticket = tracking.ticket
             
             # Time remaining calc
-            now = datetime.utcnow()
+            now = get_ist()
             time_diff = tracking.resolution_due - now
             
             if time_diff.total_seconds() > 0:
@@ -804,7 +804,7 @@ async def get_sla_monitoring_data(
 
 def get_relative_time(dt: datetime) -> str:
     """Convert datetime to relative time string"""
-    now = datetime.utcnow()
+    now = get_ist()
     diff = now - dt
     
     minutes = diff.total_seconds() / 60
@@ -885,7 +885,7 @@ async def update_all_sla_statuses(
 
 def calculate_sla_status(tracking: TicketSLATracking) -> str:
     """Calculate current SLA status based on time remaining"""
-    now = datetime.utcnow()
+    now = get_ist()
     
     # If resolution is complete, check if it was breached
     if tracking.resolution_completed_at:
@@ -937,7 +937,7 @@ async def get_predictive_insights(
 
     # 2. Bottleneck Categories
     # Simple logic: Categories with most open tickets > 24h old
-    yesterday = datetime.utcnow() - timedelta(days=1)
+    yesterday = get_ist() - timedelta(days=1)
     bottlenecks = []
     
     # Get total counts per category for old tickets
