@@ -1813,7 +1813,7 @@ const TicketList = ({ userRole, currentUserId }) => {
                                                 <span className="text-[10px] font-black uppercase tracking-[0.2em]">Full Operations View</span>
                                             </button>
 
-                                            {(userRole === 'admin' || userRole === 'manager') && (
+                                            {checkPermission('Tickets', 'delete') && (
                                                 <button
                                                     onClick={() => handleSingleDelete(selectedTicket.id, selectedTicket.db_id)}
                                                     className="w-full py-3.5 bg-rose-500/5 border border-rose-500/20 text-rose-500/70 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] hover:bg-rose-500 hover:text-white hover:border-rose-500 transition-all flex items-center justify-center gap-2 active:scale-95 mb-2"
@@ -1882,13 +1882,15 @@ const TicketList = ({ userRole, currentUserId }) => {
                                             <FiCheckCircle size={14} />
                                             Resolve
                                         </button>
-                                        <button
-                                            onClick={handleBulkDelete}
-                                            className="flex items-center gap-2 px-4 py-2.5 text-[10px] font-bold uppercase tracking-wider text-rose-400 bg-rose-500/10 border border-rose-500/20 rounded-xl hover:bg-rose-500 hover:text-white hover:shadow-lg hover:shadow-rose-500/20 transition-all active:scale-95"
-                                        >
-                                            <FiTrash2 size={14} />
-                                            Delete
-                                        </button>
+                                        {checkPermission('Tickets', 'delete') && (
+                                            <button
+                                                onClick={handleBulkDelete}
+                                                className="flex items-center gap-2 px-4 py-2.5 text-[10px] font-bold uppercase tracking-wider text-rose-400 bg-rose-500/10 border border-rose-500/20 rounded-xl hover:bg-rose-500 hover:text-white hover:shadow-lg hover:shadow-rose-500/20 transition-all active:scale-95"
+                                            >
+                                                <FiTrash2 size={14} />
+                                                Delete
+                                            </button>
+                                        )}
                                     </div>
 
                                     <button

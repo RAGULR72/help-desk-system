@@ -216,6 +216,10 @@ export const AuthProvider = ({ children }) => {
             if (staffModules.includes(module) && action === 'view') {
                 return true;
             }
+            // Managers have default edit/delete permissions for tickets
+            if (user.role === 'manager' && module === 'Tickets') {
+                return true;
+            }
             // Managers see user management by default
             if (user.role === 'manager' && module === 'Users' && action === 'view') {
                 return true;
@@ -244,7 +248,7 @@ export const AuthProvider = ({ children }) => {
             // Try to construct a key, e.g., 'ticket_edit' from 'Tickets', 'edit'
             // This is a heuristic fallback
             const map = {
-                'Tickets': { 'edit': 'ticket_edit', 'export': 'ticket_export' },
+                'Tickets': { 'edit': 'ticket_edit', 'export': 'ticket_export', 'delete': 'ticket_delete' },
                 'Users': { 'edit': 'user_management', 'export': 'export_data' }
             };
             const mappedKey = map[module]?.[action];

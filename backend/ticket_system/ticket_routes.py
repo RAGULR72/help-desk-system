@@ -690,7 +690,7 @@ async def delete_ticket(
     current_user: User = Depends(auth.get_current_user)
 ):
     """Delete a ticket (Admins/Managers only)"""
-    if current_user.role not in ["admin", "manager"]:
+    if not auth.check_permission(current_user, "Tickets", "delete"):
         raise HTTPException(status_code=403, detail="Only admins or managers can delete tickets")
         
     db_ticket = db.query(ticket_models.Ticket).filter(ticket_models.Ticket.id == ticket_id).first()
@@ -716,7 +716,7 @@ async def bulk_delete_tickets(
     current_user: User = Depends(auth.get_current_user)
 ):
     """Delete multiple tickets (Admins/Managers only)"""
-    if current_user.role not in ["admin", "manager"]:
+    if not auth.check_permission(current_user, "Tickets", "delete"):
         raise HTTPException(status_code=403, detail="Only admins or managers can delete tickets")
         
     tickets = db.query(ticket_models.Ticket).filter(ticket_models.Ticket.id.in_(deletion.ticket_ids)).all()

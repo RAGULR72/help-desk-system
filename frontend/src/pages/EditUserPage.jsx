@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { FiArrowLeft, FiSave, FiShield, FiDatabase, FiEdit2, FiDownload, FiUpload } from 'react-icons/fi';
+import { FiArrowLeft, FiSave, FiShield, FiDatabase, FiEdit2, FiDownload, FiUpload, FiTrash2 } from 'react-icons/fi';
 import api from '../api/axios';
 import { motion } from 'framer-motion';
 
@@ -394,8 +394,28 @@ const EditUserPage = () => {
                             <button
                                 type="button"
                                 onClick={() => togglePermission('import_data')}
+                                className={`relative w-11 h-6 rounded-full transition-colors ${formData.permissions?.import_data ? 'bg-orange-600' : 'bg-slate-200'}`}
                             >
-                                <div className={`absolute top-1 w-4 h-4 rounded-full bg-white shadow-sm transition-all duration-200 ${formData.permissions?.import_data ? 'left-7' : 'left-1'}`} />
+                                <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform ${formData.permissions?.import_data ? 'translate-x-5' : 'translate-x-0'}`} />
+                            </button>
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-slate-50 border border-slate-100 rounded-xl hover:border-violet-200 transition-colors">
+                            <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-lg bg-rose-100 text-rose-600 flex items-center justify-center">
+                                    <FiTrash2 size={20} />
+                                </div>
+                                <div>
+                                    <p className="font-bold text-slate-800 text-sm">Delete Tickets</p>
+                                    <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Permanent Deletion Authority</p>
+                                </div>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => togglePermission('ticket_delete')}
+                                className={`relative w-11 h-6 rounded-full transition-colors ${formData.permissions?.ticket_delete ? 'bg-rose-600' : 'bg-slate-200'}`}
+                            >
+                                <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform ${formData.permissions?.ticket_delete ? 'translate-x-5' : 'translate-x-0'}`} />
                             </button>
                         </div>
                     </div>

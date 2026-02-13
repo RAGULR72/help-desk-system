@@ -253,6 +253,58 @@ def require_roles(allowed_roles: list[str]):
         return current_user
     return role_checker
 
+def check_permission(user: models.User, module: str, action: str) -> bool:
+    """
+    Check if a user has a specific granular permission.
+    Admins always have permission.
+    Managers often have default authority.
+    """
+    if user.role == "admin":
+        return True
+    
+    # 1. Default Role-based fallback
+    if user.role == "manager":
+        # Managers can do most things by default unless explicitly restricted
+        # For now, we allow all ticket actions for managers
+        if module == "Tickets":
+            return True
+        if module == "Users" and action in ["view", "edit"]:
+            return True
+            
+    # 2. Check explicit permissions field
+    if not user.permissions:
+        return False
+
+    import json
+    try:
+        # User permissions can be a JSON string or a list/dict
+        perms = json.loads(user.permissions) if isinstance(user.permissions, str) else user.permissions
+        
+        # Format 1: List of objects [{"module": "Tickets", "edit": True, "delete": True}]
+        if isinstance(perms, list):
+            for p in perms:
+                if p.get("module") == module:
+                    return p.get(action) is True
+        
+        # Format 2: Dict {"ticket_edit": True, "ticket_delete": True}
+        if isinstance(perms, dict):
+            # Try to match key pattern: module_action (e.g. ticket_delete)
+            # Module names are usually capitalized in frontend (Tickets, Users, etc.)
+            mod_prefix = module.lower()
+            if mod_prefix.endswith('s'): mod_prefix = mod_prefix[:-1] # Tickets -> ticket
+            
+            key = f"{mod_prefix}_{action.lower()}"
+            if perms.get(key) is True:
+                return True
+                
+            # Direct match
+            if perms.get(f"{module.lower()}_{action.lower()}") is True:
+                return True
+    except:
+        pass
+
+    return False
+
 def require_2fa(current_user: models.User = Depends(get_current_user)):
     """Enforce 2FA for highly sensitive operations (e.g. Admin Panel)"""
     if not current_user.is_2fa_enabled:
