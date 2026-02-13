@@ -21,6 +21,9 @@ class BulkStatusUpdate(BaseModel):
     ticket_ids: List[int]
     status: str
 
+class BulkDelete(BaseModel):
+    ticket_ids: List[int]
+
 class TicketBase(BaseModel):
     subject: str
     description: str

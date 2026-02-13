@@ -495,6 +495,41 @@ const TicketList = ({ userRole, currentUserId }) => {
         }
     };
 
+    const handleBulkDelete = async () => {
+        if (!window.confirm(`Are you sure you want to PERMANENTLY delete ${selectedTickets.length} tickets? This action cannot be undone.`)) return;
+        try {
+            const dbIds = selectedTickets.map(id => {
+                const t = tickets.find(ticket => ticket.id === id);
+                return t ? t.db_id : null;
+            }).filter(id => id !== null);
+
+            if (dbIds.length === 0) return;
+
+            await api.delete('/api/tickets/bulk/delete', {
+                data: { ticket_ids: dbIds }
+            });
+            await refreshTickets();
+            setSelectedTickets([]);
+            setMessageConfig({ title: "Bulk Delete Success", message: `Successfully deleted ${dbIds.length} tickets!`, icon: FiTrash2, type: 'success' });
+        } catch (error) {
+            console.error("Failed to bulk delete tickets", error);
+            setMessageConfig({ title: "Delete Error", message: "Failed to delete tickets. Please check permissions.", icon: FiAlertCircle, type: 'error' });
+        }
+    };
+
+    const handleSingleDelete = async (ticketId, dbId) => {
+        if (!window.confirm(`Are you sure you want to PERMANENTLY delete ticket ${ticketId}? This action cannot be undone.`)) return;
+        try {
+            await api.delete(`/api/tickets/${dbId}`);
+            await refreshTickets();
+            setSelectedTicketId(null);
+            setMessageConfig({ title: "Ticket Deleted", message: `Successfully removed ticket ${ticketId}`, icon: FiTrash2, type: 'success' });
+        } catch (error) {
+            console.error("Failed to delete ticket", error);
+            setMessageConfig({ title: "Delete Error", message: "Failed to delete ticket.", icon: FiAlertCircle, type: 'error' });
+        }
+    };
+
     const handleExport = () => {
         // Filter tickets based on export date range if provided
         let ticketsToExport = tickets;
@@ -1778,6 +1813,15 @@ const TicketList = ({ userRole, currentUserId }) => {
                                                 <span className="text-[10px] font-black uppercase tracking-[0.2em]">Full Operations View</span>
                                             </button>
 
+                                            {(userRole === 'admin' || userRole === 'manager') && (
+                                                <button
+                                                    onClick={() => handleSingleDelete(selectedTicket.id, selectedTicket.db_id)}
+                                                    className="w-full py-3.5 bg-rose-500/5 border border-rose-500/20 text-rose-500/70 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] hover:bg-rose-500 hover:text-white hover:border-rose-500 transition-all flex items-center justify-center gap-2 active:scale-95 mb-2"
+                                                >
+                                                    <FiTrash2 size={16} /> Delete Ticket Permanently
+                                                </button>
+                                            )}
+
                                             <button
                                                 onClick={() => setSelectedTicketId(null)}
                                                 className="w-full py-4 bg-white/5 border border-card-border/50 text-slate-400 hover:text-main rounded-2xl font-bold text-[10px] uppercase tracking-widest hover:bg-white/10 transition-all active:scale-95"
@@ -1838,7 +1882,10 @@ const TicketList = ({ userRole, currentUserId }) => {
                                             <FiCheckCircle size={14} />
                                             Resolve
                                         </button>
-                                        <button className="flex items-center gap-2 px-4 py-2.5 text-[10px] font-bold uppercase tracking-wider text-rose-400 bg-rose-500/10 border border-rose-500/20 rounded-xl hover:bg-rose-500 hover:text-white hover:shadow-lg hover:shadow-rose-500/20 transition-all active:scale-95">
+                                        <button
+                                            onClick={handleBulkDelete}
+                                            className="flex items-center gap-2 px-4 py-2.5 text-[10px] font-bold uppercase tracking-wider text-rose-400 bg-rose-500/10 border border-rose-500/20 rounded-xl hover:bg-rose-500 hover:text-white hover:shadow-lg hover:shadow-rose-500/20 transition-all active:scale-95"
+                                        >
                                             <FiTrash2 size={14} />
                                             Delete
                                         </button>

@@ -683,6 +683,58 @@ async def update_ticket(
 
     return db_ticket
 
+@router.delete("/{ticket_id}")
+async def delete_ticket(
+    ticket_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(auth.get_current_user)
+):
+    """Delete a ticket (Admins/Managers only)"""
+    if current_user.role not in ["admin", "manager"]:
+        raise HTTPException(status_code=403, detail="Only admins or managers can delete tickets")
+        
+    db_ticket = db.query(ticket_models.Ticket).filter(ticket_models.Ticket.id == ticket_id).first()
+    if not db_ticket:
+        raise HTTPException(status_code=404, detail="Ticket not found")
+        
+    # Delete related comments first to avoid FK constraints
+    db.query(TicketComment).filter(TicketComment.ticket_id == ticket_id).delete()
+    
+    # Audit Log
+    AuditLogger.log_ticket_event(db, current_user.id, ticket_id, "deleted", f"Deleted ticket #{ticket_id}: {db_ticket.subject}")
+    
+    db.delete(db_ticket)
+    db.commit()
+    
+    await manager.broadcast_all({"type": "dashboard_update", "source": "tickets"})
+    return {"message": "Ticket deleted successfully"}
+
+@router.delete("/bulk/delete")
+async def bulk_delete_tickets(
+    deletion: schemas.BulkDelete,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(auth.get_current_user)
+):
+    """Delete multiple tickets (Admins/Managers only)"""
+    if current_user.role not in ["admin", "manager"]:
+        raise HTTPException(status_code=403, detail="Only admins or managers can delete tickets")
+        
+    tickets = db.query(ticket_models.Ticket).filter(ticket_models.Ticket.id.in_(deletion.ticket_ids)).all()
+    count = len(tickets)
+    
+    for ticket in tickets:
+        # Delete related comments
+        db.query(TicketComment).filter(TicketComment.ticket_id == ticket.id).delete()
+        
+        # Audit Log
+        AuditLogger.log_ticket_event(db, current_user.id, ticket.id, "deleted", f"Bulk deleted ticket #{ticket.id}: {ticket.subject}")
+        
+        db.delete(ticket)
+        
+    db.commit()
+    await manager.broadcast_all({"type": "dashboard_update", "source": "tickets"})
+    return {"message": f"Successfully deleted {count} tickets"}
+
 @router.post("/{ticket_id}/extend")
 def extend_ticket_sla(
     ticket_id: int,

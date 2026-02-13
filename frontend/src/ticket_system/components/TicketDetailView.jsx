@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import {
     FiArrowLeft, FiClock, FiUser, FiAlertCircle,
     FiPaperclip, FiDownload, FiMessageSquare, FiSend,
-    FiRotateCcw, FiFlag, FiPlusCircle, FiRefreshCw, FiEdit, FiCheckCircle, FiX, FiChevronDown, FiTool, FiStar, FiCheck, FiHeart, FiLock, FiZap, FiAlertTriangle, FiInfo, FiCpu, FiList, FiEye, FiMaximize2
+    FiRotateCcw, FiFlag, FiPlusCircle, FiRefreshCw, FiEdit, FiCheckCircle, FiX, FiChevronDown, FiTool, FiStar, FiCheck, FiHeart, FiLock, FiZap, FiAlertTriangle, FiInfo, FiCpu, FiList, FiEye, FiMaximize2, FiTrash2
 } from 'react-icons/fi';
 import CreateTicketModal from './CreateTicketModal';
 import { RepairWorkflow, RepairInitiationModal } from './RepairWorkflow';
@@ -1014,6 +1014,19 @@ const TicketDetailView = () => {
         }
     };
 
+    const handleDeleteTicket = async () => {
+        if (!window.confirm("Are you sure you want to PERMANENTLY delete this ticket? This action cannot be undone.")) return;
+
+        try {
+            await api.delete(`/api/tickets/${numericId}`);
+            alert("Ticket deleted successfully.");
+            navigate('/dashboard/tickets');
+        } catch (error) {
+            console.error("Failed to delete ticket", error);
+            alert("Failed to delete ticket. Please check permissions.");
+        }
+    };
+
     const handleResolveTicket = async () => {
         if (!window.confirm("Are you sure you want to mark this ticket as Resolved?")) return;
 
@@ -1265,6 +1278,14 @@ const TicketDetailView = () => {
                                         className="px-4 py-2 bg-indigo-600 text-white text-xs font-bold uppercase tracking-wider rounded-xl hover:bg-indigo-700 transition-colors flex items-center gap-2 shadow-lg shadow-indigo-200"
                                     >
                                         <FiEdit /> Edit Details
+                                    </button>
+                                )}
+                                {(user.role === 'admin' || user.role === 'manager') && (
+                                    <button
+                                        onClick={handleDeleteTicket}
+                                        className="px-4 py-2 bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400 text-xs font-bold uppercase tracking-wider rounded-xl hover:bg-rose-600 hover:text-white transition-all flex items-center gap-2"
+                                    >
+                                        <FiTrash2 /> Delete
                                     </button>
                                 )}
                                 <div className="w-16 h-16 bg-indigo-50 dark:bg-indigo-500/10 rounded-2xl flex items-center justify-center text-indigo-600">
