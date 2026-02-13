@@ -510,7 +510,11 @@ const TicketList = ({ userRole, currentUserId }) => {
             });
             await refreshTickets();
             setSelectedTickets([]);
-            setMessageConfig({ title: "Bulk Delete Success", message: `Successfully deleted ${dbIds.length} tickets!`, icon: FiTrash2, type: 'success' });
+            if (dbIds.length > 2) {
+                setMessageConfig({ title: "Bulk Delete Success", message: "Successfully Bulk Deleted!", icon: FiTrash2, type: 'success' });
+            } else {
+                setMessageConfig({ title: "Delete Success", message: `Ticket(s) ${selectedTickets.join(', ')} have been deleted`, icon: FiTrash2, type: 'success' });
+            }
         } catch (error) {
             console.error("Failed to bulk delete tickets", error);
             setMessageConfig({ title: "Delete Error", message: "Failed to delete tickets. Please check permissions.", icon: FiAlertCircle, type: 'error' });
@@ -523,7 +527,7 @@ const TicketList = ({ userRole, currentUserId }) => {
             await api.delete(`/api/tickets/${dbId}`);
             await refreshTickets();
             setSelectedTicketId(null);
-            setMessageConfig({ title: "Ticket Deleted", message: `Successfully removed ticket ${ticketId}`, icon: FiTrash2, type: 'success' });
+            setMessageConfig({ title: "Ticket Deleted", message: `${ticketId} has been deleted`, icon: FiTrash2, type: 'success' });
         } catch (error) {
             console.error("Failed to delete ticket", error);
             setMessageConfig({ title: "Delete Error", message: "Failed to delete ticket.", icon: FiAlertCircle, type: 'error' });
