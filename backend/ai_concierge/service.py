@@ -1,5 +1,5 @@
 import os
-import google.generativeai as genai
+from google import genai
 from dotenv import load_dotenv
 import json
 import base64
@@ -11,8 +11,9 @@ load_dotenv()
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
-if GEMINI_API_KEY:
-    genai.configure(api_key=GEMINI_API_KEY)
+# genai.configure is not needed with Client
+# if GEMINI_API_KEY:
+#     genai.configure(api_key=GEMINI_API_KEY)
 
 def get_concierge_config(db: Session):
     config = {
@@ -39,7 +40,7 @@ def generate_concierge_response(user_query, chat_history, kb_articles, bot_name=
     if not GEMINI_API_KEY:
         return {"message": "AI Service Offline", "solved": False}
 
-    model = genai.GenerativeModel('gemini-1.5-flash')
+    client = genai.Client(api_key=GEMINI_API_KEY)
 
     context = (
         f"You are '{bot_name}', an intelligent multilingual support assistant for Proserve Help Desk. "
@@ -92,7 +93,10 @@ def generate_concierge_response(user_query, chat_history, kb_articles, bot_name=
         except: pass
 
     try:
-        response = model.generate_content(content_parts)
+        response = client.models.generate_content(
+            model='gemini-2.0-flash',
+            contents=content_parts
+        )
         text = response.text.strip()
         if "```json" in text:
             text = text.split("```json")[1].split("```")[0].strip()

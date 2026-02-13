@@ -1026,95 +1026,7 @@ async def close_repair_ticket(
     db.refresh(ticket)
     return ticket
 
-@router.get("/{ticket_id}/ai-suggestion", response_model=schemas.AISuggestionResponse)
-async def get_ai_suggestion(
-    ticket_id: int,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(auth.get_current_user)
-):
-    """Generate an AI-powered resolution suggestion for a ticket (Staff Only)"""
-    if current_user.role not in ["admin", "manager", "technician"]:
-        raise HTTPException(status_code=403, detail="AI suggestions are restricted to technical staff.")
 
-    ticket = db.query(ticket_models.Ticket).filter(ticket_models.Ticket.id == ticket_id).first()
-    if not ticket:
-        raise HTTPException(status_code=404, detail="Ticket not found")
-
-    # Extract keywords from subject (SMART matching)
-    stop_words = {'the', 'a', 'an', 'is', 'are', 'was', 'were', 'not', 'can', 'cannot', 'could', 'issue', 'problem', 'help', 'with', 'my', 'your', 'and', 'but', 'or'}
-    keywords = [kw.lower() for kw in re.findall(r'\b\w{4,}\b', ticket.subject) if kw.lower() not in stop_words]
-
-    # Search similar resolved tickets
-    query = db.query(ticket_models.Ticket).filter(
-        ticket_models.Ticket.status.in_(["resolved", "closed"]),
-        ticket_models.Ticket.id != ticket_id,
-        ticket_models.Ticket.resolution_note != None
-    )
-
-    # Prefer same category matches first
-    if ticket.category:
-        query = query.order_by(
-            (ticket_models.Ticket.category == ticket.category).desc(),
-            ticket_models.Ticket.updated_at.desc()
-        )
-
-    if keywords:
-        ticket_filters = [ticket_models.Ticket.subject.ilike(f"%{kw}%") for kw in keywords]
-        query = query.filter(or_(*ticket_filters))
-    
-    similar_resolutions = query.limit(5).all()
-    past_resolution_notes = [f"Ticket #{t.id} ({t.category}): {t.resolution_note}" for t in similar_resolutions if t.resolution_note]
-
-    # Generate AI Suggestion
-    import ai_service
-    import json
-    
-    ai_response_json = ai_service.generate_resolution_suggestion(
-        ticket.subject, 
-        ticket.description or "No description provided", 
-        [], # Empty KB since it's removed
-        past_resolution_notes
-    )
-
-    if ai_response_json:
-        try:
-            # Clean json string if needed (sometimes LLMs add markdown)
-            clean_json = ai_response_json.replace("```json", "").replace("```", "").strip()
-            data = json.loads(clean_json)
-            
-            return {
-                "summary": data.get("summary", "AI Analysis Completed"),
-                "steps": data.get("steps", []),
-                "kb_articles": [],
-                "confidence": float(data.get("confidence", 0.5))
-            }
-        except Exception as e:
-            print(f"AI Parsing Error: {e}")
-            pass
-
-    # Fallback logic if AI fails
-    steps = []
-    if similar_resolutions:
-        for st in similar_resolutions:
-            if st.resolution_note:
-                steps.append(f"Similar Fix (#{st.id}): {st.resolution_note[:150]}...")
-    else:
-        steps = [
-            "1. Verify issue with the user via phone/chat.",
-            "2. Check for recent system updates in this category.",
-            "3. Attempt standard Level 1 troubleshooting.",
-            "4. Search global logs for recent error patterns.",
-            "5. Escalate to specialized team if diagnostic fails."
-        ]
-
-    summary = "No AI response. Suggestions based on similar historical tickets:" if similar_resolutions else "No direct matches. Standard protocol recommended:"
-
-    return {
-        "summary": summary,
-        "steps": steps,
-        "kb_articles": [],
-        "confidence": 0.6 if similar_resolutions else 0.3
-    }
 
 async def perform_ai_ticket_analysis(ticket_id: int):
     """
@@ -1262,7 +1174,7 @@ async def get_similar_tickets(
 
     return {"tickets": results}
 
-@router.get("/{ticket_id}/ai-suggestion")
+@router.get("/{ticket_id}/ai-suggestion", response_model=schemas.AISuggestionResponse)
 async def get_ai_ticket_suggestion(
     ticket_id: int,
     db: Session = Depends(get_db),

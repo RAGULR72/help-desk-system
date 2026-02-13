@@ -6,7 +6,7 @@ from google.api_core import exceptions
 
 # Configure logging
 logger = logging.getLogger(__name__)
-import google.generativeai as genai
+from google import genai
 from dotenv import load_dotenv
 import json
 
@@ -14,20 +14,21 @@ load_dotenv()
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
-if GEMINI_API_KEY:
-    genai.configure(api_key=GEMINI_API_KEY)
+# genai.configure no longer needed
+# if GEMINI_API_KEY:
+#     genai.configure(api_key=GEMINI_API_KEY)
 
 
-def generate_content_with_retry(model, prompt):
+def generate_content_with_retry(client, prompt, model="gemini-2.0-flash"):
     """
-    Wraps model.generate_content with exponential backoff retry logic.
+    Wraps client.models.generate_content with exponential backoff retry logic.
     """
     max_retries = 3
     base_delay = 1
 
     for attempt in range(max_retries):
         try:
-            return model.generate_content(prompt)
+            return client.models.generate_content(model=model, contents=prompt)
         except exceptions.ResourceExhausted as e:
             if attempt == max_retries - 1:
                 raise e
@@ -46,7 +47,7 @@ def generate_resolution_suggestion(ticket_subject, ticket_description, kb_articl
     if not GEMINI_API_KEY:
         return None
 
-    model = genai.GenerativeModel('gemini-2.0-flash')
+    client = genai.Client(api_key=GEMINI_API_KEY)
 
     context = "You are a Senior IT System Administrator for Proserve acting as a Co-Pilot for a technician. "
     context += f"Ticket Subject: {ticket_subject}\n"
@@ -85,7 +86,7 @@ RAW JSON ONLY. No markdown tags.
 """
 
     try:
-        response = generate_content_with_retry(model, prompt)
+        response = generate_content_with_retry(client, prompt)
         return response.text
     except Exception as e:
         print(f"Gemini API Error: {e}")
@@ -98,7 +99,7 @@ def chat_with_context(user_message, context_articles):
     if not GEMINI_API_KEY:
         return "I'm sorry, my AI brain is currently offline. Please contact support manually."
 
-    model = genai.GenerativeModel('gemini-2.0-flash')
+    client = genai.Client(api_key=GEMINI_API_KEY)
     
     context = (
         "You are a helpful IT support assistant for Proserve. "
@@ -112,7 +113,7 @@ def chat_with_context(user_message, context_articles):
     prompt = f"{context}\nUser Question: {user_message}\nAnswer:"
 
     try:
-        response = generate_content_with_retry(model, prompt)
+        response = generate_content_with_retry(client, prompt)
         return response.text
     except Exception as e:
         print(f"Gemini Chat Error: {e}")
@@ -126,7 +127,7 @@ def polish_text(raw_text, context_type="general", additional_context=None):
         return "System Alert: AI Service is offline (Missing API Key). Please check server logs."
 
     # Use flash for better instruction following
-    model = genai.GenerativeModel('gemini-2.0-flash')
+    client = genai.Client(api_key=GEMINI_API_KEY)
 
     system_instruction = (
         "You are an expert linguistic translator and professional editor. "
@@ -151,7 +152,7 @@ def polish_text(raw_text, context_type="general", additional_context=None):
     prompt = f"{system_instruction}\nInput: \"{raw_text}\"\n\nProfessional English Output:"
 
     try:
-        response = generate_content_with_retry(model, prompt)
+        response = generate_content_with_retry(client, prompt)
         return response.text.strip().replace('"', '')
     except Exception as e:
         error_msg = f"AI Error: {str(e)}"
@@ -165,7 +166,7 @@ def generate_kb_article(ticket_subject, ticket_description, resolution_note, ste
     if not GEMINI_API_KEY:
         return None
 
-    model = genai.GenerativeModel('gemini-2.0-flash')
+    client = genai.Client(api_key=GEMINI_API_KEY)
 
     prompt = (
         "You are an expert technical writer. Convert the following resolved IT ticket into a professional "
@@ -189,7 +190,7 @@ def generate_kb_article(ticket_subject, ticket_description, resolution_note, ste
     )
 
     try:
-        response = generate_content_with_retry(model, prompt)
+        response = generate_content_with_retry(client, prompt)
         # Attempt to parse as JSON
         text = response.text.strip()
         # Clean potential markdown if AI ignored instruction
@@ -207,7 +208,7 @@ def categorize_ticket(subject, description=None):
     if not GEMINI_API_KEY:
         return None
 
-    model = genai.GenerativeModel('gemini-2.0-flash')
+    client = genai.Client(api_key=GEMINI_API_KEY)
 
     prompt = (
         "You are an intelligent IT service desk dispatcher. Analyze the following ticket information "
@@ -220,7 +221,7 @@ def categorize_ticket(subject, description=None):
     )
 
     try:
-        response = generate_content_with_retry(model, prompt)
+        response = generate_content_with_retry(client, prompt)
         text = response.text.strip()
         if text.startswith("```json"):
             text = text.replace("```json", "").replace("```", "").strip()
@@ -235,7 +236,7 @@ def generate_dashboard_insights(stats_summary):
     if not GEMINI_API_KEY:
          return None
 
-    model = genai.GenerativeModel('gemini-2.0-flash')
+    client = genai.Client(api_key=GEMINI_API_KEY)
 
     prompt = (
         "You are a strategic IT Operations Manager. Analyze the following help-desk performance data "
@@ -251,7 +252,7 @@ def generate_dashboard_insights(stats_summary):
     )
 
     try:
-        response = generate_content_with_retry(model, prompt)
+        response = generate_content_with_retry(client, prompt)
         text = response.text.strip()
         if text.startswith("```json"):
             text = text.replace("```json", "").replace("```", "").strip()
@@ -266,7 +267,7 @@ def analyze_ticket_sentiment(subject, description):
     if not GEMINI_API_KEY:
         return None
 
-    model = genai.GenerativeModel('gemini-2.0-flash')
+    client = genai.Client(api_key=GEMINI_API_KEY)
 
     prompt = (
         "You are an empathetic IT Service Desk analyst. Analyze the following new ticket "
@@ -282,7 +283,7 @@ def analyze_ticket_sentiment(subject, description):
     )
 
     try:
-        response = generate_content_with_retry(model, prompt)
+        response = generate_content_with_retry(client, prompt)
         text_res = response.text.strip()
         if text_res.startswith("```json"):
             text_res = text_res.replace("```json", "").replace("```", "").strip()
@@ -298,7 +299,7 @@ def summarize_ticket(subject, description):
     if not GEMINI_API_KEY:
         return None
 
-    model = genai.GenerativeModel('gemini-2.0-flash')
+    client = genai.Client(api_key=GEMINI_API_KEY)
 
     prompt = (
         "Summarize the following IT ticket into exactly 2 clear, professional sentences "
@@ -309,7 +310,7 @@ def summarize_ticket(subject, description):
     )
 
     try:
-        response = generate_content_with_retry(model, prompt)
+        response = generate_content_with_retry(client, prompt)
         return response.text.strip()
     except Exception as e:
         print(f"Gemini Summarization Error: {e}")
@@ -322,7 +323,7 @@ def summarize_ticket_history_3_points(subject, description, comments):
     if not GEMINI_API_KEY:
         return None
 
-    model = genai.GenerativeModel('gemini-2.0-flash')
+    client = genai.Client(api_key=GEMINI_API_KEY)
 
     comments_str = ""
     for idx, c in enumerate(comments):
@@ -346,7 +347,7 @@ def summarize_ticket_history_3_points(subject, description, comments):
     """
 
     try:
-        response = generate_content_with_retry(model, prompt)
+        response = generate_content_with_retry(client, prompt)
         return response.text.strip()
     except Exception as e:
         print(f"Gemini 3-Point Summarization Error: {e}")
@@ -358,7 +359,7 @@ def generate_concierge_response(user_query, chat_history, kb_articles):
     if not GEMINI_API_KEY:
         return {"message": "AI Service Offline", "solved": False}
 
-    model = genai.GenerativeModel('gemini-2.0-flash')
+    client = genai.Client(api_key=GEMINI_API_KEY)
 
     context = (
         "You are 'Proserve AI Concierge', an intelligent support assistant. "
@@ -395,7 +396,7 @@ def generate_concierge_response(user_query, chat_history, kb_articles):
     )
 
     try:
-        response = generate_content_with_retry(model, prompt)
+        response = generate_content_with_retry(client, prompt)
         text = response.text.strip()
         if text.startswith("```json"):
             text = text.replace("```json", "").replace("```", "").strip()
@@ -413,7 +414,7 @@ def detect_duplicate_tickets(new_ticket_data, recent_tickets_data):
     if not GEMINI_API_KEY or not recent_tickets_data:
         return None
 
-    model = genai.GenerativeModel('gemini-2.0-flash')
+    client = genai.Client(api_key=GEMINI_API_KEY)
 
     prompt = (
         "You are an IT Ops analyst. Check if the following NEW TICKET is a duplicate of any RECENT TICKETS listed.\n"
@@ -435,7 +436,7 @@ def detect_duplicate_tickets(new_ticket_data, recent_tickets_data):
     )
 
     try:
-        response = generate_content_with_retry(model, prompt)
+        response = generate_content_with_retry(client, prompt)
         text = response.text.strip()
         if text.startswith("```json"):
             text = text.replace("```json", "").replace("```", "").strip()
@@ -451,7 +452,7 @@ def generate_ai_auto_reply(subject, description, kb_articles):
     if not GEMINI_API_KEY:
         return None
 
-    model = genai.GenerativeModel('gemini-2.0-flash')
+    client = genai.Client(api_key=GEMINI_API_KEY)
 
     kb_context = ""
     if kb_articles:
@@ -471,7 +472,7 @@ def generate_ai_auto_reply(subject, description, kb_articles):
     )
 
     try:
-        response = generate_content_with_retry(model, prompt)
+        response = generate_content_with_retry(client, prompt)
         return response.text.strip()
     except Exception as e:
         print(f"Gemini Auto-Reply Error: {e}")
@@ -484,7 +485,7 @@ def generate_tech_co_pilot_guide(subject, description, kb_articles, past_resolut
     if not GEMINI_API_KEY:
         return None
 
-    model = genai.GenerativeModel('gemini-2.0-flash')
+    client = genai.Client(api_key=GEMINI_API_KEY)
 
     context = "You are a Senior IT System Administrator acting as a Co-Pilot for a technician. "
     context += f"Problem Statement:\nSubject: {subject}\nDescription: {description}\n\n"
@@ -516,7 +517,7 @@ Format: Use Markdown with clear headings (Diagnostics, Action Plan, Risk Level).
 """
 
     try:
-        response = generate_content_with_retry(model, prompt)
+        response = generate_content_with_retry(client, prompt)
         return response.text.strip()
     except Exception as e:
         print(f"Gemini Tech Co-Pilot Error: {e}")
@@ -561,7 +562,7 @@ def generate_smart_suggestions(db, subject, description=None):
         for art in kb_articles:
             context += f"- {art.title}: {art.excerpt}\n"
 
-    model = genai.GenerativeModel('gemini-2.0-flash')
+    client = genai.Client(api_key=GEMINI_API_KEY)
 
     prompt = (
         "You are an Elite IT Support Architect for Proserve.\n"
@@ -579,7 +580,7 @@ def generate_smart_suggestions(db, subject, description=None):
     )
 
     try:
-        response = generate_content_with_retry(model, prompt)
+        response = generate_content_with_retry(client, prompt)
         return response.text.strip()
     except Exception as e:
         print(f"Smart Suggestions Error: {e}")
@@ -614,7 +615,7 @@ def generate_diagnostic_suggestion(db, subject, description, ticket_id):
     if similar_t:
         context = "PAST SUCCESSFUL FIXES:\n" + "\n".join([f"- {t.subject}: {t.resolution_notes}" for t in similar_t])
 
-    model = genai.GenerativeModel('gemini-2.0-flash')
+    client = genai.Client(api_key=GEMINI_API_KEY)
     prompt = f"""
     Internal Issue: {subject}
     Description: {description}
@@ -630,7 +631,7 @@ def generate_diagnostic_suggestion(db, subject, description, ticket_id):
     """
     
     try:
-        response = generate_content_with_retry(model, prompt)
+        response = generate_content_with_retry(client, prompt)
         text = response.text.strip().replace("```json", "").replace("```", "")
         import json
         return json.loads(text)

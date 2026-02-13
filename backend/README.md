@@ -17,6 +17,8 @@ A robust FastAPI backend designed for enterprise support management with advance
    venv\Scripts\activate  # Windows
    pip install -r requirements.txt
    ```
+   *Note: Dependencies have been updated to address security vulnerabilities (CVE-2026-0994, CVE-2025-4565, CVE-2024-47874).*
+   *Migration Note (Feb 2026): Switched from `google-generativeai` to `google-genai` SDK. Models updated to `gemini-2.0-flash`.*
 
 2. **Configuration**:
    Copy `.env.example` to `.env` and update your secret keys, database credentials, and API keys.

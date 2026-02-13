@@ -281,6 +281,14 @@ export const translations = {
             resolution_rate: 'Resolution Rate',
             activity: 'My Activity Stream'
         },
+        result_modal: {
+            success_title: 'Submission Successful',
+            success_message: 'Your ticket has been created successfully! You can track its status in your dashboard.',
+            error_title: 'Submission Failed',
+            error_message_default: 'We encountered an error while creating your ticket. Please try again or contact support.',
+            continue: 'Continue',
+            try_again: 'Try Again'
+        },
     },
 
     'Tamil (ID)': {
@@ -564,6 +572,14 @@ export const translations = {
             resolution_rate: 'தீர்வு விகிதம்',
             activity: 'எனது செயல்பாடு',
         },
+        result_modal: {
+            success_title: 'சமர்ப்பிப்பு வெற்றிகரமானது',
+            success_message: 'உங்கள் டிக்கெட் வெற்றிகரமாக உருவாக்கப்பட்டது! உங்கள் டாஷ்போர்டில் அதன் நிலையை நீங்கள் கண்காணிக்கலாம்.',
+            error_title: 'சமர்ப்பிப்பு தோல்வியடைந்தது',
+            error_message_default: 'டிக்கெட்டை உருவாக்கும் போது பிழை ஏற்பட்டது. தயவுசெய்து மீண்டும் முயற்சிக்கவும் அல்லது ஆதரவைத் தொடர்பு கொள்ளவும்.',
+            continue: 'தொடரவும்',
+            try_again: 'மீண்டும் முயற்சிக்கவும்'
+        },
     },
     'Hindi (IN)': {
         nav: {
@@ -830,6 +846,14 @@ export const translations = {
         services: {
             title: 'हमारी सेवाएं',
             subtitle: 'आपके व्यवसाय को चरम प्रदर्शन पर चलाने के लिए व्यापक आईटी और एवी सहायता सेवाएं'
+        },
+        result_modal: {
+            success_title: 'सबमिशन सफल',
+            success_message: 'आपका टिकेट सफलतापूर्वक बना दिया गया है! आप डैशबोर्ड में इसकी स्थिति ट्रैक कर सकते हैं।',
+            error_title: 'सबमिशन विफल',
+            error_message_default: 'टिकेट बनाते समय त्रुटि हुई। कृपया पुन: प्रयास करें या सहायता से संपर्क करें।',
+            continue: 'जारी रखें',
+            try_again: 'पुनः प्रयास करें'
         }
     }
 };

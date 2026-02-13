@@ -11,6 +11,7 @@ import {
 } from 'react-icons/fi';
 import CreateTicketModal from './components/CreateTicketModal';
 import api from '../api/axios';
+import ResultModal from '../components/ResultModal';
 
 const TicketPage = () => {
     const { user } = useAuth();
@@ -20,6 +21,7 @@ const TicketPage = () => {
     const [openFaq, setOpenFaq] = useState(null);
     const [selectedCategory, setSelectedCategory] = useState('');
     const [portalSettings, setPortalSettings] = useState({ active: false, allowed: false });
+    const [resultModal, setResultModal] = useState({ isOpen: false, type: 'success', title: '', message: '' });
 
     useEffect(() => {
         if (user) {
@@ -417,19 +419,53 @@ const TicketPage = () => {
                         const payload = {
                             subject: newTicketData.title || newTicketData.subject,
                             description: newTicketData.description,
-                            priority: newTicketData.priority.toLowerCase(),
+                            priority: (newTicketData.priority || 'Medium').toLowerCase(),
                             category: newTicketData.category,
                             subcategory: newTicketData.subcategory,
                             attachments: newTicketData.attachments
                         };
 
                         await api.post('/api/tickets/', payload);
-                        alert("Ticket created successfully! You can track it in your dashboard.");
+                        setResultModal({
+                            isOpen: true,
+                            type: 'success',
+                            title: t('result_modal.success_title'),
+                            message: t('result_modal.success_message')
+                        });
                         setIsCreateModalOpen(false);
-                        navigate('/dashboard/user');
+                        // Navigate happens after closing the modal, or maybe immediately?
+                        // Let's keep it here so background updates, modal shows success.
+                        // But modal is separate from CreateTicketModal.
+                        // CreateTicketModal closes, ResultModal opens.
                     } catch (error) {
                         console.error("Failed to create ticket", error);
-                        alert("Failed to create ticket. Please try again.");
+                        let errorMessage = t('result_modal.error_message_default');
+                        if (error.response?.data?.detail) {
+                            if (Array.isArray(error.response.data.detail)) {
+                                errorMessage = error.response.data.detail.map(err => err.msg).join(', ');
+                            } else {
+                                errorMessage = error.response.data.detail;
+                            }
+                        }
+                        setResultModal({
+                            isOpen: true,
+                            type: 'error',
+                            title: t('result_modal.error_title'),
+                            message: errorMessage
+                        });
+                    }
+                }}
+            />
+
+            <ResultModal
+                isOpen={resultModal.isOpen}
+                type={resultModal.type}
+                title={resultModal.title}
+                message={resultModal.message}
+                onClose={() => {
+                    setResultModal({ ...resultModal, isOpen: false });
+                    if (resultModal.type === 'success') {
+                        navigate('/dashboard/user');
                     }
                 }}
             />

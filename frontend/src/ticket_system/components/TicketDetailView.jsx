@@ -37,7 +37,7 @@ const SmartCoPilotCard = ({ ticketId, ticketData }) => {
         <motion.div
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
-            className="bg-slate-900 rounded-[2.5rem] border border-slate-800 overflow-hidden shadow-2xl relative group min-h-[300px]"
+            className="bg-white dark:bg-slate-900 rounded-[2.5rem] border border-gray-100 dark:border-slate-800 overflow-hidden shadow-sm relative group min-h-[300px]"
         >
             {/* Pulsing Background Glow */}
             <div className="absolute inset-0 bg-indigo-500/5 animate-pulse pointer-events-none" />
@@ -51,14 +51,14 @@ const SmartCoPilotCard = ({ ticketId, ticketData }) => {
                 />
             )}
 
-            <div className="p-8 border-b border-slate-800 flex items-center justify-between relative z-10 bg-slate-900/50 backdrop-blur-md">
+            <div className="p-8 border-b border-gray-100 dark:border-slate-800 flex items-center justify-between relative z-10 bg-white/50 dark:bg-slate-900/50 backdrop-blur-md">
                 <div className="flex items-center gap-3">
                     <div className="w-10 h-10 bg-indigo-600 rounded-2xl flex items-center justify-center text-white shadow-[0_0_20px_rgba(79,70,229,0.4)]">
                         <FiZap className={loading ? "animate-spin-slow" : ""} size={20} />
                     </div>
                     <div>
-                        <h3 className="text-sm font-black text-white uppercase tracking-widest italic">AI Core Diagnostic</h3>
-                        <p className="text-[10px] text-indigo-400/80 font-black uppercase tracking-tight flex items-center gap-2">
+                        <h3 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-widest italic">AI Core Diagnostic</h3>
+                        <p className="text-[10px] text-indigo-600 dark:text-indigo-400 font-black uppercase tracking-tight flex items-center gap-2">
                             <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-ping"></span>
                             L3 Specialist Co-Pilot
                         </p>
@@ -80,11 +80,11 @@ const SmartCoPilotCard = ({ ticketId, ticketData }) => {
                         <div className="relative">
                             <FiRefreshCw className="animate-spin text-indigo-500" size={48} />
                             <div className="absolute inset-0 flex items-center justify-center">
-                                <span className="text-[8px] font-black text-indigo-300">SCAN</span>
+                                <span className="text-[8px] font-black text-indigo-600 dark:text-indigo-300">SCAN</span>
                             </div>
                         </div>
                         <div className="text-center space-y-2">
-                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em] animate-pulse">Consulting Knowledge Base</p>
+                            <p className="text-[10px] font-black text-gray-400 dark:text-slate-400 uppercase tracking-[0.4em] animate-pulse">Consulting Knowledge Base</p>
                             <div className="flex gap-1 justify-center">
                                 <div className="w-1 h-1 bg-indigo-500 rounded-full animate-bounce delay-0" />
                                 <div className="w-1 h-1 bg-indigo-500 rounded-full animate-bounce delay-150" />
@@ -98,35 +98,35 @@ const SmartCoPilotCard = ({ ticketId, ticketData }) => {
                         animate={{ opacity: 1 }}
                         className="space-y-6"
                     >
-                        <div className="p-5 bg-indigo-900/20 border border-indigo-500/20 rounded-3xl relative overflow-hidden backdrop-blur-sm">
-                            <div className="absolute top-0 right-0 p-2 opacity-10"><FiInfo size={40} /></div>
-                            <h4 className="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+                        <div className="p-5 bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-100 dark:border-indigo-500/20 rounded-3xl relative overflow-hidden backdrop-blur-sm">
+                            <div className="absolute top-0 right-0 p-2 opacity-10 text-indigo-900 dark:text-white"><FiInfo size={40} /></div>
+                            <h4 className="text-[10px] font-black text-indigo-700 dark:text-indigo-400 uppercase tracking-widest mb-3 flex items-center gap-2">
                                 <FiCpu /> Issue Analysis
                             </h4>
-                            <p className="text-xs text-slate-300 font-bold leading-relaxed">
+                            <p className="text-xs text-gray-700 dark:text-slate-300 font-bold leading-relaxed">
                                 {suggestion.summary}
                             </p>
                         </div>
 
                         <div className="space-y-4">
-                            <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
+                            <h4 className="text-[10px] font-black text-gray-500 dark:text-slate-500 uppercase tracking-widest flex items-center gap-2">
                                 <FiList /> Execution Plan
                             </h4>
                             <div className="space-y-2.5">
                                 {suggestion.steps.map((step, i) => (
-                                    <div key={i} className="flex gap-4 p-4 bg-slate-800/40 border border-slate-700/50 rounded-2xl hover:bg-slate-800/80 transition-all border-l-4 border-l-indigo-500 shadow-sm">
-                                        <span className="text-[10px] font-black text-indigo-400 font-mono">{String(i + 1).padStart(2, '0')}</span>
-                                        <p className="text-[11px] text-slate-200 font-bold leading-relaxed">{step}</p>
+                                    <div key={i} className="flex gap-4 p-4 bg-gray-50 dark:bg-slate-800/40 border border-gray-200 dark:border-slate-700/50 rounded-2xl hover:bg-gray-100 dark:hover:bg-slate-800/80 transition-all border-l-4 border-l-indigo-500 shadow-sm">
+                                        <span className="text-[10px] font-black text-indigo-600 dark:text-indigo-400 font-mono">{String(i + 1).padStart(2, '0')}</span>
+                                        <p className="text-[11px] text-gray-700 dark:text-slate-200 font-bold leading-relaxed">{step}</p>
                                     </div>
                                 ))}
                             </div>
                         </div>
 
-                        <div className="flex items-center justify-between pt-6 border-t border-slate-800">
+                        <div className="flex items-center justify-between pt-6 border-t border-gray-100 dark:border-slate-800">
                             <div className="flex flex-col gap-1">
-                                <span className="text-[9px] font-black text-slate-500 uppercase">Analysis Confidence</span>
+                                <span className="text-[9px] font-black text-gray-500 dark:text-slate-500 uppercase">Analysis Confidence</span>
                                 <div className="flex items-center gap-3">
-                                    <div className="w-24 h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                                    <div className="w-24 h-1.5 bg-gray-200 dark:bg-slate-800 rounded-full overflow-hidden">
                                         <motion.div
                                             initial={{ width: 0 }}
                                             animate={{ width: `${suggestion.confidence * 100}%` }}
@@ -141,18 +141,18 @@ const SmartCoPilotCard = ({ ticketId, ticketData }) => {
                             </div>
                             <button
                                 onClick={fetchSuggestion}
-                                className="p-2 bg-slate-800 rounded-xl hover:text-indigo-400 transition-all text-slate-500"
+                                className="p-2 bg-gray-100 dark:bg-slate-800 rounded-xl hover:text-indigo-600 dark:hover:text-indigo-400 transition-all text-gray-500 dark:text-slate-500"
                             >
                                 <FiRefreshCw size={14} />
                             </button>
                         </div>
                     </motion.div>
                 ) : (
-                    <div className="py-12 text-center border-2 border-dashed border-slate-800 rounded-[2rem]">
-                        <div className="w-16 h-16 bg-slate-800/50 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <FiCpu className="text-slate-600" size={32} />
+                    <div className="py-12 text-center border-2 border-dashed border-gray-200 dark:border-slate-800 rounded-[2rem]">
+                        <div className="w-16 h-16 bg-gray-100 dark:bg-slate-800/50 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <FiCpu className="text-gray-400 dark:text-slate-600" size={32} />
                         </div>
-                        <p className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em]">Awaiting System Input</p>
+                        <p className="text-[10px] font-black text-gray-400 dark:text-slate-600 uppercase tracking-[0.2em]">Awaiting System Input</p>
                     </div>
                 )}
             </div>
@@ -1196,7 +1196,7 @@ const TicketDetailView = () => {
                     />
                 )}
 
-                )}
+
 
                 {/* Image Preview Modal */}
                 <ImagePreviewModal

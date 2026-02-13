@@ -1,4 +1,4 @@
-import google.generativeai as genai
+from google import genai
 import os
 import json
 from sqlalchemy.orm import Session
@@ -10,8 +10,9 @@ from dotenv import load_dotenv
 
 load_dotenv()
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-if GEMINI_API_KEY:
-    genai.configure(api_key=GEMINI_API_KEY)
+# genai.configure moved to Client instantiation
+# if GEMINI_API_KEY:
+#     genai.configure(api_key=GEMINI_API_KEY)
 
 def get_ai_dispatcher_config(db: Session):
     setting = db.query(SystemSettings).filter(SystemSettings.key == "ai_dispatcher_enabled").first()
@@ -55,7 +56,7 @@ def assign_ticket_with_ai(db: Session, ticket_id: int):
         }
         tech_data.append(tech_info)
 
-    model = genai.GenerativeModel('gemini-1.5-flash')
+    client = genai.Client(api_key=GEMINI_API_KEY)
 
     prompt = (
         "You are an expert IT Ticket Dispatcher for Proserve Help Desk.\n"
@@ -80,7 +81,10 @@ def assign_ticket_with_ai(db: Session, ticket_id: int):
     )
 
     try:
-        response = model.generate_content(prompt)
+        response = client.models.generate_content(
+            model='gemini-2.0-flash',
+            contents=prompt
+        )
         text = response.text.strip()
         if "```json" in text:
             text = text.split("```json")[1].split("```")[0].strip()
