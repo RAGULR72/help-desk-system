@@ -11,7 +11,7 @@ export const ThemeProvider = ({ children }) => {
                 return storedPrefs;
             }
         }
-        return 'dark'; // Default to dark for premium feel
+        return 'theme-nature'; // Default to nature for the USER
     });
 
     const [displaySize, setDisplaySize] = useState(() => {
