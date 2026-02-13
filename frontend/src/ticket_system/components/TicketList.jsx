@@ -817,7 +817,7 @@ const TicketList = ({ userRole, currentUserId }) => {
 
     return (
         <>
-            <div className="flex flex-col h-full bg-page-bg p-4 md:p-6 transition-colors duration-300 overflow-hidden">
+            <div className="flex flex-col h-full bg-slate-50 dark:bg-slate-950 p-4 md:p-6 transition-colors duration-300 overflow-hidden">
 
                 {/* Premium Stats Summary Bar */}
                 {userRole !== 'user' && (
@@ -908,12 +908,12 @@ const TicketList = ({ userRole, currentUserId }) => {
                                 placeholder="Search tickets..."
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                className="input-field pl-10 pr-4 py-2.5 text-[11px] bg-white/5 border-card-border/30 focus:border-primary/50 rounded-xl focus:shadow-[0_0_0_3px_rgba(var(--primary-rgb),0.1)] transition-all"
+                                className="input-field pl-10 pr-4 py-2.5 text-[11px] bg-white dark:bg-slate-900 border-card-border/30 focus:border-primary/50 rounded-xl focus:shadow-[0_0_0_3px_rgba(var(--primary-rgb),0.1)] transition-all"
                             />
                         </div>
 
                         {/* Date Filters */}
-                        <div className="flex items-center gap-1 bg-white/5 border border-card-border/50 p-1 rounded-[1.25rem] shadow-inner overflow-hidden">
+                        <div className="flex items-center gap-1 bg-white dark:bg-slate-900 border border-card-border/50 p-1 rounded-[1.25rem] shadow-inner overflow-hidden">
                             {['all', 'weekly', 'monthly', 'yearly'].map((period) => (
                                 <button
                                     key={period}
@@ -945,7 +945,7 @@ const TicketList = ({ userRole, currentUserId }) => {
                                     initial={{ opacity: 0, x: -10 }}
                                     animate={{ opacity: 1, x: 0 }}
                                     exit={{ opacity: 0, x: -10 }}
-                                    className="flex items-center gap-2 bg-white/5 p-1 rounded-xl border border-card-border/50"
+                                    className="flex items-center gap-2 bg-white dark:bg-slate-900 p-1 rounded-xl border border-card-border/50"
                                 >
                                     <input
                                         type="date"
@@ -972,7 +972,7 @@ const TicketList = ({ userRole, currentUserId }) => {
                             <div className="relative">
                                 <button
                                     onClick={() => togglePopover('export')}
-                                    className={`p-2.5 rounded-xl transition-all border shadow-sm ${activePopover === 'export' ? 'bg-primary text-white border-primary shadow-primary/20' : 'bg-white/5 border-card-border/50 text-muted hover:text-main hover:bg-white/10'}`}
+                                    className={`p-2.5 rounded-xl transition-all border shadow-sm ${activePopover === 'export' ? 'bg-primary text-white border-primary shadow-primary/20' : 'bg-white dark:bg-slate-900 border-card-border/50 text-muted hover:text-main hover:bg-white/10'}`}
                                     title="Export Data"
                                 >
                                     <FiDownload size={18} />
@@ -991,7 +991,7 @@ const TicketList = ({ userRole, currentUserId }) => {
                                                             type="date"
                                                             value={exportDateRange.start}
                                                             onChange={(e) => setExportDateRange({ ...exportDateRange, start: e.target.value })}
-                                                            className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-[10px] font-bold text-main focus:border-primary/50 outline-none"
+                                                            className="w-full bg-white dark:bg-slate-900 border border-white/10 rounded-lg px-3 py-2 text-[10px] font-bold text-main focus:border-primary/50 outline-none"
                                                         />
                                                     </div>
                                                 </div>
@@ -1002,13 +1002,13 @@ const TicketList = ({ userRole, currentUserId }) => {
                                                             type="date"
                                                             value={exportDateRange.end}
                                                             onChange={(e) => setExportDateRange({ ...exportDateRange, end: e.target.value })}
-                                                            className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-[10px] font-bold text-main focus:border-primary/50 outline-none"
+                                                            className="w-full bg-white dark:bg-slate-900 border border-white/10 rounded-lg px-3 py-2 text-[10px] font-bold text-main focus:border-primary/50 outline-none"
                                                         />
                                                     </div>
                                                 </div>
                                             </div>
 
-                                            <div className="flex bg-white/5 p-1 rounded-lg mb-4">
+                                            <div className="flex bg-white dark:bg-slate-900 p-1 rounded-lg mb-4">
                                                 <button
                                                     onClick={() => setExportFormat('excel')}
                                                     className={`flex-1 flex items-center justify-center gap-2 py-1.5 rounded-md text-[9px] font-black uppercase tracking-wide transition-all ${exportFormat === 'excel' ? 'bg-emerald-500 text-white shadow-lg' : 'text-muted hover:text-main'}`}
@@ -1040,7 +1040,7 @@ const TicketList = ({ userRole, currentUserId }) => {
                         <button
                             onClick={refreshTickets}
                             disabled={isRefreshing}
-                            className="p-2.5 text-muted hover:text-primary hover:bg-white/10 rounded-xl transition-all border border-card-border/50 bg-white/5 shadow-sm active:scale-95 disabled:opacity-50"
+                            className="p-2.5 text-muted hover:text-primary hover:bg-white/10 rounded-xl transition-all border border-card-border/50 bg-white dark:bg-slate-900 shadow-sm active:scale-95 disabled:opacity-50"
                             title="Refresh"
                         >
                             <FiRefreshCw size={18} className={isRefreshing ? 'animate-spin text-primary' : ''} />
@@ -1048,7 +1048,7 @@ const TicketList = ({ userRole, currentUserId }) => {
 
                         {/* View Toggle */}
                         {userRole !== 'user' && (
-                            <div className="flex items-center bg-white/5 border border-card-border/50 p-1 rounded-xl shadow-inner">
+                            <div className="flex items-center bg-white dark:bg-slate-900 border border-card-border/50 p-1 rounded-xl shadow-inner">
                                 <button
                                     onClick={() => setViewMode('list')}
                                     className={`p-2 rounded-lg transition-all ${viewMode === 'list' ? 'bg-primary text-white shadow-lg' : 'text-muted hover:text-main'}`}
@@ -1070,7 +1070,7 @@ const TicketList = ({ userRole, currentUserId }) => {
                         <div className="relative">
                             <button
                                 onClick={() => togglePopover('filter')}
-                                className={`flex items-center gap-3 px-5 py-2.5 text-[10px] font-black uppercase tracking-widest rounded-xl border shadow-sm transition-all ${activePopover === 'filter' ? 'bg-primary text-white border-primary' : 'bg-white/5 border-card-border/50 text-main hover:bg-white/10'}`}
+                                className={`flex items-center gap-3 px-5 py-2.5 text-[10px] font-black uppercase tracking-widest rounded-xl border shadow-sm transition-all ${activePopover === 'filter' ? 'bg-primary text-white border-primary' : 'bg-white dark:bg-slate-900 border-card-border/50 text-main hover:bg-white/10'}`}
                             >
                                 <FiFilter size={14} />
                                 <span>Filter</span>
@@ -1086,7 +1086,7 @@ const TicketList = ({ userRole, currentUserId }) => {
                                                 type="text"
                                                 autoFocus
                                                 placeholder="Search fields..."
-                                                className="input-field py-2.5 pl-10 pr-4 text-[10px] bg-white/5 border-card-border focus:border-primary/50"
+                                                className="input-field py-2.5 pl-10 pr-4 text-[10px] bg-white dark:bg-slate-900 border-card-border focus:border-primary/50"
                                             />
                                             <FiSearch className="absolute left-3.5 top-1/2 transform -translate-y-1/2 text-muted group-focus-within:text-primary transition-colors text-sm" />
                                         </div>
@@ -1104,7 +1104,7 @@ const TicketList = ({ userRole, currentUserId }) => {
 
                         {/* Sort Dropdown */}
                         {userRole !== 'user' && (
-                            <div className="relative flex items-center bg-white/5 border border-card-border/50 rounded-xl shadow-sm overflow-hidden">
+                            <div className="relative flex items-center bg-white dark:bg-slate-900 border border-card-border/50 rounded-xl shadow-sm overflow-hidden">
                                 <button
                                     onClick={() => setCurrentSort(prev => ({ ...prev, direction: prev.direction === 'asc' ? 'desc' : 'asc' }))}
                                     className="px-3 py-3 text-muted hover:text-primary hover:bg-white/10 border-r border-card-border/50 transition-all"
@@ -1212,12 +1212,12 @@ const TicketList = ({ userRole, currentUserId }) => {
                     </div>
                 </div>
 
-                <div className="flex flex-col lg:flex-row gap-4 h-full min-h-0 relative">
+                <div className="flex h-screen flex-row overflow-hidden bg-slate-50/50 dark:bg-slate-950/50 relative">
 
                     {userRole !== 'user' && (
                         <div className={`transition-all duration-300 ease-in-out ${!showActiveSLA ? 'w-0 opacity-0 overflow-hidden pointer-events-none' : 'w-72'} flex-shrink-0 space-y-4 lg:block hidden`}>
                             {/* SLA Widget */}
-                            <div className="glass-card p-6 border-none bg-white/5 relative overflow-hidden group">
+                            <div className="glass-card p-6 border-none bg-white dark:bg-slate-900 relative overflow-hidden group">
                                 {/* Close Button */}
                                 <button
                                     onClick={() => setShowActiveSLA(false)}
@@ -1302,7 +1302,7 @@ const TicketList = ({ userRole, currentUserId }) => {
                                 />
                             </div>
                         ) : (
-                            <div className="flex-1 glass-card border-none bg-white/5 flex flex-col overflow-hidden transition-colors shadow-xl shadow-black/5 relative">
+                            <div className="flex-1 glass-card border-none bg-white dark:bg-slate-900 flex flex-col overflow-hidden transition-colors shadow-xl shadow-black/5 relative">
                                 {/* Gradient top accent */}
                                 <div className="h-[2px] w-full bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
                                 <div className="lg:hidden overflow-y-auto flex-1 p-4 space-y-4 custom-scrollbar">
@@ -1316,7 +1316,7 @@ const TicketList = ({ userRole, currentUserId }) => {
                                                 initial={{ opacity: 0, y: 8 }}
                                                 animate={{ opacity: 1, y: 0 }}
                                                 onClick={() => setSelectedTicketId(ticket.id)}
-                                                className={`glass-card p-4 border-none bg-white/5 transition-all active:scale-[0.98] shadow-lg group hover:bg-white/10 cursor-pointer border-l-[3px] ${isCritical ? 'ring-2 ring-rose-500/30 shadow-[0_0_20px_rgba(239,68,68,0.2)] !bg-rose-500/[0.05] !border-l-rose-500'
+                                                className={`glass-card p-4 border-none bg-white dark:bg-slate-900 transition-all active:scale-[0.98] shadow-lg group hover:bg-white/10 cursor-pointer border-l-[3px] ${isCritical ? 'ring-2 ring-rose-500/30 shadow-[0_0_20px_rgba(239,68,68,0.2)] !bg-rose-500/[0.05] !border-l-rose-500'
                                                     : ticket.priority === 'High' ? 'border-l-orange-500'
                                                         : ticket.priority === 'Critical' ? 'border-l-rose-500'
                                                             : ticket.priority === 'Medium' ? 'border-l-amber-400'
@@ -1429,7 +1429,7 @@ const TicketList = ({ userRole, currentUserId }) => {
                                                             animate={{ opacity: 1, x: 0 }}
                                                             transition={{ delay: ticketIdx * 0.02, duration: 0.3 }}
                                                             onClick={() => setSelectedTicketId(ticket.id)}
-                                                            className={`group transition-all duration-200 cursor-pointer border-l-[3px] border-l-transparent ${priorityAccent} ${selectedTickets.includes(ticket.id) ? 'bg-primary/5 border-l-primary' : 'bg-white/5 hover:bg-white/[0.08]'
+                                                            className={`group transition-all duration-200 cursor-pointer border-l-[3px] border-l-transparent ${priorityAccent} ${selectedTickets.includes(ticket.id) ? 'bg-primary/5 border-l-primary' : 'bg-white dark:bg-slate-900 hover:bg-white/[0.08]'
                                                                 } ${isCritical ? 'relative after:absolute after:inset-0 after:rounded-xl after:shadow-[0_0_20px_rgba(239,68,68,0.15)] after:pointer-events-none after:animate-pulse !bg-rose-500/[0.03] !border-l-rose-500' : ''}`}
                                                         >
                                                             <td className={`p-2.5 first:rounded-l-xl border-y border-l ${isCritical ? 'border-rose-500/20' : 'border-white/5'} group-hover:border-primary/20 ${selectedTickets.includes(ticket.id) ? 'border-primary/30' : ''}`}>
@@ -1614,7 +1614,7 @@ const TicketList = ({ userRole, currentUserId }) => {
                                         animate={{ x: 0, opacity: 1 }}
                                         exit={{ x: 400, opacity: 0 }}
                                         transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                                        className="w-96 glass-card border-none bg-white/10 flex flex-col overflow-hidden relative shadow-2xl shadow-primary/5"
+                                        className="w-96 glass-card border-none bg-white dark:bg-slate-900 flex flex-col overflow-hidden relative shadow-2xl shadow-primary/5"
                                     >
                                         {/* Gradient accent bar at top */}
                                         <div className="h-1 w-full bg-gradient-to-r from-primary via-violet-500 to-primary-hover" />
@@ -1847,7 +1847,7 @@ const TicketList = ({ userRole, currentUserId }) => {
                                 transition={{ type: 'spring', stiffness: 300, damping: 25 }}
                                 className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50"
                             >
-                                <div className="glass-card rounded-2xl shadow-[0_30px_60px_-15px_rgba(0,0,0,0.4)] border border-primary/20 p-2.5 flex items-center gap-2 min-w-[600px] bg-white/10 backdrop-blur-2xl relative overflow-hidden">
+                                <div className="glass-card rounded-2xl shadow-[0_30px_60px_-15px_rgba(0,0,0,0.4)] border border-primary/20 p-2.5 flex items-center gap-2 min-w-[600px] bg-white dark:bg-slate-900 backdrop-blur-2xl relative overflow-hidden">
                                     {/* Top gradient border */}
                                     <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-primary to-transparent" />
                                     {/* Bottom gradient border */}

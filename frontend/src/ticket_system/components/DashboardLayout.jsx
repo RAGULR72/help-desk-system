@@ -198,7 +198,7 @@ const DashboardLayout = ({ children, activeTab = 'tickets', userRole, onTabChang
                         <div className="w-8 h-8 bg-white dark:bg-slate-800 rounded-lg flex items-center justify-center text-green-500 font-bold border border-green-200 dark:border-green-900/50 shadow-sm">
                             <img src="/proserve_logo_placeholder.png" alt="P" className="w-6 h-6 object-contain" onError={(e) => { e.target.style.display = 'none'; e.target.parentElement.innerText = 'P' }} />
                         </div>
-                        <span className="font-bold text-lg text-green-600 tracking-tight whitespace-nowrap">Proserve</span>
+                        <span className="font-bold text-lg text-primary tracking-tight whitespace-nowrap">Proserve</span>
                     </div>
                     <button onClick={() => setIsSidebarOpen(false)} className="lg:hidden p-2 text-gray-400 hover:text-gray-600 transition-colors">
                         <FiX size={20} />
@@ -227,7 +227,7 @@ const DashboardLayout = ({ children, activeTab = 'tickets', userRole, onTabChang
                                 if (window.innerWidth < 1024) setIsSidebarOpen(false);
                             }}
                             className={`w-full flex items-center justify-between px-4 py-3 text-[13px] font-medium rounded-xl transition-all duration-200 group relative ${activeTab === item.id
-                                ? 'bg-green-50 dark:bg-green-500/10 text-green-600 dark:text-green-400 shadow-sm font-semibold'
+                                ? 'bg-primary/5 dark:bg-primary/10 text-primary shadow-sm font-semibold'
                                 : 'text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/50 hover:text-slate-900 dark:hover:text-slate-100'
                                 } ${isSidebarCollapsed ? 'justify-center' : ''}`}
                             title={isSidebarCollapsed ? item.label : ''}
@@ -261,7 +261,7 @@ const DashboardLayout = ({ children, activeTab = 'tickets', userRole, onTabChang
                 <div className="p-4 border-t border-gray-200 dark:border-slate-800">
                     <motion.button
                         onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-                        className="hidden lg:flex w-full items-center justify-center gap-3 px-4 py-3 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-500/10 dark:to-emerald-500/10 hover:from-green-100 hover:to-emerald-100 dark:hover:from-green-500/20 dark:hover:to-emerald-500/20 border border-green-200 dark:border-green-800 rounded-xl text-green-600 dark:text-green-400 font-bold text-sm transition-all shadow-sm hover:shadow-md group"
+                        className="hidden lg:flex w-full items-center justify-center gap-3 px-4 py-3 bg-gradient-to-r from-primary/5 to-primary/10 dark:from-primary/5 dark:to-primary/10 hover:from-primary/10 hover:to-primary/20 dark:hover:from-primary/10 dark:hover:to-primary/20 border border-primary/20 rounded-xl text-primary font-bold text-sm transition-all shadow-sm hover:shadow-md group"
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
                         initial={false}
