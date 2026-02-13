@@ -461,19 +461,37 @@ async def get_sla_monitoring_data(
     Returns statistics, trend data (weekly/monthly/yearly), category breakdown, at-risk tickets, and system metrics
     """
     try:
+        from models import get_ist
+        now_ist = get_ist()
+
         # Ensure latest SLA statuses are applied
         sla_service.check_all_expirations(db)
 
-        from sqlalchemy import func, case, text
+        from sqlalchemy import func, case, text, or_
         from ticket_system.models import Ticket
+
+        # Auto-initialize missing SLA trackings for active tickets
+        tickets_missing_sla = db.query(Ticket).filter(
+            Ticket.status.notin_(['resolved', 'closed']),
+            ~Ticket.id.in_(db.query(TicketSLATracking.ticket_id))
+        ).all()
         
+        for t_missing in tickets_missing_sla:
+            sla_service.initialize_ticket_sla(db, t_missing.id)
+
         # Get all active ticket SLA trackings
         query = db.query(TicketSLATracking).join(Ticket).filter(
             Ticket.status.notin_(['resolved', 'closed'])
         )
         
         if current_user.role == 'technician':
-            query = query.filter(Ticket.assigned_to == current_user.id)
+            # Technicians see their own AND unassigned tickets in monitoring to identify risks
+            query = query.filter(
+                or_(
+                    Ticket.assigned_to == current_user.id,
+                    Ticket.assigned_to == None
+                )
+            )
             
         trackings = query.all()
         
@@ -483,7 +501,7 @@ async def get_sla_monitoring_data(
             if tracking.resolution_breached:
                 return 'breached'
 
-            now = datetime.utcnow()
+            now = get_ist()
             
             # 2. If resolved/closed but flag wasn't set (legacy catch), check times
             if tracking.resolution_completed_at:
@@ -621,11 +639,17 @@ async def get_sla_monitoring_data(
                     TicketSLATracking.resolution_breached == False
                 ).count()
                 
-                breached_count = db.query(Ticket).filter(
-                    Ticket.updated_at.between(day_start, day_end)
-                ).join(TicketSLATracking).filter(
-                    (TicketSLATracking.resolution_breached == True) | 
-                    ((Ticket.status.notin_(['resolved', 'closed'])) & (TicketSLATracking.resolution_due < now))
+                breached_count = db.query(Ticket).join(TicketSLATracking).filter(
+                    # Count if resolved/closed today as breached
+                    or_(
+                        (Ticket.status.in_(['resolved', 'closed']) & 
+                         Ticket.updated_at.between(day_start, day_end) & 
+                         (TicketSLATracking.resolution_breached == True)),
+                        # OR if it's currently active and breached
+                        (Ticket.status.notin_(['resolved', 'closed']) & 
+                         ((TicketSLATracking.resolution_breached == True) | 
+                          (TicketSLATracking.resolution_due < now_ist)))
+                    )
                 ).count()
                 
                 trend_data.append({"label": label, "resolved": resolved, "breached": breached_count})

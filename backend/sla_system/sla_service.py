@@ -98,7 +98,8 @@ def initialize_ticket_sla(db: Session, ticket_id: int):
         return None
     
     # Calculate due times skipping Holidays and Sundays
-    now = datetime.utcnow()
+    from models import get_ist
+    now = get_ist()
     
     response_due = calculate_due_datetime(db, now, rule.response_time_minutes)
     resolution_due = calculate_due_datetime(db, now, rule.resolution_time_hours * 60)
@@ -135,8 +136,8 @@ def check_all_expirations(db: Session):
     Updates DB flags and sends notifications.
     """
     try:
-        # Use UTC to match initialize_ticket_sla time usage
-        now = datetime.utcnow() 
+        from models import get_ist
+        now = get_ist() 
         
         expired_tickets = db.query(Ticket).filter(
             Ticket.status.notin_(['resolved', 'closed']),
@@ -165,9 +166,7 @@ def check_all_expirations(db: Session):
             # This ensures the ticket appears in "Activity" trends for today
             if ticket.sla_expired_notified == 0 or breach_newly_detected:
                 # Explicitly touch updated_at to ensure it shows in trends
-                # Use server time (UTC) converted to IST as per model convention or just UTC if model handles it
-                # Ticket model uses get_ist (UTC+5.5). We'll trust the DB to run onupdate or set it manually.
-                ticket.updated_at = datetime.utcnow() + timedelta(minutes=330) # IST
+                ticket.updated_at = get_ist()
                 
                 if ticket.sla_expired_notified == 0:
                     ticket.sla_expired_notified = 1
