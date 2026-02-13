@@ -2,7 +2,13 @@ import os
 import logging
 import time
 import random
-from google.api_core import exceptions
+try:
+    from google.api_core import exceptions
+except ImportError:
+    # Fallback for environments where google-api-core is not installed
+    class DummyExceptions:
+        class ResourceExhausted(Exception): pass
+    exceptions = DummyExceptions()
 
 # Configure logging
 logger = logging.getLogger(__name__)
