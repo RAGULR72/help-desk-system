@@ -157,7 +157,7 @@ const AnalyticsDashboard = () => {
             )}
 
             {/* Top Row Stats */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 mb-10 relative z-10">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10 relative z-10">
                 <StatCard
                     title="Total Tickets"
                     value={summary.totalTickets || summary.total_tickets || 0}
@@ -184,15 +184,6 @@ const AnalyticsDashboard = () => {
                     icon={<FiClock size={20} />}
                     color="#f59e0b"
                     bgColor="bg-amber-50/50 dark:bg-amber-400/10"
-                />
-                <StatCard
-                    title="Resolution Rate"
-                    value={`${summary.resolutionRate || summary.resolution_rate || 0}%`}
-                    trend="+5%"
-                    trendUp={true}
-                    icon={<FiCheckCircle size={20} />}
-                    color="#10b981"
-                    bgColor="bg-emerald-50/50 dark:bg-emerald-400/10"
                 />
                 <StatCard
                     title="Active Techs"
