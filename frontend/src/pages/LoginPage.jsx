@@ -499,10 +499,7 @@ const LoginPage = () => {
                 {/* Form Side */}
                 <div className="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-12 relative bg-white">
                     <div className="absolute top-0 right-0 p-8 lg:hidden">
-                        <Link to="/" className="flex items-center gap-2 group">
-                            <div className="w-12 h-12 flex items-center justify-center transition-all group-hover:scale-110">
-                                <img src="/logo.svg" alt="P" className="w-12 h-12 object-contain" />
-                            </div>
+                        <Link to="/" className="flex items-center group">
                             <span className="text-emerald-500 font-bold text-xl tracking-tight">Proserve</span>
                         </Link>
                     </div>

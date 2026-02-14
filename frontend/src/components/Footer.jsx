@@ -22,10 +22,7 @@ const Footer = () => {
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
                         >
-                            <h3 className="text-2xl font-bold text-emerald-500 mb-4 tracking-tight flex items-center gap-3">
-                                <div className="w-10 h-10 flex items-center justify-center">
-                                    <img src="/logo.svg" alt="P" className="w-10 h-10 object-contain" />
-                                </div>
+                            <h3 className="text-2xl font-bold text-emerald-500 mb-4 tracking-tight">
                                 Proserve
                             </h3>
                             <p className="text-gray-400 mb-6">
