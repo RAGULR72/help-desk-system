@@ -24,6 +24,7 @@ const CreateTicketModal = ({ isOpen, onClose, onCreate, onUpdate, initialTicket,
     });
     const [categories, setCategories] = useState([]);
     const [loadingCats, setLoadingCats] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const [kbSuggestions, setKbSuggestions] = useState([]);
     const [loadingKB, setLoadingKB] = useState(false);
     const [smartSuggestion, setSmartSuggestion] = useState(null);
@@ -204,8 +205,9 @@ const CreateTicketModal = ({ isOpen, onClose, onCreate, onUpdate, initialTicket,
         setAttachments(attachments.filter((_, i) => i !== index));
     };
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
+    const handleSubmit = async (e) => {
+        if (e) e.preventDefault();
+        if (isSubmitting) return;
 
         if (!formData.subject.trim()) {
             alert('Please enter a subject');
@@ -220,32 +222,39 @@ const CreateTicketModal = ({ isOpen, onClose, onCreate, onUpdate, initialTicket,
             return;
         }
 
-        if (isEditMode) {
-            onUpdate({
-                ...initialTicket,
-                subject: formData.subject,
-                description: formData.description,
-                priority: formData.priority,
-                category: formData.category,
-                subcategory: formData.subcategory,
-                attachments: attachments.map(f => f.name).join(',')
-            });
-        } else {
-            const newTicket = {
-                id: `#TKT-${Math.floor(Math.random() * 10000)}`,
-                title: formData.subject,
-                status: 'Open',
-                priority: formData.priority || 'Medium',
-                requester: formData.requesterName,
-                category: formData.category,
-                subcategory: formData.subcategory,
-                description: formData.description,
-                created_at: new Date().toISOString(),
-                attachments: attachments.map(f => f.name).join(',')
-            };
-            onCreate(newTicket);
+        setIsSubmitting(true);
+        try {
+            if (isEditMode) {
+                await onUpdate({
+                    ...initialTicket,
+                    subject: formData.subject,
+                    description: formData.description,
+                    priority: formData.priority,
+                    category: formData.category,
+                    subcategory: formData.subcategory,
+                    attachments: attachments.map(f => f.name).join(',')
+                });
+            } else {
+                const newTicket = {
+                    id: `#TKT-${Math.floor(Math.random() * 10000)}`,
+                    title: formData.subject,
+                    status: 'Open',
+                    priority: formData.priority || 'Medium',
+                    requester: formData.requesterName,
+                    category: formData.category,
+                    subcategory: formData.subcategory,
+                    description: formData.description,
+                    created_at: new Date().toISOString(),
+                    attachments: attachments.map(f => f.name).join(',')
+                };
+                await onCreate(newTicket);
+            }
+            onClose();
+        } catch (error) {
+            console.error("Submission failed", error);
+        } finally {
+            setIsSubmitting(false);
         }
-        onClose();
     };
 
     if (!isOpen) return null;
@@ -321,8 +330,13 @@ const CreateTicketModal = ({ isOpen, onClose, onCreate, onUpdate, initialTicket,
                             <button className="hidden md:flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg">
                                 <FiSave /> Save Draft
                             </button>
-                            <button onClick={handleSubmit} className="px-5 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg shadow-sm flex items-center gap-2">
-                                {isEditMode ? <FiSave /> : <FiSend />} {isEditMode ? 'Update Ticket' : 'Submit Ticket'}
+                            <button
+                                onClick={handleSubmit}
+                                disabled={isSubmitting}
+                                className={`px-5 py-2 text-sm font-medium text-white rounded-lg shadow-sm flex items-center gap-2 transition-all ${isSubmitting ? 'bg-indigo-400 cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-700'}`}
+                            >
+                                {isSubmitting ? <FiRefreshCw className="animate-spin" /> : (isEditMode ? <FiSave /> : <FiSend />)}
+                                {isSubmitting ? 'Submitting...' : (isEditMode ? 'Update Ticket' : 'Submit Ticket')}
                             </button>
                         </div>
                     </div>
@@ -503,7 +517,13 @@ const CreateTicketModal = ({ isOpen, onClose, onCreate, onUpdate, initialTicket,
 
                         <div className="flex justify-end gap-3 pt-6 border-t border-gray-100">
                             <button onClick={onClose} className="px-8 py-3 bg-gray-100 text-gray-600 rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-gray-200 transition-colors">Cancel</button>
-                            <button onClick={handleSubmit} className="px-10 py-3 bg-indigo-600 text-white rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-indigo-700 transition-all shadow-xl shadow-indigo-100">Submit Ticket</button>
+                            <button
+                                onClick={handleSubmit}
+                                disabled={isSubmitting}
+                                className={`px-10 py-3 text-white rounded-2xl text-xs font-black uppercase tracking-widest transition-all shadow-xl shadow-indigo-100 ${isSubmitting ? 'bg-indigo-400 cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-700'}`}
+                            >
+                                {isSubmitting ? 'Submitting...' : 'Submit Ticket'}
+                            </button>
                         </div>
                     </div>
                 </motion.div>

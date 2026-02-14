@@ -1,4 +1,5 @@
 import os
+import logging
 from google import genai
 from dotenv import load_dotenv
 import json
@@ -6,6 +7,9 @@ import base64
 from io import BytesIO
 from admin_system import models as admin_models
 from sqlalchemy.orm import Session
+
+# Configure logging
+logger = logging.getLogger(__name__)
 
 load_dotenv()
 
@@ -93,17 +97,29 @@ def generate_concierge_response(user_query, chat_history, kb_articles, bot_name=
         except: pass
 
     try:
+        # Use a more stable model
         response = client.models.generate_content(
             model='gemini-2.0-flash',
             contents=content_parts
         )
+        
+        if not response or not response.text:
+             return {"message": "AI message empty. Ticket raise panlamma?", "solved": False}
+             
         text = response.text.strip()
-        if "```json" in text:
-            text = text.split("```json")[1].split("```")[0].strip()
-        elif "```" in text:
-            text = text.split("```")[1].split("```")[0].strip()
-        if "'" in text and "\"" not in text:
-             text = text.replace("'", "\"")
-        return json.loads(text)
+        
+        # Robust JSON extraction
+        import re
+        json_match = re.search(r'(\{.*\}|\[.*\])', text, re.DOTALL)
+        if json_match:
+            candidate = json_match.group(1)
+            # Basic cleanup
+            if "'" in candidate and '"' not in candidate:
+                 candidate = candidate.replace("'", '"')
+            return json.loads(candidate)
+            
+        return json.loads(text) # Fallback to direct parse
+        
     except Exception as e:
-        return {"message": "Semma confusion-a irukku. Naan ungaluku support ticket open panna help pannatuma?", "solved": False}
+        logger.error(f"Concierge AI Error: {e}")
+        return {"message": "System-la chinna error. Support ticket open panna help pannatuma? (Check AI Key)", "solved": False}

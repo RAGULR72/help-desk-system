@@ -85,13 +85,20 @@ def assign_ticket_with_ai(db: Session, ticket_id: int):
             model='gemini-2.0-flash',
             contents=prompt
         )
+        if not response or not response.text:
+            return None
+            
         text = response.text.strip()
-        if "```json" in text:
-            text = text.split("```json")[1].split("```")[0].strip()
-        elif "```" in text:
-            text = text.split("```")[1].split("```")[0].strip()
         
-        result = json.loads(text)
+        # Robust JSON extraction
+        import re
+        json_match = re.search(r'(\{.*\}|\[.*\])', text, re.DOTALL)
+        if json_match:
+            candidate = json_match.group(1)
+            result = json.loads(candidate)
+        else:
+            result = json.loads(text)
+            
         tech_id = result.get("assigned_tech_id")
         reason = result.get("reason", "AI Auto-assigned based on skill and workload.")
 
