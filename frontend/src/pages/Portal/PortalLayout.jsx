@@ -55,11 +55,11 @@ const PortalLayout = () => {
             <header className="bg-white border-b border-slate-200 sticky top-0 z-50 backdrop-blur-md bg-opacity-80">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-between items-center h-16">
-                        <Link to="/portal" className="flex items-center space-x-2">
-                            <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-indigo-200">
-                                <LifebuoyIcon className="w-6 h-6 text-white" />
+                        <Link to="/portal" className="flex items-center space-x-3 group">
+                            <div className="w-10 h-10 bg-white border border-emerald-100 dark:border-emerald-900/30 rounded-xl flex items-center justify-center text-emerald-400 font-black shadow-lg shadow-emerald-100 group-hover:scale-110 transition-transform">
+                                <span className="text-xl">P</span>
                             </div>
-                            <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-violet-600">
+                            <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-emerald-600 to-teal-600">
                                 Proserve Support
                             </span>
                         </Link>
@@ -70,8 +70,8 @@ const PortalLayout = () => {
                                     key={item.name}
                                     to={item.path}
                                     className={`flex items-center space-x-1 text-sm font-medium transition-colors ${location.pathname === item.path
-                                        ? 'text-indigo-600'
-                                        : 'text-slate-600 hover:text-indigo-600'
+                                        ? 'text-emerald-600'
+                                        : 'text-slate-600 hover:text-emerald-600'
                                         }`}
                                 >
                                     <item.icon className="w-4 h-4" />
@@ -83,13 +83,13 @@ const PortalLayout = () => {
                         <div className="flex items-center space-x-4">
                             <Link
                                 to="/login"
-                                className="text-sm font-medium text-slate-600 hover:text-indigo-600 transition-colors"
+                                className="text-sm font-medium text-slate-600 hover:text-emerald-600 transition-colors"
                             >
                                 Sign In
                             </Link>
                             <Link
                                 to="/login?register=true"
-                                className="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700 transition-all shadow-md shadow-indigo-100"
+                                className="bg-emerald-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-emerald-700 transition-all shadow-md shadow-emerald-100"
                             >
                                 Get Support
                             </Link>
@@ -129,10 +129,10 @@ const PortalLayout = () => {
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
                         <div className="col-span-1 md:col-span-2">
                             <div className="flex items-center space-x-2 mb-4">
-                                <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white">
-                                    <LifebuoyIcon className="w-5 h-5 text-white" />
+                                <div className="w-8 h-8 bg-white border border-emerald-100 rounded-lg flex items-center justify-center text-emerald-400 font-black">
+                                    <span className="text-lg">P</span>
                                 </div>
-                                <span className="text-lg font-bold">Proserve Support</span>
+                                <span className="text-lg font-bold text-emerald-600">Proserve Support</span>
                             </div>
                             <p className="text-slate-500 max-w-sm">
                                 Empowering our customers with instant help and detailed resolution guides.
@@ -141,15 +141,15 @@ const PortalLayout = () => {
                         <div>
                             <h3 className="text-sm font-bold uppercase tracking-wider text-slate-400 mb-4">Portal</h3>
                             <ul className="space-y-2 text-sm text-slate-500">
-                                <li><Link to="/portal/track" className="hover:text-indigo-600 transition-colors">Track Ticket</Link></li>
+                                <li><Link to="/portal/track" className="hover:text-emerald-600 transition-colors">Track Ticket</Link></li>
                             </ul>
                         </div>
                         <div>
                             <h3 className="text-sm font-bold uppercase tracking-wider text-slate-400 mb-4">Support</h3>
                             <ul className="space-y-2 text-sm text-slate-500">
-                                <li><a href="#" className="hover:text-indigo-600 transition-colors">Contact Us</a></li>
-                                <li><a href="#" className="hover:text-indigo-600 transition-colors">Privacy Policy</a></li>
-                                <li><a href="#" className="hover:text-indigo-600 transition-colors">Terms of Service</a></li>
+                                <li><a href="#" className="hover:text-emerald-600 transition-colors">Contact Us</a></li>
+                                <li><a href="#" className="hover:text-emerald-600 transition-colors">Privacy Policy</a></li>
+                                <li><a href="#" className="hover:text-emerald-600 transition-colors">Terms of Service</a></li>
                             </ul>
                         </div>
                     </div>

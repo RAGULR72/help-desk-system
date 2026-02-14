@@ -256,7 +256,8 @@ def get_dashboard_analytics(
             "activeAgents": 0, "active_agents": 0,
             "onLeave": 0, "on_leave": 0,
             "totalTravelSpend": 0, "monthlyTravelSpend": 0, "pendingTravelClaims": 0,
-            "totalMessages": 0, "totalFilesShared": 0, "activeChatRooms": 0
+            "totalMessages": 0, "totalFilesShared": 0, "activeChatRooms": 0,
+            "breachedTickets": 0
         },
         "status_distribution": [],
         "category_distribution": [],
@@ -283,10 +284,17 @@ def get_dashboard_analytics(
             
             res_rate = round((resolved_count / total_count * 100), 0) if total_count > 0 else 0
             
+            from sla_system.sla_models import TicketSLATracking
+            breached_count = db.query(TicketSLATracking).join(ticket_models.Ticket).filter(
+                ticket_models.Ticket.status.notin_(['resolved', 'closed']),
+                TicketSLATracking.resolution_breached == True
+            ).count()
+
             result["summary"].update({
                 "totalTickets": total_count, "total_tickets": total_count,
                 "avgResolutionTime": avg_res_time, "avg_resolution_time": avg_res_time,
-                "resolutionRate": res_rate, "resolution_rate": res_rate
+                "resolutionRate": res_rate, "resolution_rate": res_rate,
+                "breachedTickets": breached_count
             })
 
             # 2. DISTRIBUTIONS

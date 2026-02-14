@@ -157,7 +157,7 @@ const AnalyticsDashboard = () => {
             )}
 
             {/* Top Row Stats */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10 relative z-10">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 mb-10 relative z-10">
                 <StatCard
                     title="Total Tickets"
                     value={summary.totalTickets || summary.total_tickets || 0}
@@ -166,6 +166,15 @@ const AnalyticsDashboard = () => {
                     icon={<FiActivity size={20} />}
                     color="#4f46e5"
                     bgColor="bg-indigo-50/50 dark:bg-indigo-400/10"
+                />
+                <StatCard
+                    title="SLA Breaches"
+                    value={summary.breachedTickets || 0}
+                    trend={summary.breachedTickets > 0 ? "Action Required" : "All Clear"}
+                    trendUp={summary.breachedTickets === 0}
+                    icon={<FiAlertTriangle size={20} />}
+                    color="#ef4444"
+                    bgColor="bg-rose-50/50 dark:bg-rose-400/10"
                 />
                 <StatCard
                     title="Avg Resolution"

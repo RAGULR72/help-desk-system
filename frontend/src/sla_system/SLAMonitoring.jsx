@@ -314,7 +314,7 @@ const SLAMonitoring = ({ userRole, onTabChange }) => {
                                     <span className="text-xs">System Healthy</span>
                                 </div>
                             ) : (
-                                atRiskTickets.slice(0, 5).map(ticket => (
+                                atRiskTickets.slice(0, 20).map(ticket => (
                                     <div key={ticket.id} className="relative pl-4 group">
                                         <div className={`absolute left-0 top-1 w-1 h-full rounded-full ${ticket.slaStatus === 'Breached' ? 'bg-red-500' : 'bg-amber-500'
                                             }`}></div>

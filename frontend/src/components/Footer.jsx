@@ -22,7 +22,12 @@ const Footer = () => {
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
                         >
-                            <h3 className="text-2xl font-bold text-proserve mb-4">Proserve</h3>
+                            <h3 className="text-2xl font-bold text-emerald-500 mb-4 tracking-tight flex items-center gap-3">
+                                <div className="w-8 h-8 bg-white dark:bg-slate-800 rounded-lg flex items-center justify-center text-emerald-400 font-black border border-emerald-100 dark:border-emerald-900/30 shadow-sm">
+                                    <span className="text-lg text-emerald-400">P</span>
+                                </div>
+                                Proserve
+                            </h3>
                             <p className="text-gray-400 mb-6">
                                 Professional Help Desk Support System. Providing timely and effective solutions for all your IT needs.
                             </p>

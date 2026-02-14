@@ -68,9 +68,12 @@ const Header = () => {
 
             <nav className="container mx-auto px-4 py-4">
                 <div className="flex items-center justify-between">
-                    <Link to="/">
+                    <Link to="/" className="flex items-center gap-3 group">
+                        <div className="w-8 h-8 bg-white dark:bg-slate-800 rounded-lg flex items-center justify-center text-emerald-400 font-black border border-emerald-100 dark:border-emerald-900/30 shadow-sm group-hover:scale-110 transition-transform">
+                            <span className="text-lg">P</span>
+                        </div>
                         <motion.div
-                            className="text-2xl font-bold text-proserve cursor-pointer"
+                            className="text-2xl font-bold text-emerald-500 cursor-pointer"
                             whileHover={{ scale: 1.05 }}
                         >
                             Proserve

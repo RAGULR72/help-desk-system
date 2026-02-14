@@ -195,10 +195,10 @@ const DashboardLayout = ({ children, activeTab = 'tickets', userRole, onTabChang
                 bg-white dark:bg-slate-900 border-r border-gray-200 dark:border-slate-800 flex flex-col`}>
                 <div className="p-6 flex items-center justify-between">
                     <div className={`flex items-center gap-3 transition-opacity duration-300 ${isSidebarCollapsed ? 'opacity-0 lg:opacity-0' : 'opacity-100'}`}>
-                        <div className="w-8 h-8 bg-white dark:bg-slate-800 rounded-lg flex items-center justify-center text-green-500 font-bold border border-green-200 dark:border-green-900/50 shadow-sm">
-                            <img src="/proserve_logo_placeholder.png" alt="P" className="w-6 h-6 object-contain" onError={(e) => { e.target.style.display = 'none'; e.target.parentElement.innerText = 'P' }} />
+                        <div className="w-8 h-8 bg-white dark:bg-slate-800 rounded-lg flex items-center justify-center text-emerald-400 font-black border border-emerald-100 dark:border-emerald-900/30 shadow-sm">
+                            <span className="text-lg">P</span>
                         </div>
-                        <span className="font-bold text-lg text-primary tracking-tight whitespace-nowrap">Proserve</span>
+                        <span className="font-bold text-lg text-emerald-500 tracking-tight whitespace-nowrap">Proserve</span>
                     </div>
                     <button onClick={() => setIsSidebarOpen(false)} className="lg:hidden p-2 text-gray-400 hover:text-gray-600 transition-colors">
                         <FiX size={20} />

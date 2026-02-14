@@ -494,6 +494,7 @@ async def get_sla_monitoring_data(
             )
             
         trackings = query.all()
+        print(f"DEBUG: SLA Monitoring - Total trackings fetched: {len(trackings)} for user {current_user.username} (role: {current_user.role})")
         
         # Real-time Status Calculation helper
         def get_realtime_status(tracking):
@@ -535,6 +536,9 @@ async def get_sla_monitoring_data(
             current_status = get_realtime_status(t)
             if current_status in status_counts:
                 status_counts[current_status] += 1
+            
+            if current_status == 'breached':
+                print(f"DEBUG: Found breached ticket {t.ticket_id}")
                 
             if current_status in ['at_risk', 'breached']:
                 now = get_ist()
@@ -792,7 +796,7 @@ async def get_sla_monitoring_data(
             "slaBreakdown": sla_breakdown,
             "trendData": trend_data,
             "categoryData": category_data,
-            "atRiskTickets": sorted(at_risk_tickets, key=lambda x: x['urgency'], reverse=True)[:10],
+            "atRiskTickets": sorted(at_risk_tickets, key=lambda x: x['urgency'], reverse=True)[:50],
             "recentHistory": recent_history
         }
     except Exception as e:
