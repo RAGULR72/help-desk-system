@@ -500,8 +500,8 @@ const LoginPage = () => {
                 <div className="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-12 relative bg-white">
                     <div className="absolute top-0 right-0 p-8 lg:hidden">
                         <Link to="/" className="flex items-center gap-2 group">
-                            <div className="w-8 h-8 bg-white dark:bg-slate-800 rounded-lg flex items-center justify-center text-emerald-400 font-black border border-emerald-100 dark:border-emerald-900/30 shadow-sm transition-all group-hover:scale-110">
-                                <span className="text-sm">P</span>
+                            <div className="w-8 h-8 flex items-center justify-center transition-all group-hover:scale-110">
+                                <img src="/logo.svg" alt="P" className="w-8 h-8 object-contain" />
                             </div>
                             <span className="text-emerald-500 font-bold text-xl tracking-tight">Proserve</span>
                         </Link>

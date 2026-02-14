@@ -195,8 +195,8 @@ const DashboardLayout = ({ children, activeTab = 'tickets', userRole, onTabChang
                 bg-white dark:bg-slate-900 border-r border-gray-200 dark:border-slate-800 flex flex-col`}>
                 <div className="p-6 flex items-center justify-between">
                     <div className={`flex items-center gap-3 transition-opacity duration-300 ${isSidebarCollapsed ? 'opacity-0 lg:opacity-0' : 'opacity-100'}`}>
-                        <div className="w-8 h-8 bg-white dark:bg-slate-800 rounded-lg flex items-center justify-center text-emerald-400 font-black border border-emerald-100 dark:border-emerald-900/30 shadow-sm">
-                            <span className="text-lg">P</span>
+                        <div className="w-8 h-8 rounded-lg flex items-center justify-center transition-transform hover:scale-110">
+                            <img src="/logo.svg" alt="P" className="w-7 h-7 object-contain" />
                         </div>
                         <span className="font-bold text-lg text-emerald-500 tracking-tight whitespace-nowrap">Proserve</span>
                     </div>
