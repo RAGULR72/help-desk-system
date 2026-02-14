@@ -69,8 +69,8 @@ const Header = () => {
             <nav className="container mx-auto px-4 py-4">
                 <div className="flex items-center justify-between">
                     <Link to="/" className="flex items-center gap-3 group">
-                        <div className="w-8 h-8 flex items-center justify-center transition-transform group-hover:scale-110">
-                            <img src="/logo.svg" alt="P" className="w-8 h-8 object-contain" />
+                        <div className="w-12 h-12 flex items-center justify-center transition-transform group-hover:scale-110">
+                            <img src="/logo.svg" alt="P" className="w-12 h-12 object-contain" />
                         </div>
                         <motion.div
                             className="text-2xl font-bold text-emerald-500 cursor-pointer"

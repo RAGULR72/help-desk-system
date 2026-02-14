@@ -23,8 +23,8 @@ const Footer = () => {
                             viewport={{ once: true }}
                         >
                             <h3 className="text-2xl font-bold text-emerald-500 mb-4 tracking-tight flex items-center gap-3">
-                                <div className="w-8 h-8 flex items-center justify-center">
-                                    <img src="/logo.svg" alt="P" className="w-8 h-8 object-contain" />
+                                <div className="w-10 h-10 flex items-center justify-center">
+                                    <img src="/logo.svg" alt="P" className="w-10 h-10 object-contain" />
                                 </div>
                                 Proserve
                             </h3>
