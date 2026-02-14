@@ -773,7 +773,7 @@ const ChatPage = () => {
                     }
                 `}
             </style>
-            <div className="flex h-full bg-[#efeae2] dark:bg-slate-950 border-t border-gray-200 dark:border-slate-800 overflow-hidden relative">
+            <div className="flex h-[calc(100vh-3.5rem)] bg-[#efeae2] dark:bg-slate-950 border-t border-gray-200 dark:border-slate-800 overflow-hidden relative">
 
                 {/* Sidebar */}
                 {/* 1. LEFT SIDEBAR */}
